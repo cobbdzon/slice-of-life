@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import * as queries from "./db/queries";
+import api from "./backend/api";
 
 const app = new Hono();
 
@@ -9,9 +9,6 @@ app.get("/hello", async (c) => {
   )
 })
 
-app.post("/register", async (c) => {
-  const body = await c.req.json();
-  const { username, password } = body;
-})
+app.route("/api", api);
 
 export default app;
