@@ -21,6 +21,8 @@ export const entries = sqliteTable('entries', {
   createdAt: text('created_at').$defaultFn(() => new Date().toISOString()),
 });
 
+export type User = typeof users.$inferSelect;
+
 export const usersRelations = relations(users, (r) => ({
   entries: r.many(entries),
 }));
