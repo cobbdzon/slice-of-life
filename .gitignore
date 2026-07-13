@@ -1,3 +1,7 @@
+# App-specific ignores
+public/uploads/*
+!public/uploads/.gitkeep
+
 # Logs
 logs
 *.log
@@ -7,6 +11,7 @@ yarn-error.log*
 lerna-debug.log*
 
 # database
+*.db
 *.sqlite
 
 # package-json
