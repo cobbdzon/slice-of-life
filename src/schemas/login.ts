@@ -1,14 +1,14 @@
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 
-const registrationSchema = z.object({
-  username: z.string(),
+const loginSchema = z.object({
+  username: z.string().min(1),
   password: z.string().min(8, {
     message: "Pasword must be at least 8 characters!"
   })
 })
 
-const registrationValidator = zValidator("json", registrationSchema, (result, c) => {
+const loginValidator = zValidator("form", loginSchema, (result, c) => {
   if (!result.success) {
     return c.json({
       errors: result.error.issues.map((issue) => issue.message)
@@ -16,4 +16,4 @@ const registrationValidator = zValidator("json", registrationSchema, (result, c)
   }
 })
 
-export { registrationSchema, registrationValidator };
+export { loginSchema, loginValidator };

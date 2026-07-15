@@ -5,13 +5,15 @@
   "private": true,
   "scripts": {
     "dev": "bun --watch src/index.tsx",
+    "sass": "sass --watch src/styles:public/assets/css",
     "start": "bun src/index.tsx",
     "push": "bunx drizzle-kit push"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^26.1.1",
-    "drizzle-kit": "^0.31.10"
+    "drizzle-kit": "^0.31.10",
+    "sass": "^1.101.0"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"

@@ -1,12 +1,12 @@
 import { Hono } from "hono";
 import * as queries from "../db/queries";
-import { registrationValidator } from "../schemas/registration";
+import { loginValidator } from "../schemas/login";
 import { sign } from "hono/jwt";
 import { setCookie } from "hono/cookie";
 import type { CookieOptions } from "hono/utils/cookie";
 import { env } from "./env";
 
-const api = new Hono();
+const app = new Hono();
 
 // TODO: MOVE TO COOKIES.TS, WITH A VALIDATOR FUNCTION
 // TODO: COOKIES ZOD VALIDATOR
@@ -29,68 +29,66 @@ export const tokenOptions: CookieOptions = {
   maxAge: 3600,
 }
 
-api.post("/register", registrationValidator, async (c) => {
-  const body = c.req.valid("json");
+app.post("/register", loginValidator, async (c) => {
+  const body = c.req.valid("form");
   const { username, password } = body;
   console.log(`${username} is attempting to register!`);
 
-  const { success, errorType, message, id } = await queries.insertUser(username, password);
-  if (success && id) {
-    const token = await generateToken(id);
-    setCookie(c, "AUTH_TOKEN", token, tokenOptions);
-    return c.text(`success, your user id is ${id}`);
+  const { success, errorType, message } = await queries.insertUser(username, password);
+  if (success) {
+    // const token = await generateToken(id);
+    // setCookie(c, "AUTH_TOKEN", token, tokenOptions);
+    return c.redirect("/login?registration=SUCCESS");
   } else if (typeof (message) == "string") {
     if (errorType == "USERNAME_TAKEN") {
-      c.status(409);
+      return c.redirect("/register?error=USERNAME_TAKEN")
     } else {
-      c.status(500);
+      c.redirect("/register?error=INTERNAL_SERVER_ERROR");
     }
     return c.text(message);
   }
 })
 
-api.post("/login", registrationValidator, async (c) => {
-  const body = c.req.valid("json");
+app.post("/login", loginValidator, async (c) => {
+  const body = c.req.valid("form");
   const { username, password } = body;
   console.log(`${username} is attempting to log in!`);
 
   // validate username
   const { user } = await queries.getUserFromUsername(username);
   if (!user) {
-    c.status(401);
-    return c.text("user not found");
+    return c.redirect("/login?error=USER_DOES_NOT_EXIST");
   }
 
   // validate password
   const isCorrectPassword = await Bun.password.verify(password, user.passwordHash);
   if (!isCorrectPassword) {
-    c.status(401);
-    return c.text("Wrong password!");
+    return c.redirect("/login?error=INCORRECT_PASDWORD");
   }
 
   const token = await generateToken(user.id);
   setCookie(c, "AUTH_TOKEN", token, tokenOptions);
 
   console.log(`${username} sucessfully logged in!`)
-  return c.text(`Successfully logged in as ${username}`);
+  return c.redirect("/dashboard");
 })
 
-api.get("/user/:username", async (c) => {
-  const username = c.req.param("username");
-  if (!username) {
-    return c.status(400);
-  }
+// app.get("/user/:username", async (c) => {
+//   const username = c.req.param("username");
+//   if (!username) {
+//     return c.status(400);
+//   }
+//
+//   const { user } = await queries.getUserFromUsername(username);
+//   if (!user) {
+//     return c.status(404);
+//   }
+//
+//   return c.json({
+//     id: user.id,
+//     username: user.username,
+//     createdAt: user.createdAt
+//   });
+// })
 
-  const { user } = await queries.getUserFromUsername(username);
-  if (!user) {
-    return c.status(404);
-  }
-
-  return c.json({
-    id: user.id,
-    username: user.username,
-    createdAt: user.createdAt
-  });
-})
-
-export default api;
+export default app;
