@@ -49,9 +49,25 @@ export async function insertUser(username: string, password: string): Promise<In
   }
 }
 
+export async function getUser(userId: number) {
+  try {
+    const [user] = await db.select()
+      .from(schema.users)
+      .where(eq(schema.users.id, userId))
+      .limit(1);
+    return user;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 export async function getUserFromUsername(username: string): Promise<GetUserQueryResult> {
   try {
-    const [user] = await db.select().from(schema.users).where(eq(schema.users.username, username)).limit(1);
+    const [user] = await db.select()
+      .from(schema.users)
+      .where(eq(schema.users.username, username))
+      .limit(1);
     return {
       success: true,
       user: user as schema.User,
