@@ -8,6 +8,7 @@
 }
 
 .m3-login-card {
+  position: relative;
   display: flex;
   width: 100%;
   max-width: 400px;
@@ -15,7 +16,27 @@
   border-radius: 28px;
   box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
   margin: 0; 
-  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -160px;
+    left: -160px;
+    right: -160px;
+    bottom: -160px;
+    background: radial-gradient(
+      circle, 
+      var(--md-sys-color-primary) 0%, 
+      transparent 70%
+    );
+    filter: blur(40px);
+    opacity: 0.35; 
+    z-index: -1; 
+    pointer-events: none; 
+
+    animation: fadeInGlow 3s cubic-bezier(0.2, 0, 0, 1) 0.2s forwards;
+    opacity: 0;
+  }
 }
 
 .card-image-side {
@@ -41,9 +62,24 @@
 @media (min-width: 768px) {
   .m3-login-card {
     max-width: 800px;
+    overflow: visible;
   }
 
   .card-image-side {
     display: block;
+    border-top-left-radius: 28px;
+    border-bottom-left-radius: 28px;
+    overflow: hidden;
+  }
+}
+
+@keyframes fadeInGlow {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 0.35; // Matches your target ambient glow opacity
+    transform: scale(1);
   }
 }
