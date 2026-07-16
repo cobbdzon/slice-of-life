@@ -1,3 +1,13 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
 :root {
   --md-sys-color-primary: #ffb0db;
   --md-sys-color-on-primary: #5e0041;
