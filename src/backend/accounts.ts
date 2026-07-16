@@ -1,13 +1,9 @@
 import { Hono } from "hono";
 import * as queries from "../db/queries";
 import { loginValidator } from "../schemas/login";
-import { setCookie } from "hono/cookie";
-import { generateToken, getPayloadFromToken, setToken, tokenOptions } from "./cookies";
+import { generateToken, setToken } from "./cookies";
 
 const app = new Hono();
-
-// TODO: MOVE TO COOKIES.TS, WITH A VALIDATOR FUNCTION
-// TODO: COOKIES ZOD VALIDATOR
 
 app.post("/register", loginValidator, async (c) => {
   const body = c.req.valid("form");
@@ -33,7 +29,7 @@ app.post("/login", loginValidator, async (c) => {
   console.log(`${username} is attempting to log in!`);
 
   // validate username
-  const { user } = await queries.getUserFromUsername(username);
+  const user = await queries.getUserFromUsername(username);
   if (!user) {
     return c.redirect("/login?error=USER_DOES_NOT_EXIST");
   }

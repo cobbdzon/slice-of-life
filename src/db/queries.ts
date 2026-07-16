@@ -13,10 +13,6 @@ export type InsertUserQueryResult = UserQueryResult & {
   id?: number;
 }
 
-export type GetUserQueryResult = UserQueryResult & {
-  user: schema.User;
-}
-
 // QUERIES //
 export async function insertUser(username: string, password: string): Promise<InsertUserQueryResult> {
   const passwordHash = await Bun.password.hash(password)
@@ -62,16 +58,13 @@ export async function getUser(userId: number) {
   }
 }
 
-export async function getUserFromUsername(username: string): Promise<GetUserQueryResult> {
+export async function getUserFromUsername(username: string) {
   try {
     const [user] = await db.select()
       .from(schema.users)
       .where(eq(schema.users.username, username))
       .limit(1);
-    return {
-      success: true,
-      user: user as schema.User,
-    }
+    return user;
   } catch (error) {
     throw error;
   }
