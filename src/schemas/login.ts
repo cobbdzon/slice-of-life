@@ -8,6 +8,7 @@ const loginSchema = z.object({
   })
 })
 
+// TODO: ADD CLIENT SIDE CHECKS TO PREVENT TRIGGERING THIS
 const loginValidator = zValidator("form", loginSchema, (result, c) => {
   if (!result.success) {
     return c.json({

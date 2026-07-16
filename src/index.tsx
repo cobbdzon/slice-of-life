@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import accounts from "./backend/accounts";
-import { getPayloadFromToken, getToken, deleteToken } from "./backend/cookies";
-import { getUser } from "./db/queries"
+import { deleteToken, validateTokenFromContext } from "./backend/cookies";
 
 import { LoginLayout } from "./layouts/login";
 import { RegisterLayout } from "./layouts/register";
@@ -31,44 +30,17 @@ app.get("/register", async (c) => {
   );
 })
 
+app.get("logout", async (c) => {
+  deleteToken(c);
+  return c.text("Logged out")
+})
+
 // PROTECTED //
-
-// protected path template
-// could be turned into a helper function
 app.get("/protected", async (c) => {
-  // validate token
-  const token = await getToken(c);
-  if (!token) {
-    console.log("No token")
+  const isValidToken = await validateTokenFromContext(c);
+  if (!isValidToken) {
     return c.redirect("/login");
   }
-
-  // validate token payload
-  const payload = await getPayloadFromToken(token);
-  if (!payload) {
-    console.log("No payload found from token")
-    deleteToken(c);
-    return c.redirect("/login");
-  }
-
-  // validate if user exists
-  const userId = payload.sub;
-  const user = await getUser(userId);
-  if (!user) {
-    console.log("No user found from payload")
-    deleteToken(c);
-    return c.redirect("/login");
-  }
-
-  // validate if token is expired
-  const expiryTime = payload.exp;
-  const now = Math.floor(Date.now() / 1000);
-  if (now > expiryTime) {
-    console.log("Token is expired")
-    deleteToken(c);
-    return c.redirect("/login");
-  }
-
   return c.text("Valid token!");
 })
 
