@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import accounts from "./backend/accounts";
 import { deleteToken, validateTokenFromContext } from "./backend/cookies";
+import { serveStatic } from "hono/bun";
 
-import { LoginLayout } from "./layouts/login";
-import { RegisterLayout } from "./layouts/register";
+import { LoginPage } from "./pages/Login";
+import { RegisterPage } from "./pages/Register";
 
 const app = new Hono();
 
@@ -13,20 +14,25 @@ app.get("/hello", async (c) => {
   )
 })
 
+// ASSETS //
+app.use('/static/*', serveStatic({ root: './src' }));
+
 // ACCOUNTS //
 app.route("/", accounts);
 
 app.get("/login", async (c) => {
+  const errorCode = c.req.query("error") as string;
   return c.html(
-    <LoginLayout>
-    </LoginLayout>
+    <LoginPage errorCode={errorCode}>
+    </LoginPage>
   );
-})
+});
 
 app.get("/register", async (c) => {
+  const errorCode = c.req.query("error") as string;
   return c.html(
-    <RegisterLayout>
-    </RegisterLayout>
+    <RegisterPage errorCode={errorCode}>
+    </RegisterPage>
   );
 })
 
