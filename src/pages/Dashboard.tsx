@@ -1,82 +1,165 @@
 import { BaseLayout } from '../layouts/BaseLayout';
 
-export interface JournalEntry {
+export type JournalEntry = {
   id: string;
   date: Date;
   title: string;
   note: string;
-  imagePath?: string;
+  imagePaths: string[];
 }
 
-export interface MonthGroup {
+export type JournalEntryNullable = JournalEntry | null;
+
+export type MonthGroup = {
   monthName: string;
-  year: string;
-  entries: (JournalEntry | null)[];
+  year: number;
+  journalEntries: JournalEntryNullable[];
 }
 
-interface DashboardPageProps {
-  groups: MonthGroup[];
+type DashboardPageProps = {
+  currentYear: number;
+  journalEntries: JournalEntry[];
   hideEmptyDays?: boolean;
 }
 
-export function DashboardPage({ groups, hideEmptyDays = false }: DashboardPageProps) {
+function getMonthNames(locale: string = 'en-US'): string[] {
+  return Array.from({ length: 12 }, (_, index) => {
+    const date = new Date(2026, index, 1); // year doesnt matter
+    return date.toLocaleDateString(locale, { month: 'long' });
+  });
+}
+
+function getDaysInMonth(year: number, monthIndex: number) {
+  return new Date(year, monthIndex + 1, 0).getDate();
+}
+
+// TODO: export to backend/calendar.ts to standardize handling dates across code
+export function dateToString(date: Date) {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function stringToDate(dateString: string) {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year as number, (month as number - 1), day as number);
+}
+
+export function validateRequestedYear(yearInput: string | null | undefined): number {
+  const currentYear = new Date().getFullYear();
+  const minYear = 1975;
+
+  if (!yearInput) {
+    return currentYear;
+  }
+
+  const parsedYear = parseInt(yearInput, 10);
+
+  if (
+    Number.isNaN(parsedYear) ||
+    parsedYear < minYear ||
+    parsedYear > currentYear
+  ) {
+    return currentYear;
+  }
+
+  return parsedYear;
+}
+
+export function DashboardPage({ currentYear, journalEntries = [], hideEmptyDays = false }: DashboardPageProps) {
+
+  const monthNames = getMonthNames();
+  const monthGroups: MonthGroup[] = [];
+  monthNames.forEach((monthName, monthIndex) => {
+    const daysInMonth = getDaysInMonth(currentYear, monthIndex)
+    monthGroups[monthIndex] = {
+      monthName: monthName,
+      year: currentYear,
+      journalEntries: Array(daysInMonth).fill(null),
+    }
+  })
+
+  journalEntries.forEach(entry => {
+    const monthIndex = entry.date.getMonth();
+    const dayIndex = entry.date.getDate() - 1;
+
+    const monthGroup = monthGroups[monthIndex] as MonthGroup;
+    monthGroup.journalEntries[dayIndex] = entry;
+  });
+
+  // construct the monthgroups containers
+  const monthGroupElements = monthGroups.map((monthGroup, monthIndex) => {
+
+    // construct the entries gallery contents
+    const entriesGalleryElements = monthGroup.journalEntries.map((journalEntry, dayIndex) => {
+      // empty entry box
+      if (journalEntry == null) {
+        if (hideEmptyDays) {
+          return;
+        }
+        const currentDate = new Date(currentYear, monthIndex, dayIndex + 1);
+        return (
+          <div class="entry-card empty-placeholder">
+            <a class="material-symbols-outlined" href={`/entry/new?date=${dateToString(currentDate)}`}>add</a>
+            <span class="date-text">{monthGroup.monthName} {dayIndex + 1}</span>
+          </div>
+        )
+      }
+
+      // actual entry box
+      return (
+        <a href={`/entry/${journalEntry.id}`} class="entry-card real-entry" title={journalEntry.title}>
+          <img
+            src={journalEntry.imagePaths[0] || "/static/assets/images/placeholder.png"}
+            alt={journalEntry.title}
+            loading="lazy"
+          />
+
+          <div class="entry-top-bar">
+            <span class="entry-title">{journalEntry.title}</span>
+            <span class="date-text">{monthGroup.monthName} {dayIndex + 1}</span>
+          </div>
+
+          <div class="entry-bottom-bar">
+            {
+              // TODO: possibly markdown renderer?
+            }
+            <span class="entry-note">{journalEntry.note}</span>
+          </div>
+        </a>
+      );
+    });
+
+    // hide if hideEmptyDays == true
+    const visibleEntries = monthGroup.journalEntries.filter((journalEntry) => {
+      return journalEntry != undefined;
+    })
+    if (visibleEntries.length == 0) {
+      return
+    }
+
+    return (
+      <section class="month-section">
+        <h2 class="section-title">
+          {monthGroup.monthName} <span class="section-year">{monthGroup.year}</span>
+        </h2>
+
+        <div class="entries-gallery">
+          {entriesGalleryElements}
+        </div>
+      </section>
+    )
+  })
+
   return (
     <BaseLayout title="Dashboard - Slice of Life" stylesheets={["/static/assets/css/dashboard.css"]}>
-      <div class="dashboard-wrapper">
+      <a href="/entry/new" class="m3-fab">
+        <span class="material-symbols-outlined">add</span>
+      </a>
 
-        <a href="/entry/new" class="m3-fab">
-          <span class="material-symbols-outlined">add</span>
-        </a>
+      {monthGroupElements}
 
-        {groups.map((group) => {
-          const visibleEntries = hideEmptyDays
-            ? group.entries.filter((entry): entry is JournalEntry => entry !== null)
-            : group.entries;
-
-          if (visibleEntries.length === 0) return null;
-
-          return (
-            <section class="time-section">
-              <h2 class="section-title">
-                {group.monthName} <span class="section-year">{group.year}</span>
-              </h2>
-
-              <div class="entries-gallery">
-                {visibleEntries.map((entry, index) => {
-                  if (!entry) {
-                    return (
-                      <div class="entry-card empty-placeholder">
-                        <a class="material-symbols-outlined" href="/entry/new">add</a>
-                        <span class="date-text">{group.monthName} {index + 1}</span>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <a href={`/entry/${entry.id}`} class="entry-card real-entry" title={entry.note}>
-                      <img
-                        src={entry.imagePath || "/static/assets/images/placeholder.png"}
-                        alt={entry.title}
-                        loading="lazy"
-                      />
-
-                      <div class="entry-top-bar">
-                        <span class="entry-title">{entry.title}</span>
-                        <span class="date-text">{group.monthName} {index + 1}</span>
-                      </div>
-
-                      <div class="entry-bottom-bar">
-                        <span class="entry-note">{entry.note}</span>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })}
-
-      </div>
     </BaseLayout>
-  );
+  )
 }

@@ -5,8 +5,7 @@ import { serveStatic } from "hono/bun";
 
 import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
-import { DashboardPage, type JournalEntry, type MonthGroup } from './pages/Dashboard';
-import { index } from "drizzle-orm/gel-core";
+import { DashboardPage, validateRequestedYear, type JournalEntry, type MonthGroup } from './pages/Dashboard';
 import { EntryPage } from "./pages/Entry";
 
 const app = new Hono();
@@ -17,28 +16,28 @@ const mockEntries: JournalEntry[] = [
     date: new Date("2026-07-15"),
     title: "Coffee at San Mateo cafe",
     note: "Tried the new nitro cold brew. Very smooth.",
-    imagePath: "/static/assets/images/coffee.png"
+    imagePaths: ["/static/assets/images/coffee.png"]
   },
   {
     id: "e2",
     date: new Date("2026-07-13"),
     title: "Calabarzon Roadtrip Walk",
     note: "Sunny afternoon walk along the ridge line.",
-    imagePath: "/static/assets/images/road.png"
+    imagePaths: ["/static/assets/images/road.png"]
   },
   {
     id: "e3",
     date: new Date("2026-06-28"),
     title: "Finished project milestone",
     note: "Finally pushed the working UI architecture live today.",
-    imagePath: ""
+    imagePaths: [""]
   },
   {
     id: "e4",
     date: new Date("2026-06-25"),
     title: "Rainy evening music session",
     note: "Listened to some lo-fi vinyl ambient records while tracking rain outside.",
-    imagePath: "/static/assets/images/rain.png"
+    imagePaths: ["/static/assets/images/rain.png"]
   }
 ];
 
@@ -48,64 +47,23 @@ app.get('/', async (c) => {
     return c.redirect("/login");
   }
 
-  // 1. Group actual entries by their Year-Month keys first
-  const activeMonths = new Set<string>();
-  mockEntries.forEach(e => {
-    const key = `${e.date.getFullYear()}-${e.date.getMonth()}`; // e.g. "2026-6" (July)
-    activeMonths.add(key);
-  });
-
-  // 2. Build complete monthly calendar maps containing every numerical day string
-  const mockGroups: MonthGroup[] = Array.from(activeMonths).map(yearMonthKey => {
-    const [yearNum, monthNum] = yearMonthKey.split('-').map(Number);
-    const targetDate = new Date(yearNum, monthNum, 1);
-
-    const monthName = targetDate.toLocaleDateString('en-US', { month: 'long' });
-    const year = yearNum.toString();
-
-    // Determine total days in this specific month
-    const totalDays = new Date(yearNum, monthNum + 1, 0).getDate();
-    const daySlots: (JournalEntry | null)[] = [];
-
-    // Loop chronologically backwards (from last day of the month down to 1st)
-    for (let day = totalDays; day >= 1; day--) {
-      // Find a matching entry for this specific day
-      const match = mockEntries.find(e =>
-        e.date.getFullYear() === yearNum &&
-        e.date.getMonth() === monthNum &&
-        e.date.getDate() === day
-      );
-
-      daySlots.push(match || null);
-    }
-
-    return {
-      monthName,
-      year,
-      entries: daySlots
-    };
-  });
-
-  // Sort groups so newer months display at the top of the dashboard
-  mockGroups.sort((a, b) => {
-    const dateA = new Date(`${a.monthName} 1, ${a.year}`);
-    const dateB = new Date(`${b.monthName} 1, ${b.year}`);
-    return dateB.getTime() - dateA.getTime();
-  });
-
+  const currentYear = validateRequestedYear(c.req.query("year"));
   const hideEmpty = c.req.query('hideEmpty') === 'true';
+
   return c.html(
-    <DashboardPage groups={mockGroups} hideEmptyDays={hideEmpty} />
+    <DashboardPage currentYear={currentYear} journalEntries={mockEntries} hideEmptyDays={hideEmpty} />
   );
 });
 
+// TODO: CLEAN UP
 app.get("/entry/:entryId", async (c) => {
   const entryId = c.req.param("entryId");
-  var entry: JournalEntry = {
+  var journalEntry: JournalEntry = {
     id: "null",
     date: new Date(),
     title: "Entry not found",
-    note: "Entry not found"
+    note: "Entry not found",
+    imagePaths: [],
   }
   if (entryId) {
     const requestedEntry = mockEntries.find((otherEntry) => {
@@ -114,12 +72,12 @@ app.get("/entry/:entryId", async (c) => {
       }
     });
     if (requestedEntry) {
-      entry = requestedEntry;
+      journalEntry = requestedEntry;
     }
   }
 
   return c.html(
-    <EntryPage entry={entry}>
+    <EntryPage dateString={c.req.query("date") || ""} journalEntry={journalEntry}>
     </EntryPage>
   )
 })
