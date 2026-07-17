@@ -1,3 +1,7 @@
+body {
+  overflow: hidden;
+}
+
 .m3-main-container {
   display: flex;
   justify-content: center;
@@ -10,7 +14,7 @@
 .m3-login-card {
   position: relative;
   display: flex;
-  width: 100%;
+  width: 100vh;
   max-width: 400px;
   background-color: var(--md-sys-color-surface-variant);
   border-radius: 28px;
