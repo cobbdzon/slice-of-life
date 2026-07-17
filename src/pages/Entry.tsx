@@ -1,19 +1,30 @@
 import { BaseLayout } from '../layouts/BaseLayout';
-import { type JournalEntry } from './Dashboard';
+import { stringToDate, type JournalEntry } from './Dashboard';
 
 interface EntryPageProps {
-  entry: JournalEntry;
+  dateString: string;
+  journalEntry?: JournalEntry;
 }
 
-export function EntryPage({ entry }: EntryPageProps) {
-  const formattedDate = entry.date.toLocaleDateString('en-US', {
+export function EntryPage({ dateString, journalEntry }: EntryPageProps) {
+  const requestedEntryDate = stringToDate(dateString);
+
+  journalEntry = journalEntry || {
+    id: "null",
+    date: requestedEntryDate,
+    title: "Empty entry",
+    note: "Entry note here",
+    imagePaths: [],
+  }
+
+  const formattedDate = journalEntry.date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
 
   return (
-    <BaseLayout title={`${entry.title} - Slice of Life`} stylesheets={["/static/assets/css/entry.css"]}>
+    <BaseLayout title={`${journalEntry.title} - Slice of Life`} stylesheets={["/static/assets/css/entry.css"]}>
       <div class="entry-view-container">
 
         <div class="entry-nav-strip">
@@ -24,9 +35,9 @@ export function EntryPage({ entry }: EntryPageProps) {
 
         <article class="entry-main-card">
 
-          {entry.imagePath ? (
+          {journalEntry.imagePaths[0] ? (
             <div class="entry-hero-frame">
-              <img src={entry.imagePath} alt={entry.title} />
+              <img src={journalEntry.imagePaths[0]} alt={journalEntry.title} />
             </div>
           ) : (
             <div class="entry-hero-frame image-fallback-placeholder">
@@ -37,15 +48,15 @@ export function EntryPage({ entry }: EntryPageProps) {
           <div class="entry-body-frame">
             <header class="entry-header-block">
               <span class="entry-meta-date">{formattedDate}</span>
-              <h1 class="entry-main-title">{entry.title}</h1>
+              <h1 class="entry-main-title">{journalEntry.title}</h1>
             </header>
 
             <div class="entry-text-block">
-              <p class="entry-full-note">{entry.note}</p>
+              <p class="entry-full-note">{journalEntry.note}</p>
             </div>
 
             <footer class="entry-footer-actions">
-              <a href={`/entry/${entry.id}/edit`} class="entry-edit-action">
+              <a href={`/entry/${journalEntry.id}/edit`} class="entry-edit-action">
                 <span class="material-symbols-outlined">edit</span>
                 Edit Entry
               </a>
