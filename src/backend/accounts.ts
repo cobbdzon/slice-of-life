@@ -44,7 +44,7 @@ app.post("/login", loginValidator, async (c) => {
   setToken(c, token);
 
   console.log(`${username} sucessfully logged in!`)
-  return c.redirect("/dashboard");
+  return c.redirect("/");
 })
 
 // app.get("/user/:username", async (c) => {
