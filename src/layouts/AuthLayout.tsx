@@ -21,7 +21,11 @@ export function AuthLayout(props: AuthLayoutProps) {
   const errorMessage = props.errorCode;
 
   return (
-    <BaseLayout title={props.pageTitle} stylesheets={["/static/assets/css/auth.css"]}>
+    <BaseLayout
+      title={props.pageTitle}
+      stylesheets={["/static/assets/css/auth.css"]}
+      scripts={["/static/assets/js/auth-form.js"]}
+    >
       <div class="main m3-login-card">
 
         <div class="card-image-side">
