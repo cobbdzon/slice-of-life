@@ -37,9 +37,15 @@ body.m3-surface {
 .m3-top-app-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   height: 64px;
   padding: 0 16px;
   background-color: rgba(0, 0, 0, 0);
+  gap: 16px;
+}
+.m3-top-app-bar div {
+  display: flex;
+  align-items: center;
   gap: 16px;
 }
 .m3-top-app-bar .m3-title {

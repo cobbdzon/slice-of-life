@@ -17,6 +17,7 @@ export type MonthGroup = {
 }
 
 type DashboardPageProps = {
+  username: string;
   currentYear: number;
   journalEntries: JournalEntry[];
   hideEmptyDays?: boolean;
@@ -67,8 +68,7 @@ export function validateRequestedYear(yearInput: string | null | undefined): num
   return parsedYear;
 }
 
-export function DashboardPage({ currentYear, journalEntries = [], hideEmptyDays = false }: DashboardPageProps) {
-
+export function DashboardPage({ username, currentYear, journalEntries = [], hideEmptyDays = false }: DashboardPageProps) {
   const monthNames = getMonthNames();
   const monthGroups: MonthGroup[] = [];
   monthNames.forEach((monthName, monthIndex) => {
@@ -98,23 +98,32 @@ export function DashboardPage({ currentYear, journalEntries = [], hideEmptyDays 
         if (hideEmptyDays) {
           return;
         }
-        const currentDate = new Date(currentYear, monthIndex, dayIndex + 1);
+        // const currentDate = new Date(currentYear, monthIndex, dayIndex + 1);
         return (
           <div class="entry-card empty-placeholder">
-            <a class="material-symbols-outlined" href={`/entry/new?date=${dateToString(currentDate)}`}>add</a>
+            <a href={`/entry/${currentYear}/${monthIndex + 1}/${dayIndex + 1}`} class="material-symbols-outlined">add</a>
             <span class="date-text">{monthGroup.monthName} {dayIndex + 1}</span>
           </div>
         )
       }
 
+      const hasImage = journalEntry.imagePaths.length > 0;
+      console.log(journalEntry.imagePaths.length)
+
       // actual entry box
       return (
-        <a href={`/entry/${journalEntry.id}`} class="entry-card real-entry" title={journalEntry.title}>
-          <img
-            src={journalEntry.imagePaths[0] || "/static/assets/images/placeholder.png"}
-            alt={journalEntry.title}
-            loading="lazy"
-          />
+        <a href={`/entry/${currentYear}/${monthIndex + 1}/${dayIndex + 1}`} class="entry-card real-entry" title={journalEntry.title}>
+          {
+            hasImage ? (
+              <img
+                src={journalEntry.imagePaths[0] || "/static/assets/images/placeholder.png"}
+                alt={journalEntry.title}
+                loading="lazy"
+              />
+            ) : (
+              <span class="material-symbols-outlined entry-icon-placeholder">landscape</span>
+            )
+          }
 
           <div class="entry-top-bar">
             <span class="entry-title">{journalEntry.title}</span>
@@ -153,7 +162,7 @@ export function DashboardPage({ currentYear, journalEntries = [], hideEmptyDays 
   })
 
   return (
-    <BaseLayout title="Dashboard - Slice of Life" stylesheets={["/static/assets/css/dashboard.css"]}>
+    <BaseLayout username={username} title="Dashboard - Slice of Life" stylesheets={["/static/assets/css/dashboard.css"]}>
       <a href="/entry/new" class="m3-fab">
         <span class="material-symbols-outlined">add</span>
       </a>
