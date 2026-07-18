@@ -1,12 +1,5 @@
 import { BaseLayout } from '../layouts/BaseLayout';
-
-export type JournalEntry = {
-  id: string;
-  date: Date;
-  title: string;
-  note: string;
-  imagePaths: string[];
-}
+import { type JournalEntry, type User } from '../db/schema';
 
 export type JournalEntryNullable = JournalEntry | null;
 
@@ -17,7 +10,7 @@ export type MonthGroup = {
 }
 
 type DashboardPageProps = {
-  username: string;
+  user: User;
   currentYear: number;
   journalEntries: JournalEntry[];
   hideEmptyDays?: boolean;
@@ -68,7 +61,7 @@ export function validateRequestedYear(yearInput: string | null | undefined): num
   return parsedYear;
 }
 
-export function DashboardPage({ username, currentYear, journalEntries = [], hideEmptyDays = false }: DashboardPageProps) {
+export function DashboardPage({ user, currentYear, journalEntries = [], hideEmptyDays = false }: DashboardPageProps) {
   const monthNames = getMonthNames();
   const monthGroups: MonthGroup[] = [];
   monthNames.forEach((monthName, monthIndex) => {
@@ -161,7 +154,7 @@ export function DashboardPage({ username, currentYear, journalEntries = [], hide
   })
 
   return (
-    <BaseLayout username={username} title="Dashboard - Slice of Life" stylesheets={["/static/assets/css/dashboard.css"]}>
+    <BaseLayout user={user} title="Dashboard - Slice of Life" stylesheets={["/static/assets/css/dashboard.css"]}>
       <a href="/entry/new" class="m3-fab">
         <span class="material-symbols-outlined">add</span>
       </a>
