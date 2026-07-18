@@ -1,18 +1,19 @@
 import { Hono } from "hono";
 import accounts from "./backend/accounts";
-import { deleteToken, getToken, getUserIdFromToken, validateTokenFromContext } from "./backend/cookies";
+import { deleteToken, validateTokenFromContext } from "./backend/cookies";
 import { serveStatic } from "hono/bun";
 
 import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
-import { DashboardPage, validateRequestedYear, type JournalEntry } from './pages/Dashboard';
+import { DashboardPage, validateRequestedYear } from './pages/Dashboard';
 import { EntryPage } from "./pages/Entry";
 import { entryValidator } from "./schemas/entry";
-import { getUser } from "./db/queries";
-import type { User } from "./db/schema";
+import { getUserFromContext } from "./db/queries";
+import type { JournalEntry, User } from "./db/schema";
 
 const app = new Hono();
 
+// TODO: MAKE ENTRY CREATION AND EDITOR
 const mockEntries: JournalEntry[] = [
   {
     id: "e1",
@@ -50,15 +51,13 @@ app.get('/', async (c) => {
     return c.redirect("/login");
   }
 
-  const token = await getToken(c) as string;
-  const userId = await getUserIdFromToken(token) as number;
-  const user = await getUser(userId) as User;
+  const user = await getUserFromContext(c) as User;
 
   const currentYear = validateRequestedYear(c.req.query("year"));
   const hideEmpty = c.req.query('hideEmpty') === 'true';
 
   return c.html(
-    <DashboardPage username={user.username} currentYear={currentYear} journalEntries={mockEntries} hideEmptyDays={hideEmpty} />
+    <DashboardPage user={user} currentYear={currentYear} journalEntries={mockEntries} hideEmptyDays={hideEmpty} />
   );
 });
 
@@ -68,9 +67,7 @@ app.get("/entry/:year/:month/:day", entryValidator, async (c) => {
     return c.redirect("/login");
   }
 
-  const token = await getToken(c) as string;
-  const userId = await getUserIdFromToken(token) as number;
-  const user = await getUser(userId) as User;
+  const user = await getUserFromContext(c) as User;
 
   const { year, month, day } = c.req.valid("param");
   // const parsedDate = new Date(year, month - 1, day);
@@ -83,6 +80,7 @@ app.get("/entry/:year/:month/:day", entryValidator, async (c) => {
     imagePaths: [],
   }
 
+  // TODO: SUPPORT MULTIPLE ENTRIES FOR THE SAME DATE?
   const journalEntries: JournalEntry[] = mockEntries.filter((journalEntry) => {
     const sameYear = journalEntry.date.getFullYear() === year;
     const sameMonth = journalEntry.date.getMonth() === (month - 1);
@@ -95,7 +93,7 @@ app.get("/entry/:year/:month/:day", entryValidator, async (c) => {
   }
 
   return c.html(
-    <EntryPage username={user.username} dateString={c.req.query("date") || ""} journalEntry={journalEntries[0]}>
+    <EntryPage user={user} dateString={c.req.query("date") || ""} journalEntry={journalEntries[0]}>
     </EntryPage>
   )
 })

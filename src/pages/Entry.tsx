@@ -1,13 +1,14 @@
 import { BaseLayout } from '../layouts/BaseLayout';
-import { stringToDate, type JournalEntry } from './Dashboard';
+import { type JournalEntry, type User } from '../db/schema';
+import { stringToDate } from './Dashboard';
 
 interface EntryPageProps {
-  username: string;
+  user: User;
   dateString: string;
   journalEntry?: JournalEntry;
 }
 
-export function EntryPage({ username, dateString, journalEntry }: EntryPageProps) {
+export function EntryPage({ user, dateString, journalEntry }: EntryPageProps) {
   const requestedEntryDate = stringToDate(dateString);
 
   journalEntry = journalEntry || {
@@ -30,7 +31,7 @@ export function EntryPage({ username, dateString, journalEntry }: EntryPageProps
 
   return (
     <BaseLayout
-      username={username}
+      user={user}
       title={`${journalEntry.title} - Slice of Life`}
       stylesheets={["/static/assets/css/entry.css"]}
       scripts={showControls ? ["/static/assets/js/entry-carousel.js"] : []}

@@ -1,12 +1,15 @@
+import type { User } from "../db/schema";
+
 interface BaseLayoutProps {
+  user?: User;
   title?: string;
-  username?: string;
   stylesheets?: string[];
   scripts?: string[]
   children: any;
 }
 
-export function BaseLayout({ title = "Slice of Life", username = "", stylesheets = [], scripts = [], children }: BaseLayoutProps) {
+export function BaseLayout({ user, title = "Slice of Life", stylesheets = [], scripts = [], children }: BaseLayoutProps) {
+  const username = Boolean(user) ? (user as User).username : "";
   return (
     <html lang="en">
       <head>
