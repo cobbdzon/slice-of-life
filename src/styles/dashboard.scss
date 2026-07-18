@@ -90,12 +90,12 @@
   &.empty-placeholder {
     align-items: center;
     justify-content: center;
-    border: 2px dashed var(--md-sys-color-outline-variant, #c4c7c5);
+    border: 4px dashed var(--md-sys-color-outline-variant, #c4c7c555);
     background-color: transparent;
     color: var(--md-sys-color-on-surface-variant, #49454f);
 
     &:hover {
-      border: 2px solid var(--md-sys-color-outline-variant, #c4c7c5)
+      border: 4px solid var(--md-sys-color-outline-variant, #c4c7c5)
     }
 
     .material-symbols-outlined {

@@ -82,12 +82,12 @@
 .entry-card.empty-placeholder {
   align-items: center;
   justify-content: center;
-  border: 2px dashed var(--md-sys-color-outline-variant, #c4c7c5);
+  border: 4px dashed var(--md-sys-color-outline-variant, rgba(196, 199, 197, 0.3333333333));
   background-color: transparent;
   color: var(--md-sys-color-on-surface-variant, #49454f);
 }
 .entry-card.empty-placeholder:hover {
-  border: 2px solid var(--md-sys-color-outline-variant, #c4c7c5);
+  border: 4px solid var(--md-sys-color-outline-variant, #c4c7c5);
 }
 .entry-card.empty-placeholder .material-symbols-outlined {
   font-size: 32px;
