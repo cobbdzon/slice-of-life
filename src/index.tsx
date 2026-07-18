@@ -10,6 +10,7 @@ import { EntryPage } from "./pages/Entry";
 import { entryValidator } from "./schemas/entry";
 import { getUserFromContext } from "./db/queries";
 import type { JournalEntry, User } from "./db/schema";
+import { EntryEditor } from "./pages/EntryEditor";
 
 const app = new Hono();
 
@@ -95,6 +96,20 @@ app.get("/entry/:year/:month/:day", entryValidator, async (c) => {
   return c.html(
     <EntryPage user={user} dateString={c.req.query("date") || ""} journalEntry={journalEntries[0]}>
     </EntryPage>
+  )
+})
+
+app.get("/entry/new", async (c) => {
+  const isValidToken = await validateTokenFromContext(c);
+  if (!isValidToken) {
+    return c.redirect("/login");
+  }
+
+  const user = await getUserFromContext(c) as User;
+
+  return c.html(
+    <EntryEditor user={user}>
+    </EntryEditor>
   )
 })
 
