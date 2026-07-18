@@ -13,6 +13,7 @@ export function RegisterPage(props: RegisterPageProps) {
       title="Register"
       subtitle="Create an account"
       submitMessage="Register"
+      formAction="/register"
       bottomMessage="Already have an account?"
       bottomLink="/login"
       bottomLinkMessage="Login"

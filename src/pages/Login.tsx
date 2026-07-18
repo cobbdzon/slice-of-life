@@ -4,6 +4,7 @@ interface LoginPageProps {
   errorCode?: string;
 }
 
+// TODO: display ?register=SUCCESS
 export function LoginPage(props: LoginPageProps) {
   return (
     <AuthLayout
@@ -13,6 +14,7 @@ export function LoginPage(props: LoginPageProps) {
       title="Login"
       subtitle="Enter your login credentials"
       submitMessage="Login"
+      formAction="/login"
       bottomMessage="Not registered?"
       bottomLink="/register"
       bottomLinkMessage="Create account"

@@ -6,6 +6,7 @@ export interface AuthLayoutProps {
   title: string;
   subtitle: string;
   submitMessage: string;
+  formAction: string;
 
   bottomMessage: string;
   bottomLink: string;
@@ -40,7 +41,7 @@ export function AuthLayout(props: AuthLayoutProps) {
             </div>
           )}
 
-          <form action="/login" method="post" style="display: flex; flex-direction: column; gap: 20px;">
+          <form action={props.formAction} method="post" style="display: flex; flex-direction: column; gap: 20px;">
             <md-outlined-text-field label="Username" name="username" id="username" required></md-outlined-text-field>
             <md-outlined-text-field label="Password" type="password" name="password" id="password" required minlength="8"></md-outlined-text-field>
 
