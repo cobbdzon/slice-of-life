@@ -39,12 +39,19 @@ body.m3-surface {
 .m3-top-app-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   height: 64px;
   padding: 0 16px;
   background-color: rgba(0, 0, 0, 0);
   // background-color: var(--md-sys-color-surface);
   // border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   gap: 16px;
+
+  div {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
 
   .m3-title {
     font-size: 22px;

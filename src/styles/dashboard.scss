@@ -52,6 +52,12 @@
   flex-direction: column;
   box-sizing: border-box;
 
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  &:hover {
+    transform: scale(1.03);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
   .date-text {
     font-size: 14px;
     font-weight: 500;
@@ -59,14 +65,8 @@
   }
 
   &.real-entry {
-    background-color: var(--md-sys-color-surface-container-high, #ece6f0);
+    // background-color: var(--md-sys-color-surface-container-high, #ece6f0);
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-    &:hover {
-      transform: scale(1.03);
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    }
 
     img {
       position: absolute;
@@ -77,6 +77,14 @@
       object-fit: cover;
       z-index: 1;
     }
+
+    .entry-icon-placeholder {
+      margin: auto;
+      font-size: 48px;
+      color: var(--md-sys-color-on-surface-variant, #49454f);
+      opacity: 0.4;
+      z-index: 1;
+    }
   }
 
   &.empty-placeholder {
@@ -85,6 +93,10 @@
     border: 2px dashed var(--md-sys-color-outline-variant, #c4c7c5);
     background-color: transparent;
     color: var(--md-sys-color-on-surface-variant, #49454f);
+
+    &:hover {
+      border: 2px solid var(--md-sys-color-outline-variant, #c4c7c5)
+    }
 
     .material-symbols-outlined {
       font-size: 32px;

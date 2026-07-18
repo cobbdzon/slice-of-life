@@ -1,10 +1,12 @@
 interface BaseLayoutProps {
   title?: string;
-  stylesheets?: string[]; // Array sa mga dugang nga CSS paths
+  username?: string;
+  stylesheets?: string[];
+  scripts?: string[]
   children: any;
 }
 
-export function BaseLayout({ title = "Slice of Life", stylesheets = [], children }: BaseLayoutProps) {
+export function BaseLayout({ title = "Slice of Life", username = "", stylesheets = [], scripts = [], children }: BaseLayoutProps) {
   return (
     <html lang="en">
       <head>
@@ -17,21 +19,33 @@ export function BaseLayout({ title = "Slice of Life", stylesheets = [], children
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-        {/* Imong global baseline styles */}
         <link rel="stylesheet" href="/static/assets/css/main.css" />
 
-        {/* Dynamic injection sa mga dugang nga stylesheets */}
         {stylesheets.map((href) => (
           <link rel="stylesheet" href={href} />
+        ))}
+
+        {scripts.map((href) => (
+          <script src={href}></script>
         ))}
 
         <script type="module" src="https://esm.run/@material/web/all.js"></script>
       </head>
       <body class="m3-surface">
-        {/* TODO: ADD ACCOUNT NAME */}
         <header class="m3-top-app-bar">
-          {/* <span class="material-symbols-outlined icon-btn">menu</span> */}
-          <span class="m3-title">Slice of Life</span>
+          <div class="left">
+            <span class="m3-title">Slice of Life</span>
+          </div>
+          <div class="right">
+            <span class="m3-title">{username}</span>
+            {
+              username != "" ? (
+                <md-filled-button onclick="window.location.href='/logout'">
+                  Log Out
+                </md-filled-button>
+              ) : null
+            }
+          </div>
         </header>
 
         <main class="m3-main-container">
