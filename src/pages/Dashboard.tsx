@@ -108,7 +108,6 @@ export function DashboardPage({ username, currentYear, journalEntries = [], hide
       }
 
       const hasImage = journalEntry.imagePaths.length > 0;
-      console.log(journalEntry.imagePaths.length)
 
       // actual entry box
       return (
