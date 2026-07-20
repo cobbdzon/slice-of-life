@@ -1,6 +1,6 @@
 import { db } from "../db";
 import * as schema from "../schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 export async function insertJournalEntry(userId: number, journalEntry: schema.JournalEntry) {
   const newRow: schema.DBJournalEntry = {
@@ -30,8 +30,15 @@ export async function getJournalEntries(userId: number): Promise<schema.JournalE
   }));
 }
 
-export async function getJournalEntryFromEntryId(entryId: string): Promise<schema.JournalEntry | null> {
-  const rows = await db.select().from(schema.journalEntries).where(eq(schema.journalEntries.id, entryId));
+export async function getJournalEntryFromEntryId(userId: number, entryId: string): Promise<schema.JournalEntry | null> {
+  const rows = await db.select()
+    .from(schema.journalEntries)
+    .where(
+      and(
+        eq(schema.journalEntries.id, entryId),
+        eq(schema.journalEntries.userId, userId)
+      )
+    );
 
   const matchedEntries: schema.JournalEntry[] = rows.map((row) => ({
     id: row.id,
@@ -84,4 +91,29 @@ export async function updateMultipleJournalEntries(userId: number, journalEntrie
         );
     }
   });
+}
+
+export async function deleteJournalEntry(userId: number, entryId: string) {
+  return await db
+    .delete(schema.journalEntries)
+    .where(
+      and(
+        eq(schema.journalEntries.id, entryId),
+        eq(schema.journalEntries.userId, userId)
+      )
+    );
+}
+
+export async function deleteMultipleJournalEntries(userId: number, entryIds: string[]) {
+  if (entryIds.length === 0) return;
+
+  // No loops! Drops thousands of rows in a single DB cycle
+  return await db
+    .delete(schema.journalEntries)
+    .where(
+      and(
+        inArray(schema.journalEntries.id, entryIds),
+        eq(schema.journalEntries.userId, userId)
+      )
+    );
 }

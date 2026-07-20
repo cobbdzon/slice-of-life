@@ -10,7 +10,7 @@ import { DashboardPage } from '../pages/Dashboard';
 import { EntryPage } from "../pages/Entry";
 import { EntryEditor } from "../pages/EntryEditor";
 import { entryPayloadValidator } from "../schemas/entryPayload";
-import { getJournalEntries, getJournalEntryFromEntryId, insertJournalEntry, updateJournalEntry } from "../db/queries/entry";
+import { deleteJournalEntry, getJournalEntries, getJournalEntryFromEntryId, insertJournalEntry, updateJournalEntry } from "../db/queries/entry";
 import { randomUUID } from "crypto";
 
 const app = new Hono();
@@ -96,7 +96,7 @@ app.get("/entry/:entryId/edit", async (c) => {
   const entryId = c.req.param("entryId");
 
   // validate entryId
-  const selectedEntry = await getJournalEntryFromEntryId(entryId);
+  const selectedEntry = await getJournalEntryFromEntryId(user.id, entryId);
   if (!selectedEntry) {
     return c.redirect("/?error=INVALID_ENTRY_ID")
   }
@@ -145,7 +145,7 @@ app.put("/api/entry/:entryId", entryPayloadValidator, async (c) => {
   const entryId = c.req.param("entryId");
   const { title, note, imagePaths, date } = c.req.valid("json");
 
-  const existingEntry = await getJournalEntryFromEntryId(entryId);
+  const existingEntry = await getJournalEntryFromEntryId(user.id, entryId);
   if (!existingEntry) {
     return c.redirect("/?error=ENTRY_NOT_FOUND");
   } else if (existingEntry.userId != user.id) {
@@ -159,6 +159,34 @@ app.put("/api/entry/:entryId", entryPayloadValidator, async (c) => {
     imagePaths: imagePaths,
     date: new Date(date)
   })
+
+  // const [year, month, day] = date.split('-').map(Number);
+  // return c.redirect(`/entry/${year}/${month}/${day}`);
+  return c.json({ success: true });
+})
+
+// TODO: delete files from server
+app.delete("/api/entry/:entryId", async (c) => {
+  const isValidToken = await validateTokenFromContext(c);
+  if (!isValidToken) {
+    return c.redirect("/login");
+  }
+
+  const user = await getUserFromContext(c) as User;
+
+  const entryId = c.req.param("entryId");
+
+  const existingEntry = await getJournalEntryFromEntryId(user.id, entryId);
+  if (!existingEntry) {
+    return c.redirect("/?error=ENTRY_NOT_FOUND");
+  } else if (existingEntry.userId != user.id) {
+    return c.redirect("/?error=FORBIDDEN_ENTRY_NOT_OWNED");
+  }
+
+  await deleteJournalEntry(user.id, existingEntry.id);
+
+  // const [year, month] = dateToString(existingEntry.date).split('-').map(Number);
+  return c.json({ success: true });
 })
 
 app.get("/:year", async (c) => {
