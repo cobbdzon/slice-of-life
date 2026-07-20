@@ -45,7 +45,7 @@ export function DashboardPage({ user, currentYear, journalEntries = [], hideEmpt
         // const currentDate = new Date(currentYear, monthIndex, dayIndex + 1);
         return (
           <div class="entry-card empty-placeholder">
-            <a href={`/entry/new?date=${dateToString(parsedDate)}`} class="material-symbols-outlined">add</a>
+            <a href={`/entry/new?date=${dateToString(parsedDate)}`} class="material-symbols-outlined no-link-style">add</a>
             <span class="date-text">{monthGroup.monthName} {dayIndex + 1}</span>
           </div>
         )

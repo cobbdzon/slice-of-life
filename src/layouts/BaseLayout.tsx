@@ -37,7 +37,9 @@ export function BaseLayout({ user, title = "Slice of Life", stylesheets = [], sc
       <body class="m3-surface">
         <header class="m3-top-app-bar">
           <div class="left">
-            <span class="m3-title">Slice of Life</span>
+            <a class="no-link-style m3-title" href="/">
+              Slice of Life
+            </a>
           </div>
           <div class="right">
             <span class="m3-title">{username}</span>
