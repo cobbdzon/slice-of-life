@@ -1,6 +1,6 @@
 import { BaseLayout } from '../layouts/BaseLayout';
 import { type JournalEntry, type User } from '../db/schema';
-import { stringToDate } from '../backend/entry';
+import { dateToString, stringToDate } from '../backend/entry';
 
 interface EntryPageProps {
   user: User;
@@ -39,7 +39,7 @@ export function EntryPage({ user, dateString, journalEntry }: EntryPageProps) {
       <div class="entry-view-container">
 
         <div class="entry-nav-strip">
-          <a href="/" class="entry-back-button">
+          <a href={`/#${dateToString(journalEntry.date)}`} class="entry-back-button">
             <span class="material-symbols-outlined">arrow_back</span>
           </a>
         </div>
