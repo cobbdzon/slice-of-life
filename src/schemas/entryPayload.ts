@@ -11,7 +11,6 @@ const entryPayloadSchema = z.object({
 
 const entryPayloadValidator = zValidator("json", entryPayloadSchema, (result, c) => {
   if (!result.success) {
-    console.log(result.error.issues)
     return c.json({
       errors: result.error.issues.map((issue) => issue.message)
     }, 400);

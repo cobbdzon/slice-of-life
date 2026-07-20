@@ -52,8 +52,6 @@ app.get("/entry/:year/:month/:day", entryQueryValidator, async (c) => {
     return sameYear && sameMonth && sameDay;
   });
 
-  console.log(requestedEntries)
-
   if (requestedEntries.length === 0) {
     requestedEntries[0] = defaultEntry;
   }
@@ -98,7 +96,7 @@ app.get("/entry/:entryId/edit", async (c) => {
   const entryId = c.req.param("entryId");
 
   // validate entryId
-  const selectedEntry = await getJournalEntryFromEntryId(user.id, entryId);
+  const selectedEntry = await getJournalEntryFromEntryId(entryId);
   if (!selectedEntry) {
     return c.redirect("/?error=INVALID_ENTRY_ID")
   }
@@ -147,7 +145,7 @@ app.put("/api/entry/:entryId", entryPayloadValidator, async (c) => {
   const entryId = c.req.param("entryId");
   const { title, note, imagePaths, date } = c.req.valid("json");
 
-  const existingEntry = await getJournalEntryFromEntryId(user.id, entryId);
+  const existingEntry = await getJournalEntryFromEntryId(entryId);
   if (!existingEntry) {
     return c.redirect("/?error=ENTRY_NOT_FOUND");
   } else if (existingEntry.userId != user.id) {
@@ -189,8 +187,6 @@ app.get("/:year/:month", async (c) => {
   if (!isValidToken) {
     return c.redirect("/login");
   }
-
-  console.log("fart")
 
   const year = Number(c.req.param("year"));
   if (!validateRequestedYear(year.toString())) {

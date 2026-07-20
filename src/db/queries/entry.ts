@@ -17,6 +17,7 @@ export async function insertJournalEntry(userId: number, journalEntry: schema.Jo
   return await db.insert(schema.journalEntries).values(newRow);
 }
 
+// TODO: check if imagePaths still exists and update if deleted
 export async function getJournalEntries(userId: number): Promise<schema.JournalEntry[]> {
   const rows = await db.select().from(schema.journalEntries).where(eq(schema.journalEntries.userId, userId));
 
@@ -29,24 +30,19 @@ export async function getJournalEntries(userId: number): Promise<schema.JournalE
   }));
 }
 
-export async function getJournalEntryFromEntryId(userId: number, entryId: String): Promise<schema.JournalEntry | null> {
-  const journalEntries = await getJournalEntries(userId);
-  const matchedEntries = journalEntries.filter(entry => {
-    return entry.id == entryId;
-  })
-  const rawJournalEntry = matchedEntries.pop();
-  if (!rawJournalEntry) {
-    return null;
-  }
-  const journalEntry: schema.JournalEntry = {
-    id: rawJournalEntry.id,
-    title: rawJournalEntry.title,
-    note: rawJournalEntry.note,
-    imagePaths: rawJournalEntry.imagePaths,
-    date: new Date(rawJournalEntry.date),
-    userId: userId
-  }
-  return journalEntry
+export async function getJournalEntryFromEntryId(entryId: string): Promise<schema.JournalEntry | null> {
+  const rows = await db.select().from(schema.journalEntries).where(eq(schema.journalEntries.id, entryId));
+
+  const matchedEntries: schema.JournalEntry[] = rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    note: row.note,
+    imagePaths: row.imagePaths,
+    date: new Date(row.date),
+    userId: row.userId
+  }))
+
+  return matchedEntries.pop() || null;
 }
 
 export async function updateJournalEntry(userId: number, journalEntry: schema.JournalEntry) {

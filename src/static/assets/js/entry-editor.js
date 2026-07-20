@@ -188,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       try {
-        console.log(JSON.stringify(payload));
         const response = await fetch(requestUrl, {
           method: requestMethod,
           headers: { "Content-Type": "application/json" },
