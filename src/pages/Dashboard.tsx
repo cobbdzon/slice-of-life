@@ -94,12 +94,18 @@ export function DashboardPage({ user, requestedYear, requestedMonth, journalEntr
       );
     });
 
-    // hide months that have no entries, except current one
     const visibleEntries = monthGroup.journalEntries.filter((journalEntry) => {
       return journalEntry != undefined;
     })
-    if (visibleEntries.length == 0 && (monthIndex != currentDate.getMonth() || requestedYear != currentDate.getFullYear())) {
-      return
+
+    if (requestedMonth !== undefined) {
+      if (monthIndex !== requestedMonth) {
+        return;
+      }
+    } else {
+      if (visibleEntries.length == 0 && (monthIndex != currentDate.getMonth() || requestedYear != currentDate.getFullYear())) {
+        return;
+      }
     }
 
     return (
