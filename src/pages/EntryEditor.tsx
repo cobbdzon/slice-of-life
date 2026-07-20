@@ -4,16 +4,17 @@ import type { User, JournalEntry } from "../db/schema"; // Adjust import path as
 interface EntryEditorProps {
   user: User;
   // If entry is passed, we are in EDIT mode. If undefined, we are in CREATE mode.
+  date: Date;
   entry?: JournalEntry;
 }
 
-export function EntryEditor({ user, entry }: EntryEditorProps) {
+export function EntryEditor({ user, date, entry }: EntryEditorProps) {
   const isEditMode = Boolean(entry?.id);
   const pageTitle = isEditMode ? "Edit Entry - Slice of Life" : "New Entry - Slice of Life";
 
   // Formatting the date to YYYY-MM-DD format for the HTML native date input
-  const defaultDateString = entry?.date
-    ? new Date(entry.date).toISOString().split("T")[0]
+  const defaultDateString = date
+    ? new Date(date).toISOString().split("T")[0]
     : new Date().toISOString().split("T")[0];
 
   return (
