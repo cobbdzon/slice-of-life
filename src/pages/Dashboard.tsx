@@ -55,7 +55,7 @@ export function DashboardPage({ user, currentYear, journalEntries = [], hideEmpt
 
       // actual entry box
       return (
-        <a href={`/entry/${currentYear}/${monthIndex + 1}/${dayIndex + 1}`} class="entry-card real-entry" title={journalEntry.title}>
+        <a href={`/entry/${currentYear}/${monthIndex + 1}/${dayIndex + 1}`} class="entry-card real-entry no-link-style" title={journalEntry.title}>
           {
             hasImage ? (
               <img
@@ -106,7 +106,7 @@ export function DashboardPage({ user, currentYear, journalEntries = [], hideEmpt
 
   return (
     <BaseLayout user={user} title="Dashboard - Slice of Life" stylesheets={["/static/assets/css/dashboard.css"]}>
-      <a href="/entry/new" class="m3-fab">
+      <a href={`/entry/new?date=${dateToString(new Date())}`} class="m3-fab">
         <span class="material-symbols-outlined">add</span>
       </a>
 
