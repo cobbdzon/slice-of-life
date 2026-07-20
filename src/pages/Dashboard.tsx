@@ -4,24 +4,35 @@ import { dateToString, getDaysInMonth, getMonthNames, type MonthGroup } from '..
 
 export type DashboardPageProps = {
   user: User;
-  currentYear: number;
+  requestedYear?: number;
+  requestedMonth?: number;
   journalEntries: JournalEntry[];
   hideEmptyDays: boolean;
 }
 
-export function DashboardPage({ user, currentYear, journalEntries = [], hideEmptyDays = false }: DashboardPageProps) {
+export function DashboardPage({ user, requestedYear, requestedMonth, journalEntries = [], hideEmptyDays = false }: DashboardPageProps) {
+  requestedYear = requestedYear || new Date().getFullYear();
+
+  const currentDate = new Date();
+
   const monthNames = getMonthNames();
   const monthGroups: MonthGroup[] = [];
   monthNames.forEach((monthName, monthIndex) => {
-    const daysInMonth = getDaysInMonth(currentYear, monthIndex)
+    const daysInMonth = getDaysInMonth(requestedYear, monthIndex)
     monthGroups[monthIndex] = {
       monthName: monthName,
-      year: currentYear,
+      year: requestedYear,
       journalEntries: Array(daysInMonth).fill(null),
     }
   })
 
-  journalEntries.forEach(entry => {
+
+  journalEntries.filter(entry => {
+    if (requestedMonth && requestedMonth != entry.date.getMonth()) {
+      return false
+    }
+    return entry.date.getFullYear() == requestedYear;
+  }).forEach(entry => {
     const monthIndex = entry.date.getMonth();
     const dayIndex = entry.date.getDate() - 1;
 
@@ -36,13 +47,13 @@ export function DashboardPage({ user, currentYear, journalEntries = [], hideEmpt
     const entriesGalleryElements = monthGroup.journalEntries.map((journalEntry, dayIndex) => {
       // empty entry box
 
-      const parsedDate = new Date(currentYear, monthIndex + 1, dayIndex);
+      const parsedDate = new Date(requestedYear, monthIndex + 1, dayIndex);
 
       if (journalEntry == null) {
         if (hideEmptyDays) {
           return;
         }
-        // const currentDate = new Date(currentYear, monthIndex, dayIndex + 1);
+        // const requestedDate = new Date(requestedYear, monthIndex, dayIndex + 1);
         return (
           <div class="entry-card empty-placeholder">
             <a href={`/entry/new?date=${dateToString(parsedDate)}`} class="material-symbols-outlined no-link-style">add</a>
@@ -55,7 +66,7 @@ export function DashboardPage({ user, currentYear, journalEntries = [], hideEmpt
 
       // actual entry box
       return (
-        <a href={`/entry/${currentYear}/${monthIndex + 1}/${dayIndex + 1}`} class="entry-card real-entry no-link-style" title={journalEntry.title}>
+        <a href={`/entry/${requestedYear}/${monthIndex + 1}/${dayIndex + 1}`} class="entry-card real-entry no-link-style" title={journalEntry.title}>
           {
             hasImage ? (
               <img
@@ -83,11 +94,11 @@ export function DashboardPage({ user, currentYear, journalEntries = [], hideEmpt
       );
     });
 
-    // hide if hideEmptyDays == true
+    // hide months that have no entries, except current one
     const visibleEntries = monthGroup.journalEntries.filter((journalEntry) => {
       return journalEntry != undefined;
     })
-    if (visibleEntries.length == 0) {
+    if (visibleEntries.length == 0 && (monthIndex != currentDate.getMonth() || requestedYear != currentDate.getFullYear())) {
       return
     }
 
