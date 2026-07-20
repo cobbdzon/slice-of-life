@@ -1,5 +1,6 @@
 import { BaseLayout } from "../layouts/BaseLayout"; // Adjust import path as needed
 import type { User, JournalEntry } from "../db/schema"; // Adjust import path as needed
+import { dateToString } from "../backend/entry";
 
 interface EntryEditorProps {
   user: User;
@@ -124,7 +125,7 @@ export function EntryEditor({ user, date, entry }: EntryEditorProps) {
               {isEditMode ? "Save Changes" : "Publish Entry"}
             </md-filled-button>
 
-            <md-outlined-button type="button" onclick="window.history.back()">
+            <md-outlined-button href={`/#${dateToString(date)}`}>
               Cancel
             </md-outlined-button>
 
