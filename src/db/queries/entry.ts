@@ -3,7 +3,7 @@ import * as schema from "../schema";
 import { and, eq } from "drizzle-orm";
 
 export async function insertJournalEntry(userId: number, journalEntry: schema.JournalEntry) {
-  const newRow = {
+  const newRow: schema.DBJournalEntry = {
     id: journalEntry.id,
     title: journalEntry.title,
     note: journalEntry.note,
@@ -14,11 +14,11 @@ export async function insertJournalEntry(userId: number, journalEntry: schema.Jo
     userId: userId,
   };
 
-  await db.insert(schema.entries).values(newRow);
+  return await db.insert(schema.journalEntries).values(newRow);
 }
 
 export async function getJournalEntries(userId: number): Promise<schema.JournalEntry[]> {
-  const rows = await db.select().from(schema.entries).where(eq(schema.entries.userId, userId));
+  const rows = await db.select().from(schema.journalEntries).where(eq(schema.journalEntries.userId, userId));
 
   return rows.map((row) => ({
     id: row.id,
@@ -29,7 +29,27 @@ export async function getJournalEntries(userId: number): Promise<schema.JournalE
   }));
 }
 
-export async function updateJournalEntry(userId: number, journalEntry: schema.JournalEntry): Promise<void> {
+export async function getJournalEntryFromEntryId(userId: number, entryId: String): Promise<schema.JournalEntry | null> {
+  const journalEntries = await getJournalEntries(userId);
+  const matchedEntries = journalEntries.filter(entry => {
+    return entry.id == entryId;
+  })
+  const rawJournalEntry = matchedEntries.pop();
+  if (!rawJournalEntry) {
+    return null;
+  }
+  const journalEntry: schema.JournalEntry = {
+    id: rawJournalEntry.id,
+    title: rawJournalEntry.title,
+    note: rawJournalEntry.note,
+    imagePaths: rawJournalEntry.imagePaths,
+    date: new Date(rawJournalEntry.date),
+    userId: userId
+  }
+  return journalEntry
+}
+
+export async function updateJournalEntry(userId: number, journalEntry: schema.JournalEntry) {
   const updatedRow = {
     title: journalEntry.title,
     note: journalEntry.note,
@@ -37,23 +57,23 @@ export async function updateJournalEntry(userId: number, journalEntry: schema.Jo
     imagePaths: journalEntry.imagePaths,
   };
 
-  await db
-    .update(schema.entries)
+  return await db
+    .update(schema.journalEntries)
     .set(updatedRow)
     .where(
       and(
-        eq(schema.entries.id, journalEntry.id),
-        eq(schema.entries.userId, userId)
+        eq(schema.journalEntries.id, journalEntry.id),
+        eq(schema.journalEntries.userId, userId)
       )
     );
 }
 
 export async function updateMultipleJournalEntries(userId: number, journalEntries: schema.JournalEntry[]) {
   // db.transaction opens a single transaction pipeline
-  await db.transaction(async (tx) => {
+  return await db.transaction(async (tx) => {
     for (const entry of journalEntries) {
       await tx
-        .update(schema.entries)
+        .update(schema.journalEntries)
         .set({
           title: entry.title,
           note: entry.note,
@@ -62,8 +82,8 @@ export async function updateMultipleJournalEntries(userId: number, journalEntrie
         })
         .where(
           and(
-            eq(schema.entries.id, entry.id),
-            eq(schema.entries.userId, userId)
+            eq(schema.journalEntries.id, entry.id),
+            eq(schema.journalEntries.userId, userId)
           )
         );
     }

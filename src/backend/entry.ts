@@ -1,5 +1,8 @@
+import { Hono } from 'hono';
 import { type JournalEntry } from '../db/schema';
 export type JournalEntryNullable = JournalEntry | null;
+
+export const app = new Hono();
 
 export type MonthGroup = {
   monthName: string;
@@ -60,3 +63,5 @@ export function getDefaultEntry(): JournalEntry {
     imagePaths: [],
   }
 }
+
+export default app;

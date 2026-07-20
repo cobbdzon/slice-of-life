@@ -17,6 +17,9 @@ export function EntryEditor({ user, date, entry }: EntryEditorProps) {
     ? new Date(date).toISOString().split("T")[0]
     : new Date().toISOString().split("T")[0];
 
+  // Safely extract paths array for clean server-side JSX rendering
+  const existingImagePaths: string[] = entry?.imagePaths || [];
+
   return (
     <BaseLayout
       user={user}
@@ -82,25 +85,32 @@ export function EntryEditor({ user, date, entry }: EntryEditorProps) {
           <div class="form-group image-manager-section">
             <label>Images</label>
 
+            {/* Clicking this wrapper triggers the native multiple file picker hidden inside it */}
             <div class="image-upload-zone" id="uploadZone">
               <span class="material-symbols-outlined">add_a_photo</span>
-              <p>Click or drag to add image URLs</p>
-              <input type="text" id="imageUrlInput" placeholder="Paste image URL here..." />
-              <md-text-button type="button" id="addImageBtn">Add URL</md-text-button>
+              <p>Click to select or drag images here</p>
+
+              <input
+                type="file"
+                id="fileInput"
+                accept="image/*"
+                multiple
+                style="display: none;"
+              />
             </div>
 
             <input
               type="hidden"
               id="imagePathsPayload"
               name="imagePaths"
-              value={JSON.stringify(entry?.imagePaths || [])}
+              value={JSON.stringify(existingImagePaths)}
             />
 
             <div class="image-preview-grid" id="previewGrid">
-              {(entry?.imagePaths || []).map((path, index) => (
-                <div class="preview-card" data-url={path} key={index}>
-                  <img src={path} alt="Preview asset" />
-                  <button type="button" class="remove-img-btn" onclick="removeImagePreview(this)">
+              {existingImagePaths.map((path) => (
+                <div class="preview-card" data-url={path}>
+                  <img src={path} alt="Journal asset" />
+                  <button type="button" class="remove-img-btn">
                     <span class="material-symbols-outlined">close</span>
                   </button>
                 </div>

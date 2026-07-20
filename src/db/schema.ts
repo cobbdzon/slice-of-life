@@ -8,7 +8,10 @@ export type JournalEntry = {
   title: string;
   note: string;
   imagePaths: string[];
+  userId?: number;
 }
+export type DBJournalEntry = typeof journalEntries.$inferInsert;
+export type JournalAsset = typeof journalAssets.$inferInsert;
 
 export const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -17,7 +20,7 @@ export const users = sqliteTable("users", {
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
-export const entries = sqliteTable("entries", {
+export const journalEntries = sqliteTable("entries", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -40,13 +43,39 @@ export const entries = sqliteTable("entries", {
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
+export const journalAssets = sqliteTable("journal_assets", {
+  id: text("id").primaryKey(), // Crypto.randomUUID()
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  entryId: text("entry_id")
+    .references(() => journalEntries.id, { onDelete: "set null" }),
+
+  serverPath: text("server_path").notNull().unique(),
+  originalName: text("original_name").notNull(),
+  fileSize: integer("file_size").notNull(),
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});
+
+
 export const usersRelations = relations(users, (r) => ({
-  entries: r.many(entries),
+  entries: r.many(journalEntries),
 }));
 
-export const entriesRelations = relations(entries, (r) => ({
+export const entriesRelations = relations(journalEntries, (r) => ({
   author: r.one(users, {
-    fields: [entries.userId],
+    fields: [journalEntries.userId],
     references: [users.id],
   }),
 }));
+
+export const assetsRelations = relations(journalAssets, (r) => ({
+  author: r.one(users, {
+    fields: [journalAssets.userId],
+    references: [users.id],
+  }),
+  entry: r.one(journalEntries, {
+    fields: [journalAssets.entryId],
+    references: [journalEntries.id],
+  })
+}))
