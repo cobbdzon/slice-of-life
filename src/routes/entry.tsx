@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { validateTokenFromContext } from "../backend/cookies";
 import { getUserFromContext } from "../db/queries/auth";
 
-import { getDefaultEntry, validateRequestedYear } from "../backend/entry";
+import { getDefaultEntry, stringToDate, validateRequestedYear } from "../backend/entry";
 import { entryValidator } from "../schemas/entry";
 import type { JournalEntry, User } from "../db/schema";
 
@@ -67,7 +67,6 @@ app.get("/entry/:year/:month/:day", entryValidator, async (c) => {
   }
 
   const user = await getUserFromContext(c) as User;
-
   const { year, month, day } = c.req.valid("param");
   // const parsedDate = new Date(year, month - 1, day);
 
@@ -99,10 +98,19 @@ app.get("/entry/new", async (c) => {
 
   const user = await getUserFromContext(c) as User;
 
+  // check and validate date query
+  const dateParam = c.req.query("date") || "";
+  const parsedDate = stringToDate(dateParam)
+
+  if (!parsedDate.getDate()) {
+    return c.redirect("/?error=INVALID_ENTRY_DATE")
+  }
+
   return c.html(
-    <EntryEditor user={user}>
+    <EntryEditor user={user} date={stringToDate(dateParam)}>
     </EntryEditor>
   )
 })
+
 
 export default app;

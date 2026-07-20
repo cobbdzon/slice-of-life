@@ -18,7 +18,6 @@ export function getDaysInMonth(year: number, monthIndex: number) {
   return new Date(year, monthIndex + 1, 0).getDate();
 }
 
-// TODO: export to backend/calendar.ts to standardize handling dates across code
 export function dateToString(date: Date) {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -28,7 +27,7 @@ export function dateToString(date: Date) {
 
 export function stringToDate(dateString: string) {
   const [year, month, day] = dateString.split('-').map(Number);
-  return new Date(year as number, (month as number - 1), day as number);
+  return new Date(year as number, (month as number - 1), (day ? day + 1 : 0) as number);
 }
 
 export function validateRequestedYear(yearInput: string | null | undefined): number {

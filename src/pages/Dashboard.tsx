@@ -42,7 +42,7 @@ export function DashboardPage({ user, currentYear, journalEntries = [], hideEmpt
         // const currentDate = new Date(currentYear, monthIndex, dayIndex + 1);
         return (
           <div class="entry-card empty-placeholder">
-            <a href={`/entry/${currentYear}/${monthIndex + 1}/${dayIndex + 1}`} class="material-symbols-outlined">add</a>
+            <a href={`/entry/new?date=${currentYear}-${monthIndex + 1}-${dayIndex + 1}`} class="material-symbols-outlined">add</a>
             <span class="date-text">{monthGroup.monthName} {dayIndex + 1}</span>
           </div>
         )
