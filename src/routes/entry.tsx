@@ -58,49 +58,6 @@ app.get('/', async (c) => {
   );
 });
 
-app.get("/:year", async (c) => {
-  const isValidToken = await validateTokenFromContext(c);
-  if (!isValidToken) {
-    return c.redirect("/login");
-  }
-
-  const year = c.req.param("year");
-  if (!validateRequestedYear(year)) {
-    return c.redirect("/?error=INVALID_YEAR")
-  }
-
-  const user = await getUserFromContext(c) as User;
-  const hideEmpty = c.req.query('hideEmpty') === 'true';
-
-  return c.html(
-    <DashboardPage user={user} requestedYear={Number(year)} journalEntries={mockEntries} hideEmptyDays={hideEmpty} />
-  )
-})
-
-app.get("/:year/:month", async (c) => {
-  const isValidToken = await validateTokenFromContext(c);
-  if (!isValidToken) {
-    return c.redirect("/login");
-  }
-
-  const year = Number(c.req.param("year"));
-  if (!validateRequestedYear(year.toString())) {
-    return c.redirect("/?error=INVALID_YEAR")
-  }
-
-  const month = Number(c.req.param("month"));
-  if (isNaN(month) || month < 1 || month > 12) {
-    return c.redirect(`/${year}?error=INVALID_MONTH`)
-  }
-
-  const user = await getUserFromContext(c) as User;
-  const hideEmpty = c.req.query('hideEmpty') === 'true';
-
-  return c.html(
-    <DashboardPage user={user} requestedYear={Number(year)} requestedMonth={month - 1} journalEntries={mockEntries} hideEmptyDays={hideEmpty} />
-  )
-})
-
 app.get("/entry/:year/:month/:day", entryValidator, async (c) => {
   const isValidToken = await validateTokenFromContext(c);
   if (!isValidToken) {
@@ -154,5 +111,49 @@ app.get("/entry/new", async (c) => {
   )
 })
 
+app.get("/:year", async (c) => {
+  const isValidToken = await validateTokenFromContext(c);
+  if (!isValidToken) {
+    return c.redirect("/login");
+  }
+
+  const year = c.req.param("year");
+  if (!validateRequestedYear(year)) {
+    return c.redirect("/?error=INVALID_YEAR")
+  }
+
+  const user = await getUserFromContext(c) as User;
+  const hideEmpty = c.req.query('hideEmpty') === 'true';
+
+  return c.html(
+    <DashboardPage user={user} requestedYear={Number(year)} journalEntries={mockEntries} hideEmptyDays={hideEmpty} />
+  )
+})
+
+app.get("/:year/:month", async (c) => {
+  const isValidToken = await validateTokenFromContext(c);
+  if (!isValidToken) {
+    return c.redirect("/login");
+  }
+
+  console.log("fart")
+
+  const year = Number(c.req.param("year"));
+  if (!validateRequestedYear(year.toString())) {
+    return c.redirect("/?error=INVALID_YEAR")
+  }
+
+  const month = Number(c.req.param("month"));
+  if (isNaN(month) || month < 1 || month > 12) {
+    return c.redirect(`/${year}?error=INVALID_MONTH`)
+  }
+
+  const user = await getUserFromContext(c) as User;
+  const hideEmpty = c.req.query('hideEmpty') === 'true';
+
+  return c.html(
+    <DashboardPage user={user} requestedYear={Number(year)} requestedMonth={month - 1} journalEntries={mockEntries} hideEmptyDays={hideEmpty} />
+  )
+})
 
 export default app;
