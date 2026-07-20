@@ -4,7 +4,7 @@ import type { CookieOptions } from "hono/utils/cookie";
 import { env } from "./env";
 import { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
-import { getUser } from "../db/queries";
+import { getUser } from "../db/queries/auth.ts";
 
 const JWT_SECRET = env.JWT_SECRET;
 const SIG_ALGORITHM: SignatureAlgorithm = "HS256"
