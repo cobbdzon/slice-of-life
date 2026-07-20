@@ -49,13 +49,20 @@ export function DashboardPage({ user, requestedYear, requestedMonth, journalEntr
 
       const parsedDate = new Date(requestedYear, monthIndex, dayIndex + 1);
 
+      const currentDate = new Date();
+      const isCurrentDate = currentDate.getFullYear() == requestedYear &&
+        currentDate.getMonth() == monthIndex &&
+        currentDate.getDate() == dayIndex + 1
+
+      const elementId = `${dateToString(parsedDate)}`
+
       if (journalEntry == null) {
         if (hideEmptyDays) {
           return;
         }
         // const requestedDate = new Date(requestedYear, monthIndex, dayIndex + 1);
         return (
-          <div class="entry-card empty-placeholder">
+          <div id={elementId} class={`entry-card empty-placeholder ${isCurrentDate ? "current-entry" : ""}`}>
             <a href={`/entry/new?date=${dateToString(parsedDate)}`} class="material-symbols-outlined no-link-style">add</a>
             <span class="date-text">{monthGroup.monthName} {dayIndex + 1}</span>
           </div>
@@ -66,7 +73,7 @@ export function DashboardPage({ user, requestedYear, requestedMonth, journalEntr
 
       // actual entry box
       return (
-        <a href={`/entry/${requestedYear}/${monthIndex + 1}/${dayIndex + 1}`} class="entry-card real-entry no-link-style" title={journalEntry.title}>
+        <a href={`/entry/${requestedYear}/${monthIndex + 1}/${dayIndex + 1}`} id={elementId} class="entry-card real-entry no-link-style" title={journalEntry.title}>
           {
             hasImage ? (
               <img
@@ -122,13 +129,13 @@ export function DashboardPage({ user, requestedYear, requestedMonth, journalEntr
   })
 
   return (
-    <BaseLayout user={user} title="Dashboard - Slice of Life" stylesheets={["/static/assets/css/dashboard.css"]}>
+    <BaseLayout user={user} title="Dashboard - Slice of Life" stylesheets={["/static/assets/css/dashboard.css"]} scripts={["/static/assets/js/dashboard.js"]}>
       <a href={`/entry/new?date=${dateToString(new Date())}`} class="m3-fab">
         <span class="material-symbols-outlined">add</span>
       </a>
 
       {monthGroupElements}
 
-    </BaseLayout>
+    </BaseLayout >
   )
 }

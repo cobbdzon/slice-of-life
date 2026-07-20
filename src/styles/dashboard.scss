@@ -40,21 +40,22 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  background-color: var(--md-sys-color-surface-container-high, #ece6f0); 
 
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  
   &:hover {
     transform: scale(1.03);
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
   }
 
   .date-text {
     font-size: 14px;
-    font-weight: 500;
-    opacity: 0.6;
+    font-weight: 600;
+    opacity: 0.9;
   }
 
   &.real-entry {
-    // background-color: var(--md-sys-color-surface-container-high, #ece6f0);
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
 
     img {
@@ -74,6 +75,36 @@
       opacity: 0.4;
       z-index: 1;
     }
+    
+    .entry-top-bar:not(:has(~ img)) {
+      background: none;
+      .date-text {
+        color: var(--md-sys-color-on-surface, #1d1b20);
+      }
+    }
+
+    &.current-entry {
+      border: 3px solid var(--md-sys-color-primary, #6750a4);
+      box-shadow: 0px 0px 8px rgba(103, 80, 164, 0.4);
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 8px;
+        height: 8px;
+        background-color: var(--md-sys-color-primary, #6750a4);
+        border-radius: 50%;
+        z-index: 5;
+        box-shadow: 0 0 0 2px #ffffff;
+      }
+
+      .entry-top-bar .date-text {
+        color: var(--md-sys-color-primary, #6750a4);
+        opacity: 1;
+      }
+    }
   }
 
   &.empty-placeholder {
@@ -84,7 +115,8 @@
     color: var(--md-sys-color-on-surface-variant, #49454f);
 
     &:hover {
-      border: 4px solid var(--md-sys-color-outline-variant, #c4c7c5)
+      border: 4px solid var(--md-sys-color-outline-variant, #c4c7c5);
+      background-color: rgba(var(--md-sys-color-primary-rgb, 103, 80, 164), 0.04);
     }
 
     .material-symbols-outlined {
@@ -93,6 +125,23 @@
       opacity: 0.6;
     }
 
+    &.current-entry {
+      border: 3px solid var(--md-sys-color-primary, #6750a4);
+      color: var(--md-sys-color-primary, #6750a4);
+      background-color: rgba(var(--md-sys-color-primary-rgb, 103, 80, 164), 0.02);
+      box-shadow: 0px 0px 8px rgba(103, 80, 164, 0.15);
+
+      .material-symbols-outlined, 
+      p, span {
+        opacity: 1;
+        color: var(--md-sys-color-primary, #6750a4);
+      }
+
+      &:hover {
+        background-color: rgba(var(--md-sys-color-primary-rgb, 103, 80, 164), 0.08);
+        border-color: var(--md-sys-color-primary, #6750a4);
+      }
+    }
   }
 }
 
