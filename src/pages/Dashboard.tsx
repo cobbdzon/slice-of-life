@@ -1,6 +1,6 @@
 import { BaseLayout } from '../layouts/BaseLayout';
 import { type JournalEntry, type User } from '../db/schema';
-import { getDaysInMonth, getMonthNames, type MonthGroup } from '../backend/entry';
+import { dateToString, getDaysInMonth, getMonthNames, type MonthGroup } from '../backend/entry';
 
 export type DashboardPageProps = {
   user: User;
@@ -35,6 +35,9 @@ export function DashboardPage({ user, currentYear, journalEntries = [], hideEmpt
     // construct the entries gallery contents
     const entriesGalleryElements = monthGroup.journalEntries.map((journalEntry, dayIndex) => {
       // empty entry box
+
+      const parsedDate = new Date(currentYear, monthIndex + 1, dayIndex);
+
       if (journalEntry == null) {
         if (hideEmptyDays) {
           return;
@@ -42,7 +45,7 @@ export function DashboardPage({ user, currentYear, journalEntries = [], hideEmpt
         // const currentDate = new Date(currentYear, monthIndex, dayIndex + 1);
         return (
           <div class="entry-card empty-placeholder">
-            <a href={`/entry/new?date=${currentYear}-${monthIndex + 1}-${dayIndex + 1}`} class="material-symbols-outlined">add</a>
+            <a href={`/entry/new?date=${dateToString(parsedDate)}`} class="material-symbols-outlined">add</a>
             <span class="date-text">{monthGroup.monthName} {dayIndex + 1}</span>
           </div>
         )
