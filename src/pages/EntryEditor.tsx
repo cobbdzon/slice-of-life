@@ -125,7 +125,7 @@ export function EntryEditor({ user, date, entry }: EntryEditorProps) {
               {isEditMode ? "Save Changes" : "Publish Entry"}
             </md-filled-button>
 
-            <md-outlined-button href={`/#${dateToString(date)}`}>
+            <md-outlined-button type="button" href={`/#${dateToString(date)}`}>
               Cancel
             </md-outlined-button>
 
