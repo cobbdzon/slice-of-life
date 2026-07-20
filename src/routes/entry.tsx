@@ -103,6 +103,7 @@ app.get("/entry/new", async (c) => {
   const parsedDate = stringToDate(dateParam)
 
   if (!parsedDate.getDate()) {
+    // TODO: make a popup to display errors?
     return c.redirect("/?error=INVALID_ENTRY_DATE")
   }
 
