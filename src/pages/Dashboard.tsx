@@ -47,7 +47,7 @@ export function DashboardPage({ user, requestedYear, requestedMonth, journalEntr
     const entriesGalleryElements = monthGroup.journalEntries.map((journalEntry, dayIndex) => {
       // empty entry box
 
-      const parsedDate = new Date(requestedYear, monthIndex + 1, dayIndex);
+      const parsedDate = new Date(requestedYear, monthIndex, dayIndex + 1);
 
       if (journalEntry == null) {
         if (hideEmptyDays) {

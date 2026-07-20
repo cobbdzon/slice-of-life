@@ -1,7 +1,7 @@
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 
-const entrySchema = z.object({
+const entryQuerySchema = z.object({
   year: z.coerce.number().int().min(1975).max(new Date().getFullYear() + 1),
   month: z.coerce.number().int().min(1).max(12),
   day: z.coerce.number().int().min(1).max(31)
@@ -14,7 +14,7 @@ const entrySchema = z.object({
   )
 }, { message: "Invalid calendar date!" })
 
-const entryValidator = zValidator("param", entrySchema, (result, c) => {
+const entryQueryValidator = zValidator("param", entryQuerySchema, (result, c) => {
   if (!result.success) {
     return c.json({
       errors: result.error.issues.map((issue) => issue.message)
@@ -22,4 +22,4 @@ const entryValidator = zValidator("param", entrySchema, (result, c) => {
   }
 })
 
-export { entrySchema, entryValidator };
+export { entryQuerySchema, entryQueryValidator };

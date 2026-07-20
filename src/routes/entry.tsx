@@ -2,47 +2,18 @@ import { Hono } from "hono";
 import { validateTokenFromContext } from "../backend/cookies";
 import { getUserFromContext } from "../db/queries/auth";
 
-import { getDefaultEntry, stringToDate, validateRequestedYear } from "../backend/entry";
-import { entryValidator } from "../schemas/entry";
+import { dateToString, getDefaultEntry, stringToDate, validateRequestedYear } from "../backend/entry";
+import { entryQueryValidator } from "../schemas/entryQuery";
 import type { JournalEntry, User } from "../db/schema";
 
 import { DashboardPage } from '../pages/Dashboard';
 import { EntryPage } from "../pages/Entry";
 import { EntryEditor } from "../pages/EntryEditor";
+import { entryPayloadValidator } from "../schemas/entryPayload";
+import { getJournalEntries, getJournalEntryFromEntryId, insertJournalEntry, updateJournalEntry } from "../db/queries/entry";
+import { randomUUID } from "crypto";
 
 const app = new Hono();
-
-// TODO: MAKE ENTRY CREATION AND EDITOR
-const mockEntries: JournalEntry[] = [
-  {
-    id: "e1",
-    date: new Date("2026-07-15"),
-    title: "Coffee at San Mateo cafe",
-    note: "Tried the new nitro cold brew. Very smooth.",
-    imagePaths: ["/static/assets/images/coffee.jpg"]
-  },
-  {
-    id: "e2",
-    date: new Date("2026-07-13"),
-    title: "Calabarzon Roadtrip Walk",
-    note: "Sunny afternoon walk along the ridge line.",
-    imagePaths: ["/static/assets/images/road.png"]
-  },
-  {
-    id: "e3",
-    date: new Date("2026-06-28"),
-    title: "Finished project milestone",
-    note: "Finally pushed the working UI architecture live today.",
-    imagePaths: []
-  },
-  {
-    id: "e4",
-    date: new Date("2026-06-25"),
-    title: "Rainy evening music session",
-    note: "Listened to some lo-fi vinyl ambient records while tracking rain outside.",
-    imagePaths: ["/static/assets/images/rain.jpg", "/static/assets/images/road.png"]
-  }
-];
 
 app.get('/', async (c) => {
   const isValidToken = await validateTokenFromContext(c);
@@ -53,12 +24,14 @@ app.get('/', async (c) => {
   const user = await getUserFromContext(c) as User;
   const hideEmpty = c.req.query('hideEmpty') === 'true';
 
+  const journalEntries = await getJournalEntries(user.id);
+
   return c.html(
-    <DashboardPage user={user} journalEntries={mockEntries} hideEmptyDays={hideEmpty} />
+    <DashboardPage user={user} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />
   );
 });
 
-app.get("/entry/:year/:month/:day", entryValidator, async (c) => {
+app.get("/entry/:year/:month/:day", entryQueryValidator, async (c) => {
   const isValidToken = await validateTokenFromContext(c);
   if (!isValidToken) {
     return c.redirect("/login");
@@ -69,21 +42,24 @@ app.get("/entry/:year/:month/:day", entryValidator, async (c) => {
   // const parsedDate = new Date(year, month - 1, day);
 
   const defaultEntry = getDefaultEntry();
+  const journalEntries = await getJournalEntries(user.id)
 
   // TODO: SUPPORT MULTIPLE ENTRIES FOR THE SAME DATE?
-  const journalEntries: JournalEntry[] = mockEntries.filter((journalEntry) => {
+  const requestedEntries: JournalEntry[] = journalEntries.filter((journalEntry) => {
     const sameYear = journalEntry.date.getFullYear() === year;
     const sameMonth = journalEntry.date.getMonth() === (month - 1);
     const sameDay = journalEntry.date.getDate() === day;
     return sameYear && sameMonth && sameDay;
   });
 
-  if (journalEntries.length === 0) {
-    journalEntries[0] = defaultEntry;
+  console.log(requestedEntries)
+
+  if (requestedEntries.length === 0) {
+    requestedEntries[0] = defaultEntry;
   }
 
   return c.html(
-    <EntryPage user={user} dateString={c.req.query("date") || ""} journalEntry={journalEntries[0]}>
+    <EntryPage user={user} dateString={c.req.query("date") || ""} journalEntry={requestedEntries.pop()}>
     </EntryPage>
   )
 })
@@ -111,6 +87,82 @@ app.get("/entry/new", async (c) => {
   )
 })
 
+app.get("/entry/:entryId/edit", async (c) => {
+  const isValidToken = await validateTokenFromContext(c);
+  if (!isValidToken) {
+    return c.redirect("/login");
+  }
+
+  const user = await getUserFromContext(c) as User;
+
+  const entryId = c.req.param("entryId");
+
+  // validate entryId
+  const selectedEntry = await getJournalEntryFromEntryId(user.id, entryId);
+  if (!selectedEntry) {
+    return c.redirect("/?error=INVALID_ENTRY_ID")
+  }
+  const selectedDate = selectedEntry.date;
+
+  return c.html(
+    <EntryEditor user={user} date={selectedDate} entry={selectedEntry}>
+    </EntryEditor>
+  )
+})
+
+app.post("/api/entry", entryPayloadValidator, async (c) => {
+  const isValidToken = await validateTokenFromContext(c);
+  if (!isValidToken) {
+    return c.redirect("/login");
+  }
+
+  const user = await getUserFromContext(c) as User;
+
+  //TODO: validate date
+
+  const entryPayload = c.req.valid("json");
+  const newEntry: JournalEntry = {
+    id: randomUUID(),
+    title: entryPayload.title,
+    note: entryPayload.note,
+    imagePaths: entryPayload.imagePaths,
+    date: new Date(entryPayload.date)
+  };
+
+  await insertJournalEntry(user.id, newEntry);
+
+  const [year, month, day] = dateToString(newEntry.date).split('-').map(Number);
+
+  return c.redirect(`/entry/${year}/${month}/${day}`);
+})
+
+app.put("/api/entry/:entryId", entryPayloadValidator, async (c) => {
+  const isValidToken = await validateTokenFromContext(c);
+  if (!isValidToken) {
+    return c.redirect("/login");
+  }
+
+  const user = await getUserFromContext(c) as User;
+
+  const entryId = c.req.param("entryId");
+  const { title, note, imagePaths, date } = c.req.valid("json");
+
+  const existingEntry = await getJournalEntryFromEntryId(user.id, entryId);
+  if (!existingEntry) {
+    return c.redirect("/?error=ENTRY_NOT_FOUND");
+  } else if (existingEntry.userId != user.id) {
+    return c.redirect("/?error=FORBIDDEN_ENTRY_NOT_OWNED");
+  }
+
+  updateJournalEntry(user.id, {
+    id: existingEntry.id,
+    title: title,
+    note: note,
+    imagePaths: imagePaths,
+    date: new Date(date)
+  })
+})
+
 app.get("/:year", async (c) => {
   const isValidToken = await validateTokenFromContext(c);
   if (!isValidToken) {
@@ -125,8 +177,10 @@ app.get("/:year", async (c) => {
   const user = await getUserFromContext(c) as User;
   const hideEmpty = c.req.query('hideEmpty') === 'true';
 
+  const journalEntries = await getJournalEntries(user.id);
+
   return c.html(
-    <DashboardPage user={user} requestedYear={Number(year)} journalEntries={mockEntries} hideEmptyDays={hideEmpty} />
+    <DashboardPage user={user} requestedYear={Number(year)} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />
   )
 })
 
@@ -151,8 +205,10 @@ app.get("/:year/:month", async (c) => {
   const user = await getUserFromContext(c) as User;
   const hideEmpty = c.req.query('hideEmpty') === 'true';
 
+  const journalEntries = await getJournalEntries(user.id);
+
   return c.html(
-    <DashboardPage user={user} requestedYear={Number(year)} requestedMonth={month - 1} journalEntries={mockEntries} hideEmptyDays={hideEmpty} />
+    <DashboardPage user={user} requestedYear={Number(year)} requestedMonth={month - 1} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />
   )
 })
 
