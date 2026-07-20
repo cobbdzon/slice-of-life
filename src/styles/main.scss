@@ -105,3 +105,13 @@ body.m3-surface {
   max-width: 1200px;
   margin: 0 auto;
 }
+
+a.no-link-style {
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  &:hover {
+    color: inherit;
+    text-decoration: none;
+  }
+}

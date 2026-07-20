@@ -100,4 +100,14 @@ body.m3-surface {
   margin: 0 auto;
 }
 
+a.no-link-style {
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+a.no-link-style:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
 /*# sourceMappingURL=main.css.map */
