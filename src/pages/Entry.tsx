@@ -1,6 +1,6 @@
 import { BaseLayout } from '../layouts/BaseLayout';
 import { type JournalEntry, type User } from '../db/schema';
-import { stringToDate } from './Dashboard';
+import { stringToDate } from '../backend/entry';
 
 interface EntryPageProps {
   user: User;
