@@ -128,6 +128,7 @@ export function EntryEditor({ user, date, entry }: EntryEditorProps) {
               Cancel
             </md-outlined-button>
 
+            {/* TODO: add "are you sure?" */}
             {isEditMode && (
               <md-text-button
                 type="button"
