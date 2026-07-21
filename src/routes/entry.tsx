@@ -10,7 +10,7 @@ import { DashboardPage } from '../pages/Dashboard';
 import { EntryPage } from "../pages/Entry";
 import { EntryEditor } from "../pages/EntryEditor";
 import { entryPayloadValidator } from "../schemas/entryPayload";
-import { deleteJournalEntry, getJournalEntries, getJournalEntryFromEntryId, insertJournalEntry, updateJournalEntry } from "../db/queries/entry";
+import { deleteJournalEntry, getJournalEntries, getJournalEntriesFromDate, getJournalEntryFromEntryId, insertJournalEntry, updateJournalEntry } from "../db/queries/entry";
 import { randomUUID } from "crypto";
 
 const app = new Hono();
@@ -77,6 +77,12 @@ app.get("/entry/new", async (c) => {
   if (!parsedDate.getDate()) {
     // TODO: make a popup to display errors?
     return c.redirect("/?error=INVALID_ENTRY_DATE")
+  }
+
+  const existingEntries = await getJournalEntriesFromDate(parsedDate);
+  console.log(existingEntries);
+  if (existingEntries.length > 0) {
+    return c.redirect(`/?error=ENTRY_ALREADY_EXISTS#${dateParam}`);
   }
 
   return c.html(
