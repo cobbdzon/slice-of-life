@@ -39,6 +39,7 @@
   text-decoration: none;
   display: flex;
   flex-direction: column;
+  justify-content: space-between; /* Keeps top-bar at top and bottom-bar at bottom */
   box-sizing: border-box;
   background-color: var(--md-sys-color-surface-container-high, #ece6f0);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
@@ -54,6 +55,7 @@
 }
 .entry-card.real-entry {
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
+  /* Background image fills the entire card */
 }
 .entry-card.real-entry img {
   position: absolute;
@@ -65,43 +67,50 @@
   z-index: 1;
 }
 .entry-card.real-entry {
-  /* --- ADDED: Gradient overlays for text readability --- */
-  /* Only renders if an image is inside the card */
+  /* Dark Scrim overlay over uploaded image */
 }
 .entry-card.real-entry:has(img)::before {
   content: "";
   position: absolute;
   inset: 0;
-  /* Dark scrim at the top and bottom, completely clear in the middle */
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.15) 25%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.15) 75%, rgba(0, 0, 0, 0.65) 100%);
-  z-index: 2; /* Sits above the <img> (z-index: 1) */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.15) 30%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.15) 70%, rgba(0, 0, 0, 0.65) 100%);
+  z-index: 2;
   pointer-events: none;
 }
 .entry-card.real-entry {
-  /* Elevate text and content above the gradient overlay */
-}
-.entry-card.real-entry .entry-top-bar,
-.entry-card.real-entry .entry-bottom-bar,
-.entry-card.real-entry .date-text,
-.entry-card.real-entry p, .entry-card.real-entry span {
-  position: relative;
-  z-index: 3; /* Sits above the ::before overlay (z-index: 2) */
-  color: #ffffff; /* Force white text over images */
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* Optional: adds subtle drop shadow to text */
+  /* Placeholder Icon centered absolutely */
 }
 .entry-card.real-entry .entry-icon-placeholder {
-  margin: auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   font-size: 48px;
   color: var(--md-sys-color-on-surface-variant, #49454f);
-  opacity: 0.4;
+  opacity: 0.35;
   z-index: 1;
+  pointer-events: none;
 }
-.entry-card.real-entry .entry-top-bar:not(:has(~ img)) {
-  background: none;
+.entry-card.real-entry {
+  /* Standard card without image: use dark theme text */
 }
-.entry-card.real-entry .entry-top-bar:not(:has(~ img)) .date-text {
+.entry-card.real-entry:not(:has(img)) .entry-title,
+.entry-card.real-entry:not(:has(img)) .date-text,
+.entry-card.real-entry:not(:has(img)) .entry-note {
   color: var(--md-sys-color-on-surface, #1d1b20);
   text-shadow: none;
+}
+.entry-card.real-entry:not(:has(img)) .entry-note {
+  opacity: 0.75;
+}
+.entry-card.real-entry {
+  /* Card with image: use white text with text-shadow */
+}
+.entry-card.real-entry:has(img) .entry-title,
+.entry-card.real-entry:has(img) .date-text,
+.entry-card.real-entry:has(img) .entry-note {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 .entry-card.real-entry.current-entry {
   border: 3px solid var(--md-sys-color-primary, #6750a4);
@@ -155,31 +164,22 @@
   border-color: var(--md-sys-color-primary, #6750a4);
 }
 
+/* Structural top & bottom overlay bars */
 .entry-top-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 12px 12px 24px 12px;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.65) 0%, transparent 100%);
-  z-index: 2;
+  position: relative;
+  z-index: 3;
+  padding: 12px;
 }
 
 .entry-bottom-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 24px 12px 12px 12px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 100%);
-  z-index: 2;
-  margin-top: auto;
+  position: relative;
+  z-index: 3;
+  padding: 12px;
 }
 
 .entry-title {
-  color: #ffffff;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -187,7 +187,6 @@
 }
 
 .entry-note {
-  color: rgba(255, 255, 255, 0.85);
   font-size: 12px;
   font-weight: 400;
   display: block;
