@@ -4,6 +4,7 @@ import { getUserFromContext } from "../db/queries/auth";
 import { validateTokenFromContext } from "./cookies";
 import { type JournalAsset, type User } from "../db/schema";
 import { deleteJournalAssetsWithMissingFile, deleteOrphanedJournalAssets, getJournalAssetsWithMissingFile, getOrphanedImagesFilenamesOnDisk, getOrphanedJournalAssets, insertJournalAsset } from "../db/queries/uploads";
+import { mkdir } from "fs/promises";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024;
 export const GARBAGE_COLLECT_INTERVAL = 30 * 60 * 1000; // 30 mins
@@ -60,6 +61,9 @@ app.post("/upload", async (c) => {
 });
 
 export async function startGarbageCollectionLoop() {
+  // check if uploads directory exists
+  await mkdir("./public/uploads", { recursive: true });
+
   while (true) {
     try {
       const assetsWithMissingFile = await getJournalAssetsWithMissingFile();
