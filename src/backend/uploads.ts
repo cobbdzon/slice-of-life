@@ -3,15 +3,13 @@ import { Hono } from "hono";
 import { getUserFromContext } from "../db/queries/auth";
 import { validateTokenFromContext } from "./cookies";
 import { type JournalAsset, type User } from "../db/schema";
-import { deleteJournalAssets, getJournalAssets, getJournalAssetsWithMissingFile, getOrphanedImagesFilenamesOnDisk, getOrphanedJournalAssets, insertJournalAsset } from "../db/queries/uploads";
+import { deleteJournalAssets, getJournalAssetsWithMissingFile, getOrphanedImagesFilenamesOnDisk, getOrphanedJournalAssets, insertJournalAsset } from "../db/queries/uploads";
 import { mkdir } from "fs/promises";
 
+// TODO: make upload paths customizable via env, and these constants
 export const MAX_FILE_SIZE = 5 * 1024 * 1024;
-// const GARBAGE_COLLECT_INTERVAL = 30 * 60 * 1000; // 30 mins
-// const STALE_THRESHOLD_MS = 60 * 60 * 1000; // 1 hr
-const GARBAGE_COLLECT_INTERVAL = 5000; // 30 mins
-const STALE_THRESHOLD_MS = 20000; // 1 hr
-
+const GARBAGE_COLLECT_INTERVAL = 30 * 60 * 1000; // 30 mins
+const STALE_THRESHOLD_MS = 60 * 60 * 1000; // 1 hr
 
 const app = new Hono();
 

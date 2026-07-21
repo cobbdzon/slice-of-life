@@ -129,6 +129,7 @@ export function DashboardPage({ user, requestedYear, requestedMonth, journalEntr
 
   return (
     <BaseLayout user={user} title="Dashboard - Slice of Life" stylesheets={["/static/assets/css/dashboard.css"]} scripts={["/static/assets/js/dashboard.js"]}>
+      {/* TODO: seek to the next day thats available */}
       <a href={`/entry/new?date=${dateToString(new Date())}`} class="m3-fab">
         <span class="material-symbols-outlined">add</span>
       </a>
