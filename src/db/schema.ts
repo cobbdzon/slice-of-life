@@ -44,12 +44,10 @@ export const journalEntries = sqliteTable("entries", {
 });
 
 export const journalAssets = sqliteTable("journal_assets", {
-  id: text("id").primaryKey(), // Crypto.randomUUID()
+  id: text("id").primaryKey(), // crypto.randomUUID()
   userId: integer("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  entryId: text("entry_id")
-    .references(() => journalEntries.id, { onDelete: "set null" }),
 
   serverPath: text("server_path").notNull().unique(),
   originalName: text("original_name").notNull(),
@@ -60,6 +58,7 @@ export const journalAssets = sqliteTable("journal_assets", {
 
 export const usersRelations = relations(users, (r) => ({
   entries: r.many(journalEntries),
+  assets: r.many(journalAssets),
 }));
 
 export const entriesRelations = relations(journalEntries, (r) => ({
@@ -67,7 +66,6 @@ export const entriesRelations = relations(journalEntries, (r) => ({
     fields: [journalEntries.userId],
     references: [users.id],
   }),
-  assets: r.many(journalAssets),
 }));
 
 export const assetsRelations = relations(journalAssets, (r) => ({
@@ -75,8 +73,4 @@ export const assetsRelations = relations(journalAssets, (r) => ({
     fields: [journalAssets.userId],
     references: [users.id],
   }),
-  entry: r.one(journalEntries, {
-    fields: [journalAssets.entryId],
-    references: [journalEntries.id],
-  })
-}))
+}));

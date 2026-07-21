@@ -26,7 +26,6 @@ export function DashboardPage({ user, requestedYear, requestedMonth, journalEntr
     }
   })
 
-
   journalEntries.filter(entry => {
     if (requestedMonth && requestedMonth != entry.date.getMonth()) {
       return false
