@@ -80,7 +80,7 @@ app.get("/entry/new", async (c) => {
   }
 
   const existingEntries = await getJournalEntriesFromDate(parsedDate);
-  console.log(existingEntries);
+  // console.log(existingEntries);
   if (existingEntries.length > 0) {
     return c.redirect(`/?error=ENTRY_ALREADY_EXISTS#${dateParam}`);
   }

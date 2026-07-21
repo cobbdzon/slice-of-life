@@ -3,12 +3,15 @@ import { Hono } from "hono";
 import { getUserFromContext } from "../db/queries/auth";
 import { validateTokenFromContext } from "./cookies";
 import { type JournalAsset, type User } from "../db/schema";
-import { deleteJournalAssetsWithMissingFile, deleteOrphanedJournalAssets, getJournalAssetsWithMissingFile, getOrphanedImagesFilenamesOnDisk, getOrphanedJournalAssets, insertJournalAsset } from "../db/queries/uploads";
+import { deleteJournalAssets, getJournalAssets, getJournalAssetsWithMissingFile, getOrphanedImagesFilenamesOnDisk, getOrphanedJournalAssets, insertJournalAsset } from "../db/queries/uploads";
 import { mkdir } from "fs/promises";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024;
-export const GARBAGE_COLLECT_INTERVAL = 30 * 60 * 1000; // 30 mins
-const STALE_THRESHOLD_MS = 60 * 60 * 1000; // 1 hr
+// const GARBAGE_COLLECT_INTERVAL = 30 * 60 * 1000; // 30 mins
+// const STALE_THRESHOLD_MS = 60 * 60 * 1000; // 1 hr
+const GARBAGE_COLLECT_INTERVAL = 5000; // 30 mins
+const STALE_THRESHOLD_MS = 20000; // 1 hr
+
 
 const app = new Hono();
 
@@ -63,21 +66,29 @@ app.post("/upload", async (c) => {
 export async function startGarbageCollectionLoop() {
   // check if uploads directory exists
   await mkdir("./public/uploads", { recursive: true });
+  await Bun.sleep(5000); // some delay
 
   while (true) {
     try {
+      // assets with no file
       const assetsWithMissingFile = await getJournalAssetsWithMissingFile();
-      const assetsOrphaned = await getOrphanedJournalAssets();
-      const imagesFilenamesOrphaned = await getOrphanedImagesFilenamesOnDisk();
+      // console.log("Missing file: ", assetsWithMissingFile.map(asset => asset.originalName));
+      await deleteJournalAssets(assetsWithMissingFile); // no file
 
-      // DEBUG
-      console.log("Missing file: ", assetsWithMissingFile.map(asset => asset.originalName));
-      console.log("Does not belong to any entry: ", assetsOrphaned.map(asset => asset.originalName));
-      console.log("Possibly stale: ", imagesFilenamesOrphaned);
+      // assets with no parent entry, that is not stale
+      const assetsOrphaned = (await getOrphanedJournalAssets()).filter(asset => {
+        const isStale = Date.now() - new Date(asset.createdAt as string).getTime() > STALE_THRESHOLD_MS;
+        return isStale;
+      });
+      // console.log("Does not belong to any entry: ", assetsOrphaned.map(asset => asset.originalName));
+      await deleteJournalAssets(assetsOrphaned, true) // no entry
 
-      await deleteJournalAssetsWithMissingFile(assetsWithMissingFile);
-      await deleteOrphanedJournalAssets(assetsOrphaned);
+      // delete files that have no entry in the database, that is not stale
+      const imagesFilenamesOrphaned = (await getOrphanedImagesFilenamesOnDisk()).filter(filename => {
+        return filename != ".gitkeep";
+      });
 
+      // console.log("Orphaned file with no database entry: ", imagesFilenamesOrphaned);
       for (const filename of imagesFilenamesOrphaned) {
         const filePath = `./public/uploads/${filename}`;
         const file = Bun.file(filePath);
