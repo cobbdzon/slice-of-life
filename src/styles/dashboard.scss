@@ -40,7 +40,7 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  background-color: var(--md-sys-color-surface-container-high, #ece6f0); 
+  background-color: var(--md-sys-color-surface-container-high, #ece6f0);  
 
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   
@@ -68,6 +68,36 @@
       z-index: 1;
     }
 
+    /* --- ADDED: Gradient overlays for text readability --- */
+    /* Only renders if an image is inside the card */
+    &:has(img)::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      /* Dark scrim at the top and bottom, completely clear in the middle */
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.65) 0%,
+        rgba(0, 0, 0, 0.15) 25%,
+        rgba(0, 0, 0, 0) 50%,
+        rgba(0, 0, 0, 0.15) 75%,
+        rgba(0, 0, 0, 0.65) 100%
+      );
+      z-index: 2; /* Sits above the <img> (z-index: 1) */
+      pointer-events: none;
+    }
+
+    /* Elevate text and content above the gradient overlay */
+    .entry-top-bar,
+    .entry-bottom-bar,
+    .date-text,
+    p, span {
+      position: relative;
+      z-index: 3; /* Sits above the ::before overlay (z-index: 2) */
+      color: #ffffff; /* Force white text over images */
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* Optional: adds subtle drop shadow to text */
+    }
+
     .entry-icon-placeholder {
       margin: auto;
       font-size: 48px;
@@ -80,6 +110,7 @@
       background: none;
       .date-text {
         color: var(--md-sys-color-on-surface, #1d1b20);
+        text-shadow: none;
       }
     }
 

@@ -64,6 +64,31 @@
   object-fit: cover;
   z-index: 1;
 }
+.entry-card.real-entry {
+  /* --- ADDED: Gradient overlays for text readability --- */
+  /* Only renders if an image is inside the card */
+}
+.entry-card.real-entry:has(img)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Dark scrim at the top and bottom, completely clear in the middle */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.15) 25%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.15) 75%, rgba(0, 0, 0, 0.65) 100%);
+  z-index: 2; /* Sits above the <img> (z-index: 1) */
+  pointer-events: none;
+}
+.entry-card.real-entry {
+  /* Elevate text and content above the gradient overlay */
+}
+.entry-card.real-entry .entry-top-bar,
+.entry-card.real-entry .entry-bottom-bar,
+.entry-card.real-entry .date-text,
+.entry-card.real-entry p, .entry-card.real-entry span {
+  position: relative;
+  z-index: 3; /* Sits above the ::before overlay (z-index: 2) */
+  color: #ffffff; /* Force white text over images */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* Optional: adds subtle drop shadow to text */
+}
 .entry-card.real-entry .entry-icon-placeholder {
   margin: auto;
   font-size: 48px;
@@ -76,6 +101,7 @@
 }
 .entry-card.real-entry .entry-top-bar:not(:has(~ img)) .date-text {
   color: var(--md-sys-color-on-surface, #1d1b20);
+  text-shadow: none;
 }
 .entry-card.real-entry.current-entry {
   border: 3px solid var(--md-sys-color-primary, #6750a4);
