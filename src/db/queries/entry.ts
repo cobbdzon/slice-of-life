@@ -30,6 +30,20 @@ export async function getJournalEntries(userId: number): Promise<schema.JournalE
   }));
 }
 
+export async function getJournalEntriesFromDate(date: Date): Promise<schema.JournalEntry[]> {
+  const rows = await db.select()
+    .from(schema.journalEntries)
+    .where(eq(schema.journalEntries.date, date.toISOString()));
+
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    note: row.note,
+    imagePaths: row.imagePaths,
+    date: new Date(row.date),
+  }));
+}
+
 export async function getJournalEntryFromEntryId(userId: number, entryId: string): Promise<schema.JournalEntry | null> {
   const rows = await db.select()
     .from(schema.journalEntries)
