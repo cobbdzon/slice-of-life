@@ -4,7 +4,7 @@ function updateUrlQuerySilent(key, value) {
   window.history.replaceState({}, "", url);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // --- Core Element Mappings ---
   const form = document.getElementById("entryForm");
   const entryDateElement = document.getElementById("entryDate");
@@ -21,16 +21,69 @@ document.addEventListener('DOMContentLoaded', () => {
   const MAX_IMAGES = 10;
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit per file
 
-  // --- 1. Date Query String Synchronization ---
+  // --- SHARED IMAGE STATE HELPERS (Scoped at top level of DOMContentLoaded) ---
+  const getImagesArray = () => {
+    if (!imagePathsPayload) return [];
+    try {
+      return JSON.parse(imagePathsPayload.value || "[]");
+    } catch {
+      return [];
+    }
+  };
+
+  const setImagesArray = (arr) => {
+    if (imagePathsPayload) {
+      imagePathsPayload.value = JSON.stringify(arr);
+    }
+  };
+
+  // --- Date Safeguards & Existing Entries Check ---
+  let existingDatesSet = new Set();
+  const isEditMode = form?.dataset.mode === "edit";
+  const initialDate = entryDateElement?.value || "";
+
+  try {
+    const res = await fetch("/api/entry/existing");
+    if (res.ok) {
+      const datesArray = await res.json(); // ["2026-07-21T00:00:00.000Z", ...]
+      existingDatesSet = new Set(datesArray.map(iso => iso.split("T")[0]));
+    }
+  } catch (err) {
+    console.error("Failed to fetch existing entries:", err);
+  }
+
+  const isDateTaken = (dateStr) => {
+    if (!dateStr) return false;
+    if (isEditMode && dateStr === initialDate) return false;
+    return existingDatesSet.has(dateStr);
+  };
+
+  // --- 1. Date Query String Synchronization & Conflict Reversion ---
   if (entryDateElement) {
+    let lastValidDate = entryDateElement.value;
+
+    if (isDateTaken(lastValidDate)) {
+      alert(`An entry already exists for ${lastValidDate}. Please pick a different date.`);
+      entryDateElement.value = "";
+      lastValidDate = "";
+    }
+
     entryDateElement.addEventListener("change", () => {
-      updateUrlQuerySilent("date", entryDateElement.value);
+      const selectedDate = entryDateElement.value;
+
+      if (isDateTaken(selectedDate)) {
+        alert(`An entry already exists for ${selectedDate}. Reverting to previous date.`);
+        entryDateElement.value = lastValidDate; // Snaps back to previous valid date
+        return;
+      }
+
+      lastValidDate = selectedDate;
+      updateUrlQuerySilent("date", selectedDate);
     });
   }
 
   // --- 2. Material Web Component Enter Key Submission Fix ---
   const triggerSubmit = (e) => {
-    // Only intercept if Enter is pressed without holding Shift (so textareas can new-line)
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       form.requestSubmit();
@@ -40,33 +93,26 @@ document.addEventListener('DOMContentLoaded', () => {
   if (entryTitle) entryTitle.addEventListener("keydown", triggerSubmit);
   if (entryNote) entryNote.addEventListener("keydown", triggerSubmit);
 
-  // --- 3. Multi-File Upload Engine (Immediate Server Preloading) ---
-  const getImagesArray = () => JSON.parse(imagePathsPayload.value || "[]");
-  const setImagesArray = (arr) => { imagePathsPayload.value = JSON.stringify(arr); };
-
+  // --- 3. Multi-File Upload Engine ---
   const handleFilesInput = async (files) => {
     const currentImages = getImagesArray();
 
-    // Enforce strict overall count ceiling check upfront
     if (currentImages.length + files.length > MAX_IMAGES) {
       alert(`You can only have up to ${MAX_IMAGES} images per journal entry.`);
       return;
     }
 
-    // Process picked/dropped files sequentially
     for (const file of Array.from(files)) {
       if (!file.type.startsWith("image/")) {
         alert(`"${file.name}" is not an image asset.`);
         continue;
       }
 
-      // Size Constraint Verification
       if (file.size > MAX_FILE_SIZE) {
         alert(`"${file.name}" exceeds the 5MB file size limit.`);
         continue;
       }
 
-      // Create a temporary local blob URL & card placeholder with a loading spinner
       const tempBlobUrl = URL.createObjectURL(file);
       const card = document.createElement("div");
       card.className = "preview-card uploading";
@@ -77,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       previewGrid.appendChild(card);
 
-      // Dispatch file payload directly to your backend preloader endpoint
       const formData = new FormData();
       formData.append("image", file);
 
@@ -90,14 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!response.ok) throw new Error("Upload failed");
 
         const data = await response.json();
-        const serverUrl = data.url; // The permanent URL returned by Bun/Hono
+        const serverUrl = data.url;
 
-        // Update tracking state array
         const updatedImages = getImagesArray();
         updatedImages.push(serverUrl);
         setImagesArray(updatedImages);
 
-        // Swap the loading state out for the permanent removal card
         card.className = "preview-card";
         card.removeAttribute("data-temp-url");
         card.setAttribute("data-url", serverUrl);
@@ -111,39 +154,35 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (err) {
         console.error("Server Preload Error:", err);
         alert(`Failed to upload "${file.name}" to the server.`);
-        card.remove(); // Evict failed UI node from DOM
+        card.remove();
       } finally {
-        URL.revokeObjectURL(tempBlobUrl); // Clear temporary browser memory allocation
+        URL.revokeObjectURL(tempBlobUrl);
       }
     }
   };
 
   if (uploadZone && fileInput) {
-    // Open system file dialogue window on interaction clicks
     uploadZone.addEventListener("click", () => fileInput.click());
 
-    // Catch confirmation events out of the system file tree selection
     fileInput.addEventListener("change", () => {
       if (fileInput.files.length > 0) {
         handleFilesInput(fileInput.files);
-        fileInput.value = ""; // Clear out input so the same files can be chosen again later
+        fileInput.value = "";
       }
     });
 
-    // Suppress regular browser drop window behaviors opening files as link strings
     ["dragenter", "dragover", "dragleave", "drop"].forEach(name => {
       uploadZone.addEventListener(name, (e) => e.preventDefault(), false);
     });
 
-    // Add active UI visual class changes on hover targeting tracking
     ["dragenter", "dragover"].forEach(name => {
       uploadZone.addEventListener(name, () => uploadZone.classList.add("highlight"), false);
     });
+
     ["dragleave", "drop"].forEach(name => {
       uploadZone.addEventListener(name, () => uploadZone.classList.remove("highlight"), false);
     });
 
-    // Capture files dropped explicitly inside the zone target frame
     uploadZone.addEventListener("drop", (e) => {
       if (e.dataTransfer.files.length > 0) {
         handleFilesInput(e.dataTransfer.files);
@@ -171,20 +210,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- 5. Form Submission Payload Dispatches ---
   if (form) {
     form.addEventListener("submit", async (e) => {
-      e.preventDefault(); // Turn off standard full page refresh executions
+      e.preventDefault();
 
-      const isEditMode = form.dataset.mode === "edit";
+      const selectedDate = entryDateElement.value;
+
+      if (isDateTaken(selectedDate)) {
+        alert(`Cannot save: an entry already exists for ${selectedDate}.`);
+        return;
+      }
+
       const entryId = form.dataset.entryId;
-
-      // Select endpoints configurations matching workflow patterns
       const requestUrl = isEditMode ? `/api/entry/${entryId}` : "/api/entry";
       const requestMethod = isEditMode ? "PUT" : "POST";
 
       const payload = {
         title: entryTitle.value,
         note: entryNote.value,
-        date: entryDateElement.value,
-        imagePaths: getImagesArray(),
+        date: selectedDate,
+        imagePaths: getImagesArray(), // 👈 Now safely accessible here!
       };
 
       try {
@@ -195,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (response.ok) {
-          // Send user straight to the dashboard month view context they were looking at
           const dateObj = new Date(payload.date);
           window.location.href = `/entry/${dateObj.getFullYear()}/${dateObj.getMonth() + 1}/${dateObj.getDate()}`;
         } else {
@@ -214,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function handleDeleteEntry(entryId) {
   if (!entryId || entryId === "undefined") return;
 
-  if (!confirm("Are you absolute certain you want to permanently delete this entry?")) {
+  if (!confirm("Are you absolutely certain you want to permanently delete this entry?")) {
     return;
   }
 

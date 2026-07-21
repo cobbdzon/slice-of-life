@@ -31,9 +31,9 @@ export async function getJournalEntries(userId: number): Promise<schema.JournalE
 }
 
 export async function getJournalEntriesFromDate(date: Date): Promise<schema.JournalEntry[]> {
-  const rows = await db.select()
-    .from(schema.journalEntries)
-    .where(eq(schema.journalEntries.date, date.toISOString()));
+  const rows = (await db.select().from(schema.journalEntries)).filter(entry => {
+    return (entry.date.split("T")[0] == date.toISOString().split("T")[0]);
+  })
 
   return rows.map((row) => ({
     id: row.id,
