@@ -80,7 +80,6 @@ app.get("/entry/new", async (c) => {
   }
 
   const existingEntries = await getJournalEntriesFromDate(parsedDate);
-  // console.log(existingEntries);
   if (existingEntries.length > 0) {
     return c.redirect(`/?error=ENTRY_ALREADY_EXISTS#${dateParam}`);
   }
@@ -89,6 +88,22 @@ app.get("/entry/new", async (c) => {
     <EntryEditor user={user} date={stringToDate(dateParam)}>
     </EntryEditor>
   )
+})
+
+// TODO: Move somewhere else?
+app.get("/api/entry/existing", async (c) => {
+  const isValidToken = await validateTokenFromContext(c);
+  if (!isValidToken) {
+    return c.redirect("/login");
+  }
+
+  const user = await getUserFromContext(c) as User;
+  const existingEntryDates = (await getJournalEntries(user.id)).map(entry => {
+    // strip away information for security
+    return entry.date.toISOString();
+  })
+
+  return c.json(existingEntryDates);
 })
 
 app.get("/entry/:entryId/edit", async (c) => {
@@ -123,8 +138,9 @@ app.post("/api/entry", entryPayloadValidator, async (c) => {
   const user = await getUserFromContext(c) as User;
 
   //TODO: validate date
-
   const entryPayload = c.req.valid("json");
+  const date = new Date(entryPayload.date);
+
   const newEntry: JournalEntry = {
     id: randomUUID(),
     title: entryPayload.title,
@@ -132,6 +148,11 @@ app.post("/api/entry", entryPayloadValidator, async (c) => {
     imagePaths: entryPayload.imagePaths,
     date: new Date(entryPayload.date)
   };
+
+  const existingEntries = await getJournalEntriesFromDate(date);
+  if (existingEntries.length > 0) {
+    return c.redirect(`/?error=ENTRY_ALREADY_EXISTS#${entryPayload.date}`);
+  }
 
   await insertJournalEntry(user.id, newEntry);
 
