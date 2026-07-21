@@ -2,10 +2,12 @@ import { randomUUID } from "crypto";
 import { Hono } from "hono";
 import { getUserFromContext } from "../db/queries/auth";
 import { validateTokenFromContext } from "./cookies";
-import { db } from "../db/db";
-import { journalAssets, type User } from "../db/schema";
+import { type JournalAsset, type User } from "../db/schema";
+import { deleteJournalAssetsWithMissingFile, deleteOrphanedJournalAssets, getJournalAssetsWithMissingFile, getOrphanedImagesFilenamesOnDisk, getOrphanedJournalAssets, insertJournalAsset } from "../db/queries/uploads";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024;
+export const GARBAGE_COLLECT_INTERVAL = 30 * 60 * 1000; // 30 mins
+const STALE_THRESHOLD_MS = 60 * 60 * 1000; // 1 hr
 
 const app = new Hono();
 
@@ -40,14 +42,15 @@ app.post("/upload", async (c) => {
   await Bun.write(destination, file);
 
   try {
-    // TODO: db/queries/uploads.ts
-    await db.insert(journalAssets).values({
+    const newUpload: JournalAsset = {
       id: assetId,
       userId: user.id,
       serverPath: publicUrlPath,
       originalName: file.name,
-      fileSize: file.size,
-    })
+      fileSize: file.size
+    }
+
+    await insertJournalAsset(newUpload);
   } catch (error) {
     console.error("Database tracking inventory crash: ", error);
     return c.json({ message: "Could not save file asset information" }, 500);
@@ -55,5 +58,40 @@ app.post("/upload", async (c) => {
 
   return c.json({ url: publicUrlPath });
 });
+
+export async function startGarbageCollectionLoop() {
+  while (true) {
+    try {
+      const assetsWithMissingFile = await getJournalAssetsWithMissingFile();
+      const assetsOrphaned = await getOrphanedJournalAssets();
+      const imagesFilenamesOrphaned = await getOrphanedImagesFilenamesOnDisk();
+
+      // DEBUG
+      console.log("Missing file: ", assetsWithMissingFile.map(asset => asset.originalName));
+      console.log("Does not belong to any entry: ", assetsOrphaned.map(asset => asset.originalName));
+      console.log("Possibly stale: ", imagesFilenamesOrphaned);
+
+      await deleteJournalAssetsWithMissingFile(assetsWithMissingFile);
+      await deleteOrphanedJournalAssets(assetsOrphaned);
+
+      for (const filename of imagesFilenamesOrphaned) {
+        const filePath = `./public/uploads/${filename}`;
+        const file = Bun.file(filePath);
+
+        if (await file.exists()) {
+          const isStale = Date.now() - file.lastModified > STALE_THRESHOLD_MS;
+          if (isStale) {
+            console.log(`Deleting ${filename}`);
+            await file.delete();
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Garbage collection error:", err);
+    }
+
+    await Bun.sleep(GARBAGE_COLLECT_INTERVAL);
+  }
+}
 
 export default app;

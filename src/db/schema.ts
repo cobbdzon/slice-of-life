@@ -67,6 +67,7 @@ export const entriesRelations = relations(journalEntries, (r) => ({
     fields: [journalEntries.userId],
     references: [users.id],
   }),
+  assets: r.many(journalAssets),
 }));
 
 export const assetsRelations = relations(journalAssets, (r) => ({
