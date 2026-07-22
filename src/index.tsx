@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import authRoutes from "./routes/auth.tsx";
 import entryRoutes from "./routes/entry.tsx";
+import profileRoutes from "./routes/profile.tsx";
 import uploadsApi, { startGarbageCollectionLoop } from "./backend/uploads.ts"
 import { serveStatic } from "hono/bun";
 
 const app = new Hono();
-
 
 app.use(
   '/static/uploads/*',
@@ -17,8 +17,9 @@ app.use(
 app.use('/static/*', serveStatic({ root: './src' }));
 
 app.route("/", authRoutes);
-app.route("/", entryRoutes);
+app.route("/", profileRoutes);
 
+app.route("/", entryRoutes);
 app.route("/api", uploadsApi);
 
 startGarbageCollectionLoop();
