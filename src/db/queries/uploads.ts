@@ -1,16 +1,16 @@
 import { eq, inArray } from "drizzle-orm";
 import { db } from "../db";
-import * as schema from "../schema";
+import { journalAssets, journalEntries, type JournalAsset } from "../schema";
 import { readdir } from "fs/promises";
 // import { and, eq, inArray } from "drizzle-orm";
 
-export async function insertJournalAsset(journalAsset: schema.JournalAsset) {
-  return await db.insert(schema.journalAssets).values(journalAsset).returning();
+export async function insertJournalAsset(asset: JournalAsset) {
+  return await db.insert(journalAssets).values(asset).returning();
 }
 
-export async function getJournalAssets(userId: number): Promise<schema.JournalAsset[]> {
-  return await db.select().from(schema.journalAssets).where(
-    eq(schema.journalAssets.userId, userId)
+export async function getJournalAssets(userId: number): Promise<JournalAsset[]> {
+  return await db.select().from(journalAssets).where(
+    eq(journalAssets.userId, userId)
   )
 }
 
@@ -22,8 +22,8 @@ export async function getUserTotalFilesSize(userId: number) {
   return userUploadSizes.reduce((acc, val) => acc + val, 0);
 }
 
-export async function getJournalAssetsWithMissingFile(): Promise<schema.JournalAsset[]> {
-  const allAssets = await db.select().from(schema.journalAssets);
+export async function getJournalAssetsWithMissingFile(): Promise<JournalAsset[]> {
+  const allAssets = await db.select().from(journalAssets);
   const missingAssets = [];
 
   for (const asset of allAssets) {
@@ -37,10 +37,10 @@ export async function getJournalAssetsWithMissingFile(): Promise<schema.JournalA
   return missingAssets;
 }
 
-export async function getOrphanedJournalAssets(): Promise<schema.JournalAsset[]> {
+export async function getOrphanedJournalAssets(): Promise<JournalAsset[]> {
   const entries = await db
     .select()
-    .from(schema.journalEntries);
+    .from(journalEntries);
 
   const activeAssetFilenames = entries.flatMap(entry => {
     return entry.imagePaths;
@@ -48,7 +48,7 @@ export async function getOrphanedJournalAssets(): Promise<schema.JournalAsset[]>
     return imagePath.split("/").pop();
   })
 
-  const assets = await db.select().from(schema.journalAssets);
+  const assets = await db.select().from(journalAssets);
 
   return assets.filter(asset => {
     const filename = asset.serverPath.split("/").pop()
@@ -62,7 +62,7 @@ export async function getOrphanedImagesFilenamesOnDisk() {
     .filter((entry) => entry.isFile())
     .map((entry) => entry.name);
 
-  const assetFilenames = (await db.select().from(schema.journalAssets)).map(asset => {
+  const assetFilenames = (await db.select().from(journalAssets)).map(asset => {
     return (asset.serverPath).split("/").pop() || ""
   })
 
@@ -73,7 +73,7 @@ export async function getOrphanedImagesFilenamesOnDisk() {
   return filenames.filter((filename) => !dbSet.has(filename));
 }
 
-export async function deleteJournalAssets(assetsToDelete: schema.JournalAsset[], deleteFilesFromDisk = false): Promise<number> {
+export async function deleteJournalAssets(assetsToDelete: JournalAsset[], deleteFilesFromDisk = false): Promise<number> {
   if (!assetsToDelete || assetsToDelete.length === 0) {
     return 0;
   }
@@ -85,8 +85,8 @@ export async function deleteJournalAssets(assetsToDelete: schema.JournalAsset[],
   }
 
   await db
-    .delete(schema.journalAssets)
-    .where(inArray(schema.journalAssets.id, idsToDelete));
+    .delete(journalAssets)
+    .where(inArray(journalAssets.id, idsToDelete));
 
   if (deleteFilesFromDisk) {
     await Promise.all(

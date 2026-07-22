@@ -1,10 +1,10 @@
 import { db } from "../db";
-import * as schema from "../schema";
 import { getToken, getUserIdFromToken } from "../../backend/cookies";
 
 import { DrizzleQueryError, eq } from "drizzle-orm";
 import { LibsqlError } from "@libsql/client";
 import type { Context } from "hono";
+import { users, type User } from "../schema";
 
 export type UserQueryResult = {
   success: boolean;
@@ -19,11 +19,11 @@ export type InsertUserQueryResult = UserQueryResult & {
 export async function insertUser(username: string, password: string): Promise<InsertUserQueryResult> {
   const passwordHash = await Bun.password.hash(password)
   try {
-    return await db.insert(schema.users).values({
+    return await db.insert(users).values({
       username: username,
       passwordHash: passwordHash
     }).returning({
-      id: schema.users.id
+      id: users.id
     }).then((insertedIds) => {
       console.log(`${username} has successfully registered!`)
       return {
@@ -47,32 +47,32 @@ export async function insertUser(username: string, password: string): Promise<In
   }
 }
 
-export async function getUser(userId: number): Promise<schema.User | null> {
+export async function getUser(userId: number): Promise<User | null> {
   try {
     const [user] = await db.select()
-      .from(schema.users)
-      .where(eq(schema.users.id, userId))
+      .from(users)
+      .where(eq(users.id, userId))
       .limit(1);
-    return user as schema.User;
+    return user as User;
   } catch (error) {
     console.error(error);
     return null;
   }
 }
 
-export async function getUserFromUsername(username: string): Promise<schema.User | null> {
+export async function getUserFromUsername(username: string): Promise<User | null> {
   try {
     const [user] = await db.select()
-      .from(schema.users)
-      .where(eq(schema.users.username, username))
+      .from(users)
+      .where(eq(users.username, username))
       .limit(1);
-    return user as schema.User;
+    return user as User;
   } catch (error) {
     throw error;
   }
 }
 
-export async function getUserFromContext(c: Context): Promise<schema.User | null> {
+export async function getUserFromContext(c: Context): Promise<User | null> {
   const token = await getToken(c);
   if (!token) {
     return null;
