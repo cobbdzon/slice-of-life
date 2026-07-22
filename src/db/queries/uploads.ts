@@ -14,6 +14,14 @@ export async function getJournalAssets(userId: number): Promise<schema.JournalAs
   )
 }
 
+export async function getUserTotalFilesSize(userId: number) {
+  const userUploadSizes = (await getJournalAssets(userId)).map(upload => upload.fileSize);
+  if (userUploadSizes.length == 0) {
+    return 0;
+  }
+  return userUploadSizes.reduce((acc, val) => acc + val, 0);
+}
+
 export async function getJournalAssetsWithMissingFile(): Promise<schema.JournalAsset[]> {
   const allAssets = await db.select().from(schema.journalAssets);
   const missingAssets = [];

@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isDateTaken = (dateStr) => {
     if (!dateStr) return false;
     if (isEditMode && dateStr === initialDate) return false;
+    console.log(existingDatesSet, dateStr);
     return existingDatesSet.has(dateStr);
   };
 
