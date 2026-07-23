@@ -1,3 +1,4 @@
+import { Bar } from "../components/Bar";
 import type { User } from "../db/schema";
 import { BaseLayout } from "../layouts/BaseLayout";
 
@@ -11,6 +12,7 @@ export function ProfilePage({ user }: ProfilePageProps) {
       <md-title>
         Hello there
       </md-title>
+      <Bar value={0.5}></Bar>
     </BaseLayout>
   )
 }

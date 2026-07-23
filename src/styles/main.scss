@@ -93,7 +93,7 @@ body.m3-surface {
     font-size: 22px;
     font-weight: 400;
   }
-  
+
   .icon-btn {
     cursor: pointer;
     user-select: none;
@@ -115,3 +115,5 @@ a.no-link-style {
     text-decoration: none;
   }
 }
+
+@import "./bar.scss";
