@@ -18,7 +18,7 @@ export function Bar({ value, className, label }: BarProps) {
       >
         <div
           class="m3-progress-bar__indicator"
-          style={{ width: `${percentage}%` }}
+          style={{ "--target-width": `${percentage}%` }}
         />
       </div>
     );
