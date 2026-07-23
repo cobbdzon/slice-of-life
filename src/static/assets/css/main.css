@@ -113,7 +113,7 @@ a.no-link-style:hover {
 .m3-progress-bar {
   position: relative;
   width: 100%;
-  height: 16px; /* Standard M3 linear progress height */
+  height: 16px;
   border-radius: 50cqh;
   overflow: hidden;
   background-color: var(--md-sys-color-surface-container-highest, #e6e0e9);
@@ -124,7 +124,8 @@ a.no-link-style:hover {
   height: 100%;
   background-color: var(--md-sys-color-primary, #6750a4);
   border-radius: 50cqh;
-  transition: width 0.3s cubic-bezier(0.2, 0, 0, 1); /* M3 Emphasized Decelerate motion */
+  width: var(--target-width, 0%);
+  animation: m3-bar-fill 0.8s cubic-bezier(0.2, 0, 0, 1) forwards;
 }
 
 .m3-progress-bar--thick {
@@ -133,6 +134,15 @@ a.no-link-style:hover {
 }
 .m3-progress-bar--thick .m3-progress-bar__indicator {
   border-radius: 8px;
+}
+
+@keyframes m3-bar-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--target-width);
+  }
 }
 
 /*# sourceMappingURL=main.css.map */
