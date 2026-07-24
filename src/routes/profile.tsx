@@ -15,8 +15,19 @@ app.get("/profile", async (c) => {
   const user = await getUserFromContext(c) as User;
 
   return c.html(
-    <ProfilePage user={user}/>
+    <ProfilePage user={user} />
   )
+});
+
+app.get("/api/progress", async(c) => {
+  const isValidToken = await validateTokenFromContext(c);
+  if (!isValidToken) {
+    return c.redirect("/");
+  }
+
+  const currentProgress = Math.floor(Math.random() * 100);
+  console.log(currentProgress);
+  return c.json({ percentage: currentProgress });
 })
 
 export default app;
