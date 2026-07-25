@@ -137,9 +137,11 @@ app.post("/api/entry", entryPayloadValidator, async (c) => {
 
   const user = await getUserFromContext(c) as User;
 
-  //TODO: validate date
   const entryPayload = c.req.valid("json");
   const date = new Date(entryPayload.date);
+  if (isNaN(date.getTime())) {
+    return c.redirect("/?error=INVALID_ENTRY_DAT;");
+  }
 
   const newEntry: JournalEntry = {
     id: randomUUID(),
