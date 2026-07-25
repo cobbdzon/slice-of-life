@@ -40,7 +40,6 @@ app.post("/upload", async (c) => {
     return c.json({ message: "FILE_TOO_BIG" }, 413);
   }
 
-  // TODO: give files age unless they start belonging to an entry
   await Bun.write(destination, file);
 
   try {
