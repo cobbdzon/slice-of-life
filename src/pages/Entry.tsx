@@ -1,15 +1,18 @@
 import { BaseLayout } from '../layouts/BaseLayout';
 import { type JournalEntry, type User } from '../db/schema';
 import { dateToString, stringToDate } from '../backend/entry';
+import { getFileSizeOfImagePaths } from '../db/queries/uploads';
 
 interface EntryPageProps {
   user: User;
   dateString: string;
   journalEntry?: JournalEntry;
+  showFileSize?: Boolean;
 }
 
-export function EntryPage({ user, dateString, journalEntry }: EntryPageProps) {
+export async function EntryPage({ user, dateString, journalEntry, showFileSize = true }: EntryPageProps) {
   const requestedEntryDate = stringToDate(dateString);
+
 
   journalEntry = journalEntry || {
     id: "null",
@@ -28,6 +31,13 @@ export function EntryPage({ user, dateString, journalEntry }: EntryPageProps) {
   const hasImages = journalEntry.imagePaths && journalEntry.imagePaths.length > 0;
   const totalImages = journalEntry.imagePaths ? journalEntry.imagePaths.length : 0;
   const showControls = totalImages > 1;
+
+  // TODO: client side async?
+  var fileSizeText = ""
+  if (showFileSize && journalEntry.imagePaths.length > 0) {
+    const entryFileSize = (await getFileSizeOfImagePaths(journalEntry.imagePaths)) / (1024 * 1024);
+    fileSizeText = `${entryFileSize.toFixed(2)} MiB`
+  }
 
   return (
     <BaseLayout
@@ -90,6 +100,7 @@ export function EntryPage({ user, dateString, journalEntry }: EntryPageProps) {
           <div class="entry-body-frame">
             <header class="entry-header-block">
               <span class="entry-meta-date">{formattedDate}</span>
+              <span class="entry-meta-filesize">{fileSizeText}</span>
               <h1 class="entry-main-title">{journalEntry.title}</h1>
             </header>
 

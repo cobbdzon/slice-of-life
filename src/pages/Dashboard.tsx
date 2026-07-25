@@ -1,16 +1,18 @@
 import { BaseLayout } from '../layouts/BaseLayout';
 import { type JournalEntry, type User } from '../db/schema';
 import { dateToString, getDaysInMonth, getMonthNames, type MonthGroup } from '../backend/entry';
+import { getFileSizeOfImagePaths } from '../db/queries/uploads';
 
 export type DashboardPageProps = {
   user: User;
   requestedYear?: number;
   requestedMonth?: number;
   journalEntries: JournalEntry[];
-  hideEmptyDays: boolean;
+  hideEmptyDays?: boolean;
+  showFileSize?: boolean;
 }
 
-export function DashboardPage({ user, requestedYear, requestedMonth, journalEntries = [], hideEmptyDays = false }: DashboardPageProps) {
+export async function DashboardPage({ user, requestedYear, requestedMonth, journalEntries = [], hideEmptyDays = false, showFileSize = true }: DashboardPageProps) {
   requestedYear = requestedYear || new Date().getFullYear();
 
   const currentDate = new Date();
@@ -43,7 +45,7 @@ export function DashboardPage({ user, requestedYear, requestedMonth, journalEntr
   const monthGroupElements = monthGroups.map((monthGroup, monthIndex) => {
 
     // construct the entries gallery contents
-    const entriesGalleryElements = monthGroup.journalEntries.map((journalEntry, dayIndex) => {
+    const entriesGalleryElements = monthGroup.journalEntries.map(async (journalEntry, dayIndex) => {
       // empty entry box
 
       const parsedDate = new Date(requestedYear, monthIndex, dayIndex + 1);
@@ -70,6 +72,13 @@ export function DashboardPage({ user, requestedYear, requestedMonth, journalEntr
 
       const hasImage = journalEntry.imagePaths.length > 0;
 
+      // TODO: client side async?
+      var fileSizeText = ""
+      if (showFileSize && journalEntry.imagePaths.length > 0) {
+        const entryFileSize = (await getFileSizeOfImagePaths(journalEntry.imagePaths)) / (1024 * 1024);
+        fileSizeText = `${entryFileSize.toFixed(2)} MiB`
+      }
+
       // actual entry box
       return (
         <a href={`/entry/${requestedYear}/${monthIndex + 1}/${dayIndex + 1}`} id={elementId} class="entry-card real-entry no-link-style" title={journalEntry.title}>
@@ -87,7 +96,8 @@ export function DashboardPage({ user, requestedYear, requestedMonth, journalEntr
 
           <div class="entry-top-bar">
             <span class="entry-title">{journalEntry.title}</span>
-            <span class="date-text">{monthGroup.monthName} {dayIndex + 1}</span>
+            <span class="date-text">{monthGroup.monthName} {dayIndex + 1}</span> <br />
+            <span class="filesize-text">{fileSizeText}</span>
           </div>
 
           <div class="entry-bottom-bar">
