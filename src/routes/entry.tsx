@@ -189,12 +189,9 @@ app.put("/api/entry/:entryId", entryPayloadValidator, async (c) => {
     date: new Date(date)
   })
 
-  // const [year, month, day] = date.split('-').map(Number);
-  // return c.redirect(`/entry/${year}/${month}/${day}`);
   return c.json({ success: true });
 })
 
-// TODO: delete files from server
 app.delete("/api/entry/:entryId", async (c) => {
   const isValidToken = await validateTokenFromContext(c);
   if (!isValidToken) {
