@@ -22,6 +22,15 @@ export async function getUserTotalFilesSize(userId: number) {
   return userUploadSizes.reduce((acc, val) => acc + val, 0);
 }
 
+export async function getFileSizeOfImagePaths(imagePaths: string[]) {
+  const fileSizes = (await db.select()
+    .from(journalAssets)
+    .where(inArray(journalAssets.serverPath, imagePaths)))
+    .map(asset => asset.fileSize);
+
+  return fileSizes.reduce((acc, val) => acc + val, 0);
+}
+
 export async function getJournalAssetsWithMissingFile(): Promise<JournalAsset[]> {
   const allAssets = await db.select().from(journalAssets);
   const missingAssets = [];
