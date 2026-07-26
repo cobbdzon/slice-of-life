@@ -185,7 +185,7 @@ app.put("/api/entry/:entryId", entryPayloadValidator, async (c) => {
   const newImagePathsSet = new Set(imagePaths);
   const removedImagePaths = existingEntry.imagePaths.filter(imageEntry => !newImagePathsSet.has(imageEntry));
   const assetsToRemove = await getJournalAssetsFromImagePaths(removedImagePaths);
-  console.log(await deleteJournalAssets(assetsToRemove, true));
+  await deleteJournalAssets(assetsToRemove, true);
 
   await updateJournalEntry(user.id, {
     id: existingEntry.id,
