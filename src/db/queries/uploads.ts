@@ -14,6 +14,13 @@ export async function getJournalAssets(userId: number): Promise<JournalAsset[]> 
   )
 }
 
+export async function getJournalAssetsFromImagePaths(imagePaths: string[]) {
+  const assets = await db.select()
+    .from(journalAssets)
+    .where(inArray(journalAssets.serverPath, imagePaths))
+  return assets;
+}
+
 export async function getUserTotalFilesSize(userId: number) {
   const userUploadSizes = (await getJournalAssets(userId)).map(upload => upload.fileSize);
   if (userUploadSizes.length == 0) {
@@ -23,11 +30,8 @@ export async function getUserTotalFilesSize(userId: number) {
 }
 
 export async function getFileSizeOfImagePaths(imagePaths: string[]) {
-  const fileSizes = (await db.select()
-    .from(journalAssets)
-    .where(inArray(journalAssets.serverPath, imagePaths)))
+  const fileSizes = (await getJournalAssetsFromImagePaths(imagePaths))
     .map(asset => asset.fileSize);
-
   return fileSizes.reduce((acc, val) => acc + val, 0);
 }
 
@@ -97,10 +101,12 @@ export async function deleteJournalAssets(assetsToDelete: JournalAsset[], delete
     .delete(journalAssets)
     .where(inArray(journalAssets.id, idsToDelete));
 
+  console.log(deleteFilesFromDisk);
   if (deleteFilesFromDisk) {
     await Promise.all(
       assetsToDelete.map(async (asset) => {
-        const file = Bun.file(`.${asset.serverPath}`);
+        const filename = asset.serverPath.split("/").pop();
+        const file = Bun.file(`./public/uploads/${filename}`);
         if (await file.exists()) {
           await file.delete();
         }

@@ -12,6 +12,7 @@ import { EntryEditor } from "../pages/EntryEditor";
 import { entryPayloadValidator } from "../schemas/entryPayload";
 import { deleteJournalEntry, getJournalEntries, getJournalEntriesFromDate, getJournalEntryFromEntryId, insertJournalEntry, updateJournalEntry } from "../db/queries/entry";
 import { randomUUID } from "crypto";
+import { deleteJournalAssets, getJournalAssetsFromImagePaths } from "../db/queries/uploads";
 
 const app = new Hono();
 
@@ -181,7 +182,12 @@ app.put("/api/entry/:entryId", entryPayloadValidator, async (c) => {
     return c.redirect("/?error=FORBIDDEN_ENTRY_NOT_OWNED");
   }
 
-  updateJournalEntry(user.id, {
+  const newImagePathsSet = new Set(imagePaths);
+  const removedImagePaths = existingEntry.imagePaths.filter(imageEntry => !newImagePathsSet.has(imageEntry));
+  const assetsToRemove = await getJournalAssetsFromImagePaths(removedImagePaths);
+  console.log(await deleteJournalAssets(assetsToRemove, true));
+
+  await updateJournalEntry(user.id, {
     id: existingEntry.id,
     title: title,
     note: note,
@@ -209,6 +215,9 @@ app.delete("/api/entry/:entryId", async (c) => {
     return c.redirect("/?error=FORBIDDEN_ENTRY_NOT_OWNED");
   }
 
+  await getJournalAssetsFromImagePaths(existingEntry.imagePaths).then(async (imagePaths) => {
+    await deleteJournalAssets(imagePaths, true);
+  })
   await deleteJournalEntry(user.id, existingEntry.id);
 
   // const [year, month] = dateToString(existingEntry.date).split('-').map(Number);

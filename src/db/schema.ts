@@ -1,6 +1,5 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
-import { boolean } from "zod";
 
 export type User = typeof users.$inferSelect;
 export type JournalEntry = {
@@ -54,8 +53,6 @@ export const journalAssets = sqliteTable("journal_assets", {
   serverPath: text("server_path").notNull().unique(),
   originalName: text("original_name").notNull(),
   fileSize: integer("file_size").notNull(),
-  // TODO: IMPLEMENT THIS TO INSTANTLY DELETE JOURNAL ASSETS
-  // markedForDeletion: boolean("marked_for_deletion"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
