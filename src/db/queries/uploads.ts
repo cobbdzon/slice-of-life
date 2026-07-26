@@ -101,7 +101,6 @@ export async function deleteJournalAssets(assetsToDelete: JournalAsset[], delete
     .delete(journalAssets)
     .where(inArray(journalAssets.id, idsToDelete));
 
-  console.log(deleteFilesFromDisk);
   if (deleteFilesFromDisk) {
     await Promise.all(
       assetsToDelete.map(async (asset) => {
