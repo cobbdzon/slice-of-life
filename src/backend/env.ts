@@ -1,8 +1,11 @@
-import type { Env } from "bun";
 import { stat } from "fs/promises";
 import { z } from "zod";
 
 const envSchema = z.object({
+  MAX_UPLOAD_FILE_SIZE: z.coerce.number().min(1), // in mb
+  GARBAGE_COLLECT_INTERVAL: z.coerce.number(), // in minutes
+  UPLOAD_FILE_STALE_THRESHOLD: z.coerce.number().min(5), // in minutes
+
   IMAGE_UPLOAD_PATH: z.string(),
   IMAGE_URL_PATH: z.string(),
   JWT_SECRET: z.string(),
