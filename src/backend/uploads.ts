@@ -5,11 +5,12 @@ import { validateTokenFromContext } from "./cookies";
 import { type JournalAsset, type User } from "../db/schema";
 import { deleteJournalAssets, getJournalAssetsWithMissingFile, getOrphanedImagesFilenamesOnDisk, getOrphanedJournalAssets, insertJournalAsset } from "../db/queries/uploads";
 import { mkdir } from "fs/promises";
+import { env } from "./env";
 
-// TODO: make upload paths customizable via env, and these constants
-export const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const GARBAGE_COLLECT_INTERVAL = 30 * 60 * 1000; // 30 mins
-const STALE_THRESHOLD_MS = 60 * 60 * 1000; // 1 hr
+export const MAX_FILE_SIZE = env.MAX_UPLOAD_FILE_SIZE * 1024 * 1024;
+// TODO: HANDLE 0 VALUE
+const GARBAGE_COLLECT_INTERVAL = env.GARBAGE_COLLECT_INTERVAL * 60 * 1000;
+const STALE_THRESHOLD_MS = env.UPLOAD_FILE_STALE_THRESHOLD * 60 * 1000;
 
 const app = new Hono();
 
