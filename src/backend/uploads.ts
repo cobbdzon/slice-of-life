@@ -62,6 +62,10 @@ app.post("/upload", async (c) => {
 });
 
 export async function startGarbageCollectionLoop() {
+  if (env.GARBAGE_COLLECT_INTERVAL == 0) {
+    return console.warn("Attempted to start garbage collection when interval is set to 0!")
+  }
+
   // check if uploads directory exists
   await mkdir("./public/uploads", { recursive: true });
   await Bun.sleep(5000); // some delay
