@@ -18,8 +18,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const imagePathsPayload = document.getElementById("imagePathsPayload");
 
   // --- Constants for Upload Safeguards ---
+  // TODO: do the same server fetch for max images?
   const MAX_IMAGES = 10;
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit per file
+  var MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit per file
+  try {
+    const res = await fetch("/api/max_upload_file_size");
+    if (!res.ok) { return }
+    const res_json = await res.json()
+    MAX_FILE_SIZE = Number(res_json.MAX_UPLOAD_FILE_SIZE);
+    console.log(MAX_FILE_SIZE);
+  } catch (err) {
+    console.error("Failed to get server max upload file size:", err);
+  }
 
   // --- SHARED IMAGE STATE HELPERS (Scoped at top level of DOMContentLoaded) ---
   const getImagesArray = () => {
@@ -55,7 +65,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const isDateTaken = (dateStr) => {
     if (!dateStr) return false;
     if (isEditMode && dateStr === initialDate) return false;
-    console.log(existingDatesSet, dateStr);
     return existingDatesSet.has(dateStr);
   };
 
@@ -110,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       if (file.size > MAX_FILE_SIZE) {
-        alert(`"${file.name}" exceeds the 5MB file size limit.`);
+        alert(`"${file.name}" exceeds the ${MAX_FILE_SIZE / (1024 * 1024)} MiB file size limit.`);
         continue;
       }
 
