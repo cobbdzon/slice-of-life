@@ -7,7 +7,7 @@ import { deleteJournalAssets, getJournalAssetsWithMissingFile, getOrphanedImages
 import { mkdir } from "fs/promises";
 import { env } from "./env";
 
-export const MAX_FILE_SIZE = env.MAX_UPLOAD_FILE_SIZE * 1024 * 1024;
+const MAX_UPLOAD_FILE_SIZE = env.MAX_UPLOAD_FILE_SIZE * 1024 * 1024;
 // TODO: HANDLE 0 VALUE
 const GARBAGE_COLLECT_INTERVAL = env.GARBAGE_COLLECT_INTERVAL * 60 * 1000;
 const STALE_THRESHOLD_MS = env.UPLOAD_FILE_STALE_THRESHOLD * 60 * 1000;
@@ -17,6 +17,18 @@ const app = new Hono();
 export function getFilenameFromUrlPath(urlPath: string) {
   return urlPath.split("/").pop();
 }
+
+// TODO: move to an api file that declares api paths that can access select env variables?
+// /api/max_upload_file_size
+app.get("/max_upload_file_size", async (c) => {
+  const isValidToken = await validateTokenFromContext(c);
+  if (!isValidToken) {
+    return c.status(401);
+  }
+  return c.json({
+    MAX_UPLOAD_FILE_SIZE: MAX_UPLOAD_FILE_SIZE,
+  })
+})
 
 app.post("/upload", async (c) => {
   const isValidToken = await validateTokenFromContext(c);
@@ -37,7 +49,7 @@ app.post("/upload", async (c) => {
   const destination = `./public/uploads/${filename}`;
   const publicUrlPath = `/static/uploads/${filename}`;
 
-  if (file.size > MAX_FILE_SIZE) {
+  if (file.size > MAX_UPLOAD_FILE_SIZE) {
     return c.json({ message: "FILE_TOO_BIG" }, 413);
   }
 

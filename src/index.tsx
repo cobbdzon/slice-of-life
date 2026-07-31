@@ -19,8 +19,8 @@ app.use('/static/*', serveStatic({ root: './src' }));
 app.route("/", authRoutes);
 app.route("/", profileRoutes);
 
-app.route("/", entryRoutes);
 app.route("/api", uploadsApi);
+app.route("/", entryRoutes);
 
 startGarbageCollectionLoop();
 
