@@ -8,7 +8,6 @@ import { mkdir } from "fs/promises";
 import { env } from "./env";
 
 const MAX_UPLOAD_FILE_SIZE = env.MAX_UPLOAD_FILE_SIZE * 1024 * 1024;
-// TODO: HANDLE 0 VALUE
 const GARBAGE_COLLECT_INTERVAL = env.GARBAGE_COLLECT_INTERVAL * 60 * 1000;
 const STALE_THRESHOLD_MS = env.UPLOAD_FILE_STALE_THRESHOLD * 60 * 1000;
 
