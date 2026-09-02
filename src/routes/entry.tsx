@@ -141,7 +141,7 @@ app.post("/api/entry", entryPayloadValidator, async (c) => {
   const entryPayload = c.req.valid("json");
   const date = new Date(entryPayload.date);
   if (isNaN(date.getTime())) {
-    return c.redirect("/?error=INVALID_ENTRY_DAT;");
+    return c.redirect("/?error=INVALID_ENTRY_DATE");
   }
 
   const newEntry: JournalEntry = {

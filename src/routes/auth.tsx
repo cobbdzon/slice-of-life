@@ -32,13 +32,13 @@ app.post("/login", authValidator, async (c) => {
   // validate password
   const isCorrectPassword = await Bun.password.verify(password, user.passwordHash);
   if (!isCorrectPassword) {
-    return c.redirect("/login?error=INCORRECT_PASDWORD");
+    return c.redirect("/login?error=INCORRECT_PASSWORD");
   }
 
   const token = await generateToken(user.id);
   setToken(c, token);
 
-  console.log(`${username} sucessfully logged in!`)
+  console.log(`${username} successfully logged in!`)
   return c.redirect("/");
 })
 
