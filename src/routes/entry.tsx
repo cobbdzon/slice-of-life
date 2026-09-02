@@ -80,7 +80,7 @@ app.get("/entry/new", async (c) => {
     return c.redirect("/?error=INVALID_ENTRY_DATE")
   }
 
-  const existingEntries = await getJournalEntriesFromDate(parsedDate);
+  const existingEntries = await getJournalEntriesFromDate(user.id, parsedDate);
   if (existingEntries.length > 0) {
     return c.redirect(`/?error=ENTRY_ALREADY_EXISTS#${dateParam}`);
   }
@@ -152,7 +152,7 @@ app.post("/api/entry", entryPayloadValidator, async (c) => {
     date: new Date(entryPayload.date)
   };
 
-  const existingEntries = await getJournalEntriesFromDate(date);
+  const existingEntries = await getJournalEntriesFromDate(user.id, date);
   if (existingEntries.length > 0) {
     return c.redirect(`/?error=ENTRY_ALREADY_EXISTS#${entryPayload.date}`);
   }

@@ -30,10 +30,14 @@ export async function getJournalEntries(userId: number): Promise<JournalEntry[]>
   }));
 }
 
-export async function getJournalEntriesFromDate(date: Date): Promise<JournalEntry[]> {
-  const rows = (await db.select().from(journalEntries)).filter(entry => {
-    return (entry.date.split("T")[0] == date.toISOString().split("T")[0]);
-  })
+export async function getJournalEntriesFromDate(userId: number, date: Date): Promise<JournalEntry[]> {
+  const dateStr = date.toISOString().split("T")[0];
+  const rows = await db.select().from(journalEntries).where(
+    and(
+      eq(journalEntries.userId, userId),
+      eq(journalEntries.date, dateStr)
+    )
+  );
 
   return rows.map((row) => ({
     id: row.id,
