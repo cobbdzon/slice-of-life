@@ -66,6 +66,7 @@ app.post("/upload", async (c) => {
     await insertJournalAsset(newUpload);
   } catch (error) {
     console.error("Database tracking inventory crash: ", error);
+    await Bun.file(destination).delete();
     return c.json({ message: "Could not save file asset information" }, 500);
   }
 
