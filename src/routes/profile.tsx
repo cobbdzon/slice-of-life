@@ -26,7 +26,6 @@ app.get("/api/progress", async(c) => {
   }
 
   const currentProgress = Math.floor(Math.random() * 100);
-  console.log(currentProgress);
   return c.json({ percentage: currentProgress });
 })
 

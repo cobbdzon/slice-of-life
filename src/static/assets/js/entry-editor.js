@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!res.ok) { return }
     const res_json = await res.json()
     MAX_FILE_SIZE = Number(res_json.MAX_UPLOAD_FILE_SIZE);
-    console.log(MAX_FILE_SIZE);
   } catch (err) {
     console.error("Failed to get server max upload file size:", err);
   }

@@ -5,6 +5,7 @@ import { env } from "./env";
 import { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { getUser } from "../db/queries/auth.ts";
+import { logger } from "./logger";
 
 const JWT_SECRET = env.JWT_SECRET;
 const SIG_ALGORITHM: SignatureAlgorithm = "HS256"
@@ -51,7 +52,7 @@ export async function getPayloadFromToken(token: string) {
     const payload = await verify(token, JWT_SECRET, SIG_ALGORITHM) as TokenPayload;
     return payload;
   } catch (error) {
-    console.error(error);
+    logger.error(`JWT error: ${(error as Error).message}`);
     return;
   }
 }
@@ -64,14 +65,14 @@ export async function getUserIdFromToken(token: string) {
 export async function validateTokenFromContext(c: Context) {
   const token = await getToken(c);
   if (!token) {
-    console.log("No token")
+    logger.debug("no auth token present")
     return false;
   }
 
   // validate token payload
   const payload = await getPayloadFromToken(token);
   if (!payload) {
-    console.log("No payload found from token")
+    logger.debug("no payload from token")
     deleteToken(c);
     return false;
   }
@@ -80,7 +81,7 @@ export async function validateTokenFromContext(c: Context) {
   const userId = payload.sub;
   const user = await getUser(userId);
   if (!user) {
-    console.log("No user found from payload")
+    logger.debug("no user for token payload")
     deleteToken(c);
     return false;
   }
@@ -89,7 +90,7 @@ export async function validateTokenFromContext(c: Context) {
   const expiryTime = payload.exp;
   const now = Math.floor(Date.now() / 1000);
   if (now > expiryTime) {
-    console.log("Token is expired")
+    logger.debug("token expired")
     deleteToken(c);
     return false;
   }
