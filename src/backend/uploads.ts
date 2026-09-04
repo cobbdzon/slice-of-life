@@ -46,8 +46,8 @@ app.post("/upload", async (c) => {
   const assetId = randomUUID();
   const fileExtension = file.name.split(".").pop();
   const filename = `${assetId}.${fileExtension}`;
-  const destination = `./public/uploads/${filename}`;
-  const publicUrlPath = `/static/uploads/${filename}`;
+  const destination = `${env.UPLOAD_DIR}${filename}`;
+  const publicUrlPath = `${env.UPLOAD_URL_PREFIX}${filename}`;
 
   if (file.size > MAX_UPLOAD_FILE_SIZE) {
     return c.json({ message: "FILE_TOO_BIG" }, 413);
@@ -81,7 +81,7 @@ export async function startGarbageCollectionLoop() {
   }
 
   // check if uploads directory exists
-  await mkdir("./public/uploads", { recursive: true });
+  await mkdir(env.UPLOAD_DIR, { recursive: true });
   await Bun.sleep(5000); // some delay
 
   while (true) {
@@ -106,7 +106,7 @@ export async function startGarbageCollectionLoop() {
 
       // console.log("Orphaned file with no database entry: ", imagesFilenamesOrphaned);
       for (const filename of imagesFilenamesOrphaned) {
-        const filePath = `./public/uploads/${filename}`;
+        const filePath = `${env.UPLOAD_DIR}${filename}`;
         const file = Bun.file(filePath);
 
         if (await file.exists()) {
