@@ -1,3 +1,9 @@
+// M3 Shape Tokens (matching M3 shape scale)
+$shape-sm: 8px;    // chips / small elements
+$shape-md: 16px;   // standard controls
+$shape-lg: 20px;   // containers
+$shape-xl: 28px;   // cards / large surfaces
+
 body {
   overflow: hidden;
 }
@@ -16,7 +22,7 @@ body {
   width: 100%;
   max-width: 520px;
   background-color: var(--md-sys-color-surface-variant);
-  border-radius: 28px;
+  border-radius: $shape-xl;
   padding: 32px;
   box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
   display: flex;
@@ -112,7 +118,7 @@ body {
   align-items: center;
   height: 24px;
   padding: 0 10px;
-  border-radius: 8px;
+  border-radius: $shape-sm;
   font-size: 0.75rem;
   font-weight: 500;
 
@@ -142,7 +148,7 @@ body {
   gap: 14px;
   background-color: var(--md-sys-color-surface-container-highest);
   padding: 20px;
-  border-radius: 20px;
+  border-radius: $shape-lg;
 }
 
 .m3-storage-header {
@@ -200,6 +206,12 @@ body {
     color: var(--md-sys-color-on-surface-variant);
     opacity: 0.8;
   }
+}
+
+// Card Action Strip
+.m3-user-card__actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 @keyframes fadeInGlow {

@@ -66,7 +66,7 @@ app.post("/upload", async (c) => {
 
     await insertJournalAsset(newUpload);
   } catch (error) {
-    logger.error(`upload DB insert failed: ${error.message}`);
+    logger.error(`upload DB insert failed: ${(error as Error).message}`);
     await Bun.file(destination).delete();
     return c.json({ message: "Could not save file asset information" }, 500);
   }

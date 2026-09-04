@@ -181,6 +181,11 @@ body {
   opacity: 0.8;
 }
 
+.m3-user-card__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 @keyframes fadeInGlow {
   from {
     opacity: 0;
