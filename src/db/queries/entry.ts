@@ -31,7 +31,7 @@ export async function getJournalEntries(userId: number): Promise<JournalEntry[]>
 }
 
 export async function getJournalEntriesFromDate(userId: number, date: Date): Promise<JournalEntry[]> {
-  const dateStr = date.toISOString().split("T")[0];
+  const dateStr = date.toISOString().split("T")[0]!;
   const rows = await db.select().from(journalEntries).where(
     and(
       eq(journalEntries.userId, userId),

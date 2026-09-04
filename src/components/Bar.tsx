@@ -9,9 +9,9 @@ export function Bar({ value, className, label }: BarProps) {
   const percentage = value * 100;
   return (
       <div
-        class={`m3-progress-bar ${className}`}
+        class={`m3-progress-bar${className ? ` ${className}` : ""}`}
         role="progressbar"
-        aria-label={label}
+        aria-label={label || "Progress"}
         aria-valuenow={Math.round(percentage)}
         aria-valuemin={0}
         aria-valuemax={100}

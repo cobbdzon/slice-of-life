@@ -15,7 +15,7 @@ export async function ProfilePage({ user }: ProfilePageProps) {
   });
 
   const userFileSizeTaken = await getUserTotalFilesSize(user.id) / (1024 * 1024); // In MiB
-  const userFileSizeLimit = 10;   // In MiB
+  const userFileSizeLimit = user.fileUploadLimit || 10;   // In MiB (default 10 for Free plan)
   const usageRatio = userFileSizeTaken / userFileSizeLimit;
   const usagePercentage = Math.round(usageRatio * 100);
 
@@ -56,7 +56,7 @@ export async function ProfilePage({ user }: ProfilePageProps) {
             </div>
 
             <div class="m3-storage-bar-wrapper">
-              <Bar value={usageRatio} />
+              <Bar value={usageRatio} label="Storage used" />
             </div>
 
             <div class="m3-storage-footer">
@@ -67,6 +67,13 @@ export async function ProfilePage({ user }: ProfilePageProps) {
                 {(userFileSizeLimit - userFileSizeTaken).toFixed(2)} MiB remaining
               </span>
             </div>
+          </div>
+
+          {/* Card Action Strip */}
+          <div class="m3-user-card__actions">
+            <md-filled-button onclick="window.location.href='/logout'">
+              Log Out
+            </md-filled-button>
           </div>
         </div>
       </div>
