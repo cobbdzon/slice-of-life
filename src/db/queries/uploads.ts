@@ -2,7 +2,7 @@ import { eq, inArray } from "drizzle-orm";
 import { db } from "../db";
 import { journalAssets, journalEntries, type JournalAsset } from "../schema";
 import { readdir } from "fs/promises";
-// import { and, eq, inArray } from "drizzle-orm";
+import { env } from "../../backend/env";
 
 export async function insertJournalAsset(asset: JournalAsset) {
   return await db.insert(journalAssets).values(asset).returning();
@@ -41,7 +41,7 @@ export async function getJournalAssetsWithMissingFile(): Promise<JournalAsset[]>
 
   for (const asset of allAssets) {
     const filename = asset.serverPath.split("/").pop();
-    const exists = await Bun.file(`./public/uploads/${filename}`).exists();
+    const exists = await Bun.file(`${env.UPLOAD_DIR}${filename}`).exists();
     if (!exists) {
       missingAssets.push(asset);
     }
@@ -70,7 +70,7 @@ export async function getOrphanedJournalAssets(): Promise<JournalAsset[]> {
 }
 
 export async function getOrphanedImagesFilenamesOnDisk() {
-  const entries = await readdir("./public/uploads", { withFileTypes: true });
+  const entries = await readdir(env.UPLOAD_DIR, { withFileTypes: true });
   const filenames = entries
     .filter((entry) => entry.isFile())
     .map((entry) => entry.name);
@@ -105,7 +105,7 @@ export async function deleteJournalAssets(assetsToDelete: JournalAsset[], delete
     await Promise.all(
       assetsToDelete.map(async (asset) => {
         const filename = asset.serverPath.split("/").pop();
-        const file = Bun.file(`./public/uploads/${filename}`);
+        const file = Bun.file(`${env.UPLOAD_DIR}${filename}`);
         if (await file.exists()) {
           await file.delete();
         }

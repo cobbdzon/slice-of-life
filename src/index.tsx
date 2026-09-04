@@ -4,11 +4,13 @@ import entryRoutes from "./routes/entry.tsx";
 import profileRoutes from "./routes/profile.tsx";
 import uploadsApi, { startGarbageCollectionLoop } from "./backend/uploads.ts"
 import { serveStatic } from "hono/bun";
+import { env } from "./backend/env";
 
 const app = new Hono();
 
+// Serve uploaded files: URL prefix (e.g. /static/uploads/) → disk dir (e.g. ./public/uploads/)
 app.use(
-  '/static/uploads/*',
+  `${env.UPLOAD_URL_PREFIX}*`,
   serveStatic({
     root: './public',
     rewriteRequestPath: (path) => path.replace(/^\/static/, '')

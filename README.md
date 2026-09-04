@@ -24,8 +24,8 @@ Set up the environment. Copy the shape of `.env` — all values are required at 
 | --------------------------- | ----------------------- | ------------------------------------ |
 | `JWT_SECRET`                | `changeme`              | Secret for signing session cookies   |
 | `NODE_ENV`                  | `development`           | `development` or `production`        |
-| `IMAGE_UPLOAD_PATH`         | `./public/uploads/`     | Where uploads are written, trailing slash |
-| `IMAGE_URL_PATH`           | `/static/uploads/`      | URL prefix for uploads, trailing slash |
+| `UPLOAD_DIR`                | `./public/uploads/`     | Disk directory for uploaded files, trailing slash |
+| `UPLOAD_URL_PREFIX`         | `/static/uploads/`      | URL prefix that serves uploaded files, trailing slash |
 | `MAX_UPLOAD_FILE_SIZE`      | `5`                     | Max upload size in MB                |
 | `UPLOAD_FILE_STALE_THRESHOLD` | `30`                  | Minutes before an orphaned upload is eligible for cleanup |
 | `GARBAGE_COLLECT_INTERVAL`  | `60`                    | Minutes between upload cleanup runs  |
