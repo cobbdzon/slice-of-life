@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { getUserFromUsername, insertUser } from "../db/queries/auth";
 import { authValidator } from "../schemas/auth";
 import { generateToken, setToken, deleteToken } from "../backend/cookies";
+import { logger } from "../backend/logger";
 
 import { LoginPage } from "../pages/Login";
 import { RegisterPage } from "../pages/Register";
@@ -21,7 +22,7 @@ app.get("/login", async (c) => {
 app.post("/login", authValidator, async (c) => {
   const body = c.req.valid("form");
   const { username, password } = body;
-  console.log(`${username} is attempting to log in!`);
+  logger.info(`login attempt: ${username}`);
 
   // validate username
   const user = await getUserFromUsername(username);
@@ -38,7 +39,7 @@ app.post("/login", authValidator, async (c) => {
   const token = await generateToken(user.id);
   setToken(c, token);
 
-  console.log(`${username} successfully logged in!`)
+  logger.info(`login success: ${username}`)
   return c.redirect("/");
 })
 
@@ -53,7 +54,7 @@ app.get("/register", async (c) => {
 app.post("/register", authValidator, async (c) => {
   const body = c.req.valid("form");
   const { username, password } = body;
-  console.log(`${username} is attempting to register!`);
+  logger.info(`register attempt: ${username}`);
 
   const { success, errorType, message } = await insertUser(username, password);
   if (success) {

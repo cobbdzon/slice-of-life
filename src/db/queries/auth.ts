@@ -5,6 +5,7 @@ import { DrizzleQueryError, eq } from "drizzle-orm";
 import { LibsqlError } from "@libsql/client";
 import type { Context } from "hono";
 import { users, type User } from "../schema";
+import { logger } from "../../backend/logger";
 
 export type UserQueryResult = {
   success: boolean;
@@ -25,7 +26,7 @@ export async function insertUser(username: string, password: string): Promise<In
     }).returning({
       id: users.id
     }).then((insertedIds) => {
-      console.log(`${username} has successfully registered!`)
+      logger.info(`register success: ${username}`)
       return {
         success: true,
         id: insertedIds[0]?.id
@@ -35,7 +36,7 @@ export async function insertUser(username: string, password: string): Promise<In
     if (error instanceof DrizzleQueryError) {
       const queryErrorCause = error.cause as LibsqlError;
       if (queryErrorCause.code == "SQLITE_CONSTRAINT" && queryErrorCause.message.includes("users.username")) {
-        console.warn(`${username} is already taken!`);
+        logger.warn(`username taken: ${username}`);
         return {
           success: false,
           errorType: "USERNAME_TAKEN",
@@ -55,7 +56,7 @@ export async function getUser(userId: number): Promise<User | null> {
       .limit(1);
     return user as User;
   } catch (error) {
-    console.error(error);
+    logger.error(`getUser failed: ${(error as Error).message}`);
     return null;
   }
 }

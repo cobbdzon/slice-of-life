@@ -6,6 +6,7 @@ import { type JournalAsset, type User } from "../db/schema";
 import { deleteJournalAssets, getJournalAssetsWithMissingFile, getOrphanedImagesFilenamesOnDisk, getOrphanedJournalAssets, insertJournalAsset } from "../db/queries/uploads";
 import { mkdir } from "fs/promises";
 import { env } from "./env";
+import { logger } from "./logger";
 
 const MAX_UPLOAD_FILE_SIZE = env.MAX_UPLOAD_FILE_SIZE * 1024 * 1024;
 const GARBAGE_COLLECT_INTERVAL = env.GARBAGE_COLLECT_INTERVAL * 60 * 1000;
@@ -65,7 +66,7 @@ app.post("/upload", async (c) => {
 
     await insertJournalAsset(newUpload);
   } catch (error) {
-    console.error("Database tracking inventory crash: ", error);
+    logger.error(`upload DB insert failed: ${error.message}`);
     await Bun.file(destination).delete();
     return c.json({ message: "Could not save file asset information" }, 500);
   }
@@ -75,7 +76,8 @@ app.post("/upload", async (c) => {
 
 export async function startGarbageCollectionLoop() {
   if (env.GARBAGE_COLLECT_INTERVAL == 0) {
-    return console.warn("Attempted to start garbage collection when interval is set to 0!")
+    logger.warn("GC interval is 0, skipping")
+    return;
   }
 
   // check if uploads directory exists
@@ -110,13 +112,13 @@ export async function startGarbageCollectionLoop() {
         if (await file.exists()) {
           const isStale = Date.now() - file.lastModified > STALE_THRESHOLD_MS;
           if (isStale) {
-            console.log(`Deleting ${filename}`);
+            logger.debug(`GC deleting: ${filename}`);
             await file.delete();
           }
         }
       }
     } catch (err) {
-      console.error("Garbage collection error:", err);
+      logger.error(`GC error: ${(err as Error).message}`);
     }
 
     await Bun.sleep(GARBAGE_COLLECT_INTERVAL);

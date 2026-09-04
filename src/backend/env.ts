@@ -1,5 +1,6 @@
 import { stat } from "fs/promises";
 import { z } from "zod";
+import { logger } from "./logger";
 
 const envSchema = z.object({
   MAX_UPLOAD_FILE_SIZE: z.coerce.number().min(1), // in mb
@@ -9,7 +10,8 @@ const envSchema = z.object({
   IMAGE_UPLOAD_PATH: z.string(),
   IMAGE_URL_PATH: z.string(),
   JWT_SECRET: z.string(),
-  NODE_ENV: z.optional(z.string())
+  NODE_ENV: z.optional(z.string()),
+  LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
 })
 
 const parseEnv = envSchema.parse(process.env)
@@ -17,13 +19,13 @@ const parseEnv = envSchema.parse(process.env)
 // validate env
 const imageUploadPath = await stat(parseEnv.IMAGE_UPLOAD_PATH);
 if (!imageUploadPath.isDirectory()) {
-  console.error(`Path: "${imageUploadPath}, does not exist!"`);
+  logger.error(`upload path invalid: ${parseEnv.IMAGE_UPLOAD_PATH}`);
 } else if (parseEnv.IMAGE_UPLOAD_PATH.at(-1) != "/") {
-  console.error("IMAGE_UPLOAD_PATH does not have a trailing slash!");
+  logger.warn("IMAGE_UPLOAD_PATH missing trailing slash");
 }
 
 if (parseEnv.IMAGE_URL_PATH.at(-1) != "/") {
-  console.error("IMAGE_URL_PATH does not have a trailing slash!");
+  logger.warn("IMAGE_URL_PATH missing trailing slash");
 }
 
 export const env = parseEnv as z.infer<typeof envSchema>;
