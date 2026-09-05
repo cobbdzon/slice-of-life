@@ -62,8 +62,8 @@ app.post("/register", authValidator, async (c) => {
   const { success, errorType, message } = await insertUser(username, password);
   if (success) {
     return c.redirect("/login?registration=SUCCESS");
-  } else if (typeof (message) == "string") {
-    if (errorType == "USERNAME_TAKEN") {
+  } else if (typeof (message) === "string") {
+    if (errorType === "USERNAME_TAKEN") {
       return c.redirect("/register?error=USERNAME_TAKEN")
     } else {
       c.redirect("/register?error=INTERNAL_SERVER_ERROR");
@@ -72,7 +72,7 @@ app.post("/register", authValidator, async (c) => {
   }
 })
 
-app.get("logout", async (c) => {
+app.get("/logout", async (c) => {
   deleteToken(c);
   return c.redirect("/login");
 })

@@ -35,7 +35,7 @@ export async function insertUser(username: string, password: string): Promise<In
   } catch (error) {
     if (error instanceof DrizzleQueryError) {
       const queryErrorCause = error.cause as LibsqlError;
-      if (queryErrorCause.code == "SQLITE_CONSTRAINT" && queryErrorCause.message.includes("users.username")) {
+      if (queryErrorCause.code === "SQLITE_CONSTRAINT" && queryErrorCause.message.includes("users.username")) {
         logger.warn(`username taken: ${username}`);
         return {
           success: false,

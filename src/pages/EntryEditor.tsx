@@ -45,7 +45,7 @@ export function EntryEditor({ user, date, entry }: EntryEditorProps) {
 
           {/* Date Input */}
           <div class="form-group">
-            <label for="entryDate">Date of Entry</label>
+            <label htmlFor="entryDate">Date of Entry</label>
             <input
               type="date"
               id="entryDate"

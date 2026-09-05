@@ -20,11 +20,11 @@ const parseEnv = envSchema.parse(process.env)
 const uploadDirStat = await stat(parseEnv.UPLOAD_DIR);
 if (!uploadDirStat.isDirectory()) {
   logger.error(`UPLOAD_DIR does not exist or is not a directory: ${parseEnv.UPLOAD_DIR}`);
-} else if (parseEnv.UPLOAD_DIR.at(-1) != "/") {
+} else if (parseEnv.UPLOAD_DIR.at(-1) !== "/") {
   logger.warn("UPLOAD_DIR missing trailing slash");
 }
 
-if (parseEnv.UPLOAD_URL_PREFIX.at(-1) != "/") {
+if (parseEnv.UPLOAD_URL_PREFIX.at(-1) !== "/") {
   logger.warn("UPLOAD_URL_PREFIX missing trailing slash");
 }
 
