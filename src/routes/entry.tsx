@@ -178,7 +178,7 @@ app.put("/api/entry/:entryId", entryPayloadValidator, async (c) => {
   const existingEntry = await getJournalEntryFromEntryId(user.id, entryId);
   if (!existingEntry) {
     return c.redirect("/?error=ENTRY_NOT_FOUND");
-  } else if (existingEntry.userId != user.id) {
+  } else if (existingEntry.userId !== user.id) {
     return c.redirect("/?error=FORBIDDEN_ENTRY_NOT_OWNED");
   }
 
@@ -211,7 +211,7 @@ app.delete("/api/entry/:entryId", async (c) => {
   const existingEntry = await getJournalEntryFromEntryId(user.id, entryId);
   if (!existingEntry) {
     return c.redirect("/?error=ENTRY_NOT_FOUND");
-  } else if (existingEntry.userId != user.id) {
+  } else if (existingEntry.userId !== user.id) {
     return c.redirect("/?error=FORBIDDEN_ENTRY_NOT_OWNED");
   }
 

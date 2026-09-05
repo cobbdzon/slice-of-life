@@ -23,7 +23,7 @@ export async function getJournalAssetsFromImagePaths(imagePaths: string[]) {
 
 export async function getUserTotalFilesSize(userId: number) {
   const userUploadSizes = (await getJournalAssets(userId)).map(upload => upload.fileSize);
-  if (userUploadSizes.length == 0) {
+  if (userUploadSizes.length === 0) {
     return 0;
   }
   return userUploadSizes.reduce((acc, val) => acc + val, 0);

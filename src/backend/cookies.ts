@@ -19,7 +19,7 @@ type TokenPayload = {
 
 export const tokenOptions: CookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV == "production",
+  secure: process.env.NODE_ENV === "production",
   sameSite: "Lax",
   path: "/",
   maxAge: TOKEN_LIFE,

@@ -48,7 +48,7 @@ export function BaseLayout({ user, title = "Slice of Life", stylesheets = [], sc
               ) : null
             }
             {
-              username != "" ? (
+              username !== "" ? (
                 <md-filled-button onclick="window.location.href='/logout'">
                   Log Out
                 </md-filled-button>

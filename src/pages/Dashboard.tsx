@@ -29,10 +29,10 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
   })
 
   journalEntries.filter(entry => {
-    if (requestedMonth && requestedMonth != entry.date.getMonth()) {
+    if (requestedMonth && requestedMonth !== entry.date.getMonth()) {
       return false
     }
-    return entry.date.getFullYear() == requestedYear;
+    return entry.date.getFullYear() === requestedYear;
   }).forEach(entry => {
     const monthIndex = entry.date.getMonth();
     const dayIndex = entry.date.getDate() - 1;
@@ -51,13 +51,13 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
       const parsedDate = new Date(requestedYear, monthIndex, dayIndex + 1);
 
       const currentDate = new Date();
-      const isCurrentDate = currentDate.getFullYear() == requestedYear &&
-        currentDate.getMonth() == monthIndex &&
-        currentDate.getDate() == dayIndex + 1
+      const isCurrentDate = currentDate.getFullYear() === requestedYear &&
+        currentDate.getMonth() === monthIndex &&
+        currentDate.getDate() === dayIndex + 1
 
       const elementId = `${dateToString(parsedDate)}`
 
-      if (journalEntry == null) {
+      if (journalEntry === null) {
         if (hideEmptyDays) {
           return;
         }
@@ -111,7 +111,7 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
     });
 
     const visibleEntries = monthGroup.journalEntries.filter((journalEntry) => {
-      return journalEntry != undefined;
+      return journalEntry !== undefined;
     })
 
     if (requestedMonth !== undefined) {
@@ -119,7 +119,7 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
         return;
       }
     } else {
-      if (visibleEntries.length == 0 && (monthIndex != currentDate.getMonth() || requestedYear != currentDate.getFullYear())) {
+      if (visibleEntries.length === 0 && (monthIndex !== currentDate.getMonth() || requestedYear !== currentDate.getFullYear())) {
         return;
       }
     }

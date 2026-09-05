@@ -75,7 +75,7 @@ app.post("/upload", async (c) => {
 });
 
 export async function startGarbageCollectionLoop() {
-  if (env.GARBAGE_COLLECT_INTERVAL == 0) {
+  if (env.GARBAGE_COLLECT_INTERVAL === 0) {
     logger.warn("GC interval is 0, skipping")
     return;
   }
@@ -101,7 +101,7 @@ export async function startGarbageCollectionLoop() {
 
       // delete files that have no entry in the database, that is not stale
       const imagesFilenamesOrphaned = (await getOrphanedImagesFilenamesOnDisk()).filter(filename => {
-        return filename != ".gitkeep";
+        return filename !== ".gitkeep";
       });
 
       // console.log("Orphaned file with no database entry: ", imagesFilenamesOrphaned);
