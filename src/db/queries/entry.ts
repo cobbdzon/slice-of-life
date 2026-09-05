@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, like } from "drizzle-orm";
 import { journalEntries, type DBJournalEntry, type JournalEntry } from "../schema";
 
 export async function insertJournalEntry(userId: number, journalEntry: JournalEntry) {
@@ -17,9 +17,27 @@ export async function insertJournalEntry(userId: number, journalEntry: JournalEn
   return await db.insert(journalEntries).values(newRow);
 }
 
+export type JournalEntriesFilter = {
+  year?: number;
+  month?: number; // 0-based, like Date.getMonth()
+};
+
 // TODO: check if imagePaths still exists and update if deleted
-export async function getJournalEntries(userId: number): Promise<JournalEntry[]> {
-  const rows = await db.select().from(journalEntries).where(eq(journalEntries.userId, userId));
+export async function getJournalEntries(userId: number, filter: JournalEntriesFilter = {}): Promise<JournalEntry[]> {
+  const conditions = [eq(journalEntries.userId, userId)];
+
+  if (filter.year !== undefined) {
+    conditions.push(like(journalEntries.date, `${filter.year}-%`));
+    if (filter.month !== undefined) {
+      const monthStr = (filter.month + 1).toString().padStart(2, "0");
+      conditions.push(like(journalEntries.date, `${filter.year}-${monthStr}-%`));
+    }
+  }
+
+  const rows = await db.select()
+    .from(journalEntries)
+    .where(and(...conditions))
+    .orderBy(journalEntries.date);
 
   return rows.map((row) => ({
     id: row.id,
