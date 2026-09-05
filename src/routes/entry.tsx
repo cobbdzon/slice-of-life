@@ -24,9 +24,9 @@ app.get('/', async (c) => {
 
   const user = await getUserFromContext(c) as User;
   const hideEmpty = c.req.query('hideEmpty') === 'true';
-
-  const journalEntries = await getJournalEntries(user.id);
   const currentDate = new Date();
+
+  const journalEntries = await getJournalEntries(user.id, { year: currentDate.getFullYear(), month: currentDate.getMonth() });
 
   return c.html(
     <DashboardPage user={user} requestedYear={currentDate.getFullYear()} requestedMonth={currentDate.getMonth()} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />
@@ -44,7 +44,7 @@ app.get("/entry/:year/:month/:day", entryQueryValidator, async (c) => {
   // const parsedDate = new Date(year, month - 1, day);
 
   const defaultEntry = getDefaultEntry();
-  const journalEntries = await getJournalEntries(user.id)
+  const journalEntries = await getJournalEntries(user.id, { year, month: month - 1 })
 
   // TODO: SUPPORT MULTIPLE ENTRIES FOR THE SAME DATE?
   const requestedEntries: JournalEntry[] = journalEntries.filter((journalEntry) => {
@@ -239,7 +239,7 @@ app.get("/:year", async (c) => {
   const user = await getUserFromContext(c) as User;
   const hideEmpty = c.req.query('hideEmpty') === 'true';
 
-  const journalEntries = await getJournalEntries(user.id);
+  const journalEntries = await getJournalEntries(user.id, { year: Number(year) });
 
   return c.html(
     <DashboardPage user={user} requestedYear={Number(year)} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />
@@ -265,7 +265,7 @@ app.get("/:year/:month", async (c) => {
   const user = await getUserFromContext(c) as User;
   const hideEmpty = c.req.query('hideEmpty') === 'true';
 
-  const journalEntries = await getJournalEntries(user.id);
+  const journalEntries = await getJournalEntries(user.id, { year, month: month - 1 });
 
   return c.html(
     <DashboardPage user={user} requestedYear={Number(year)} requestedMonth={month - 1} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />

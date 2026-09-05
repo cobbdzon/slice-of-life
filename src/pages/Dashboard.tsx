@@ -28,12 +28,7 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
     }
   })
 
-  journalEntries.filter(entry => {
-    if (requestedMonth !== undefined && requestedMonth !== entry.date.getMonth()) {
-      return false
-    }
-    return entry.date.getFullYear() === requestedYear;
-  }).forEach(entry => {
+  journalEntries.forEach(entry => {
     const monthIndex = entry.date.getMonth();
     const dayIndex = entry.date.getDate() - 1;
 
