@@ -29,7 +29,7 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
   })
 
   journalEntries.filter(entry => {
-    if (requestedMonth && requestedMonth !== entry.date.getMonth()) {
+    if (requestedMonth !== undefined && requestedMonth !== entry.date.getMonth()) {
       return false
     }
     return entry.date.getFullYear() === requestedYear;
@@ -111,7 +111,7 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
     });
 
     const visibleEntries = monthGroup.journalEntries.filter((journalEntry) => {
-      return journalEntry !== undefined;
+      return journalEntry !== null && journalEntry !== undefined;
     })
 
     if (requestedMonth !== undefined) {

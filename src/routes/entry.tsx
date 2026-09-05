@@ -26,9 +26,10 @@ app.get('/', async (c) => {
   const hideEmpty = c.req.query('hideEmpty') === 'true';
 
   const journalEntries = await getJournalEntries(user.id);
+  const currentDate = new Date();
 
   return c.html(
-    <DashboardPage user={user} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />
+    <DashboardPage user={user} requestedYear={currentDate.getFullYear()} requestedMonth={currentDate.getMonth()} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />
   );
 });
 
