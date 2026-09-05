@@ -9,6 +9,9 @@ import { logger } from "../backend/logger";
 import { LoginPage } from "../pages/Login";
 import { RegisterPage } from "../pages/Register";
 
+// dummy hash so not-found and wrong-password take similar time (anti-enumeration)
+const DUMMY_PASSWORD_HASH = await Bun.password.hash("dummy-password-for-timing");
+
 const app = new Hono();
 
 app.get("/login", async (c) => {
@@ -24,16 +27,16 @@ app.post("/login", authValidator, async (c) => {
   const { username, password } = body;
   logger.info(`login attempt: ${username}`);
 
-  // validate username
+  // verify against user or dummy hash for similar timing
   const user = await getUserFromUsername(username);
-  if (!user) {
-    return c.redirect("/login?error=USER_DOES_NOT_EXIST");
-  }
+  const passwordMatches = user
+    ? await Bun.password.verify(password, user.passwordHash)
+    : await Bun.password.verify(password, DUMMY_PASSWORD_HASH);
 
-  // validate password
-  const isCorrectPassword = await Bun.password.verify(password, user.passwordHash);
-  if (!isCorrectPassword) {
-    return c.redirect("/login?error=INCORRECT_PASSWORD");
+  // same error for unknown user and wrong password (anti-enumeration)
+  if (!user || !passwordMatches) {
+    logger.info(`login failed: ${username}`);
+    return c.redirect("/login?error=INVALID_CREDENTIALS");
   }
 
   const token = await generateToken(user.id);

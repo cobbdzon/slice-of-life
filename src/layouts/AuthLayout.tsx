@@ -17,8 +17,17 @@ export interface AuthLayoutProps {
   errorCode?: string;
 }
 
+// error codes -> friendly messages (unknown codes fall back to raw value)
+const ERROR_MESSAGES: Record<string, string> = {
+  INVALID_CREDENTIALS: "Invalid username or password.",
+  INTERNAL_SERVER_ERROR: "Something went wrong. Please try again.",
+  USERNAME_TAKEN: "This username is already taken.",
+};
+
 export function AuthLayout(props: AuthLayoutProps) {
-  const errorMessage = props.errorCode;
+  const errorMessage = props.errorCode
+    ? ERROR_MESSAGES[props.errorCode] ?? props.errorCode
+    : undefined;
 
   return (
     <BaseLayout
