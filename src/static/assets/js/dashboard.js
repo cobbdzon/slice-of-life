@@ -6,20 +6,44 @@ function dateToString(date) {
 }
 
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const pad = (n) => n.toString().padStart(2, "0");
 
 // Gate entrance animation styling on JS availability so cards never flash (or
 // get stuck hidden) without JS.
 document.documentElement.classList.add("js");
 
 document.addEventListener("DOMContentLoaded", () => {
-  const id = decodeURIComponent((window.location.hash || `#${dateToString(new Date())}`).substring(1));
-  const targetCard = document.getElementById(id);
+  const yearFromQuery = () => {
+    const yearParam = new URLSearchParams(window.location.search).get("year");
+    return yearParam ? Number(yearParam) : new Date().getFullYear();
+  };
 
-  if (targetCard) {
+  // Resolve a short-form hash: #MM-DD seeks to that day's card, #MM seeks to
+  // the month's header. Both use the year from ?year (or the current year).
+  const stripped = decodeURIComponent(
+    (window.location.hash || `#${dateToString(new Date()).slice(5)}`).substring(1)
+  );
+  let target = null;
+  let targetBlock = "center";
+  let seekerMonth = null;
+
+  const dayMatch = stripped.match(/^(\d{2})-(\d{2})$/);
+  const monthMatch = stripped.match(/^(\d{2})$/);
+
+  if (dayMatch) {
+    seekerMonth = Number(dayMatch[1]) - 1;
+    target = document.getElementById(`${yearFromQuery()}-${dayMatch[1]}-${dayMatch[2]}`);
+  } else if (monthMatch) {
+    seekerMonth = Number(monthMatch[1]) - 1;
+    target = document.querySelector(`.month-section[data-month="${seekerMonth}"]`);
+    targetBlock = "start";
+  }
+
+  if (target) {
     setTimeout(() => {
-      targetCard.scrollIntoView({
+      target.scrollIntoView({
         behavior: "smooth",
-        block: "center",
+        block: targetBlock,
       });
     }, 100);
   }
@@ -44,14 +68,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll(".entry-card").forEach((card) => entryObserver.observe(card));
 
-  // Year/Month seeker: month +/- seeks within the rendered year via the
-  // #YYYY-MM-01 anchor, or full-page navigates when crossing years or when
-  // viewing a single month (?month=).
+  // Year/Month seeker
   const seeker = document.querySelector(".seeker");
   if (seeker) {
     const monthValue = seeker.querySelector(".seeker-value--month");
-    const pad = (n) => n.toString().padStart(2, "0");
+    const nextMonthButton = seeker.querySelector('[data-month-step="1"]');
+    const updateMonthNextLock = (year, month) => {
+      if (nextMonthButton) {
+        nextMonthButton.disabled = year === new Date().getFullYear() && month === 11;
+      }
+    };
 
+    // Keep the label in sync with the month the page loaded on.
+    if (seekerMonth !== null) {
+      monthValue.textContent = MONTH_NAMES[seekerMonth];
+      seeker.dataset.month = String(seekerMonth);
+      updateMonthNextLock(Number(seeker.dataset.year), seekerMonth);
+    }
+
+    // Year +/- : stay on the same month when switching years.
+    seeker.querySelectorAll('a[href^="/?year="]').forEach((link) => {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        const month = Number(seeker.dataset.month);
+        window.location.href = `${link.getAttribute("href")}#${pad(month + 1)}`;
+      });
+    });
+
+    // Month +/- : seek to the month's header within the rendered year, or
+    // full-page navigate when crossing years or viewing a single month.
     seeker.querySelectorAll("[data-month-step]").forEach((button) => {
       button.addEventListener("click", () => {
         const originalYear = Number(seeker.dataset.year);
@@ -66,20 +111,23 @@ document.addEventListener("DOMContentLoaded", () => {
           year += 1;
         }
 
-        if (seeker.dataset.mode === "month" || year !== originalYear) {
-          window.location.href = `/?year=${year}&month=${month + 1}#${year}-${pad(month + 1)}-01`;
+        if (seeker.dataset.mode === "month") {
+          window.location.href = `/?year=${year}&month=${month + 1}#${pad(month + 1)}`;
+          return;
+        }
+        if (year !== originalYear) {
+          window.location.href = `/?year=${year}#${pad(month + 1)}`;
           return;
         }
 
-        const targetId = `${year}-${pad(month + 1)}-01`;
-        const target = document.getElementById(targetId) ||
-          document.querySelector(`.month-section[data-month="${month}"]`);
-        if (target) {
-          history.pushState(null, "", `#${targetId}`);
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        const header = document.querySelector(`.month-section[data-month="${month}"]`);
+        if (header) {
+          history.pushState(null, "", `#${pad(month + 1)}`);
+          header.scrollIntoView({ behavior: "smooth", block: "start" });
         }
         monthValue.textContent = MONTH_NAMES[month];
         seeker.dataset.month = String(month);
+        updateMonthNextLock(year, month);
       });
     });
   }
