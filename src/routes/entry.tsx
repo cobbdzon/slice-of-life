@@ -109,7 +109,7 @@ app.get("/entry/new", async (c) => {
 
   const existingEntries = await getJournalEntriesFromDate(user.id, parsedDate);
   if (existingEntries.length > 0) {
-    return c.redirect(`/?error=ENTRY_ALREADY_EXISTS#${dateParam}`);
+    return c.redirect(`/?error=ENTRY_ALREADY_EXISTS#${dateParam.slice(5)}`);
   }
 
   return c.html(
@@ -181,7 +181,7 @@ app.post("/api/entry", entryPayloadValidator, async (c) => {
 
   const existingEntries = await getJournalEntriesFromDate(user.id, date);
   if (existingEntries.length > 0) {
-    return c.redirect(`/?error=ENTRY_ALREADY_EXISTS#${entryPayload.date}`);
+    return c.redirect(`/?error=ENTRY_ALREADY_EXISTS#${entryPayload.date.slice(5)}`);
   }
 
   const missingImages = await getMissingJournalAssets(user.id, newEntry.imagePaths);
