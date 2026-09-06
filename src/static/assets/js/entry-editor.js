@@ -251,7 +251,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           window.location.href = `/entry/${dateObj.getFullYear()}/${dateObj.getMonth() + 1}/${dateObj.getDate()}`;
         } else {
           const errorData = await response.json().catch(() => ({}));
-          alert(`Failed to save entry: ${errorData.message || response.statusText}`);
+          if (errorData.error === "MISSING_IMAGES") {
+            alert("Some images were cleaned up before saving (uploaded too long ago). Remove and re-add them, then save again.");
+          } else {
+            alert(`Failed to save entry: ${errorData.message || response.statusText}`);
+          }
         }
       } catch (err) {
         console.error("Submission Failure:", err);

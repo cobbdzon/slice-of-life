@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../db";
 import { journalAssets, journalEntries, type JournalAsset } from "../schema";
 import { readdir } from "fs/promises";
@@ -20,6 +20,39 @@ export async function getJournalAssetsFromImagePaths(imagePaths: string[]) {
     .from(journalAssets)
     .where(inArray(journalAssets.serverPath, imagePaths))
   return assets;
+}
+
+// Returns submitted image paths that have no DB asset row or no file on disk
+// (e.g. cleaned up by GC while the editor sat stale). Used to reject publishing.
+export async function getMissingJournalAssets(userId: number, imagePaths: string[]): Promise<string[]> {
+  if (imagePaths.length === 0) {
+    return [];
+  }
+
+  const existingAssets = await db.select()
+    .from(journalAssets)
+    .where(
+      and(
+        eq(journalAssets.userId, userId),
+        inArray(journalAssets.serverPath, imagePaths)
+      )
+    );
+
+  const missing: string[] = [];
+  for (const path of imagePaths) {
+    const asset = existingAssets.find((a) => a.serverPath === path);
+    if (!asset) {
+      missing.push(path);
+      continue;
+    }
+    const filename = asset.serverPath.split("/").pop();
+    const exists = await Bun.file(`${env.UPLOAD_DIR}${filename}`).exists();
+    if (!exists) {
+      missing.push(path);
+    }
+  }
+
+  return missing;
 }
 
 export async function getUserTotalFilesSize(userId: number) {
