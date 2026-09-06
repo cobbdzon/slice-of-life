@@ -4,9 +4,10 @@ import { getUserFromContext } from "../db/queries/auth";
 import { validateTokenFromContext } from "./cookies";
 import { type JournalAsset, type User } from "../db/schema";
 import { deleteJournalAssets, getJournalAssetsWithMissingFile, getOrphanedImagesFilenamesOnDisk, getOrphanedJournalAssets, insertJournalAsset } from "../db/queries/uploads";
-import { mkdir } from "fs/promises";
+import { mkdir, rename } from "fs/promises";
 import { env } from "./env";
 import { logger } from "./logger";
+import { sanitizeImageUpload, toSafeUploadFilename } from "./imageProcessing";
 
 const MAX_UPLOAD_FILE_SIZE = env.MAX_UPLOAD_FILE_SIZE * 1024 * 1024;
 const GARBAGE_COLLECT_INTERVAL = env.GARBAGE_COLLECT_INTERVAL * 60 * 1000;
@@ -43,17 +44,31 @@ app.post("/upload", async (c) => {
 
   if (!file) return c.json({ message: "No file received" }, 400);
 
-  const assetId = randomUUID();
-  const fileExtension = file.name.split(".").pop();
-  const filename = `${assetId}.${fileExtension}`;
-  const destination = `${env.UPLOAD_DIR}${filename}`;
-  const publicUrlPath = `${env.UPLOAD_URL_PREFIX}${filename}`;
-
   if (file.size > MAX_UPLOAD_FILE_SIZE) {
     return c.json({ message: "FILE_TOO_BIG" }, 413);
   }
 
-  await Bun.write(destination, file);
+  // Fully re-encode the upload as a clean raster image before it ever reaches
+  // disk. The bytes stored are sharp's output (metadata-stripped, bounded), so
+  // no client-controlled payload can survive into storage. If the input cannot
+  // be decoded and re-encoded as an image, it is rejected outright.
+  let sanitized: { buffer: Buffer; extension: string };
+  try {
+    sanitized = await sanitizeImageUpload(Buffer.from(await file.arrayBuffer()));
+  } catch (error) {
+    logger.info(`upload rejected: not a decodable image (${(error as Error).message})`);
+    return c.json({ message: "UNSUPPORTED_FILE" }, 415);
+  }
+
+  const assetId = randomUUID();
+  const filename = `${assetId}.${sanitized.extension}`;
+  const destination = `${env.UPLOAD_DIR}${filename}`;
+  const publicUrlPath = `${env.UPLOAD_URL_PREFIX}${filename}`;
+
+  // Write to a temp file, then atomically rename into place so no partially
+  // written or mid-failure file is ever visible in the upload directory.
+  const tempDestination = `${destination}.tmp-${Date.now()}`;
+  await Bun.write(tempDestination, sanitized.buffer);
 
   try {
     const newUpload: JournalAsset = {
@@ -61,15 +76,21 @@ app.post("/upload", async (c) => {
       userId: user.id,
       serverPath: publicUrlPath,
       originalName: file.name,
-      fileSize: file.size
+      fileSize: sanitized.buffer.length
     }
 
     await insertJournalAsset(newUpload);
   } catch (error) {
     logger.error(`upload DB insert failed: ${(error as Error).message}`);
-    await Bun.file(destination).delete();
+    await Bun.file(tempDestination).delete().catch(() => {});
     return c.json({ message: "Could not save file asset information" }, 500);
   }
+
+  await rename(tempDestination, destination).catch(async (error) => {
+    logger.error(`upload rename failed: ${(error as Error).message}`);
+    await Bun.file(tempDestination).delete().catch(() => {});
+    throw error;
+  });
 
   return c.json({ url: publicUrlPath });
 });

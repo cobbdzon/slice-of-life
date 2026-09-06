@@ -4,6 +4,7 @@ import { journalAssets, journalEntries, type JournalAsset } from "../schema";
 import { readdir } from "fs/promises";
 import { env } from "../../backend/env";
 import { logger } from "../../backend/logger";
+import { toSafeUploadFilename } from "../../backend/imageProcessing";
 
 export async function insertJournalAsset(asset: JournalAsset) {
   return await db.insert(journalAssets).values(asset).returning();
@@ -45,7 +46,11 @@ export async function getMissingJournalAssets(userId: number, imagePaths: string
       missing.push(path);
       continue;
     }
-    const filename = asset.serverPath.split("/").pop();
+    const filename = toSafeUploadFilename(asset.serverPath);
+    if (!filename) {
+      missing.push(path);
+      continue;
+    }
     const exists = await Bun.file(`${env.UPLOAD_DIR}${filename}`).exists();
     if (!exists) {
       missing.push(path);
@@ -74,7 +79,8 @@ export async function getJournalAssetsWithMissingFile(): Promise<JournalAsset[]>
   const missingAssets = [];
 
   for (const asset of allAssets) {
-    const filename = asset.serverPath.split("/").pop();
+    const filename = toSafeUploadFilename(asset.serverPath);
+    if (!filename) continue;
     const exists = await Bun.file(`${env.UPLOAD_DIR}${filename}`).exists();
     if (!exists) {
       missingAssets.push(asset);
@@ -89,17 +95,20 @@ export async function getOrphanedJournalAssets(): Promise<JournalAsset[]> {
     .select()
     .from(journalEntries);
 
-  const activeAssetFilenames = entries.flatMap(entry => {
-    return entry.imagePaths;
-  }).map(imagePath => {
-    return imagePath.split("/").pop();
-  })
+  const activeAssetFilenames = new Set(
+    entries.flatMap(entry => {
+      return entry.imagePaths;
+    }).map(imagePath => {
+      const filename = toSafeUploadFilename(imagePath);
+      return filename || "";
+    }).filter(Boolean)
+  );
 
   const assets = await db.select().from(journalAssets);
 
   return assets.filter(asset => {
-    const filename = asset.serverPath.split("/").pop()
-    return !activeAssetFilenames.includes(filename)
+    const filename = toSafeUploadFilename(asset.serverPath);
+    return filename !== null && !activeAssetFilenames.has(filename);
   });
 }
 
@@ -109,13 +118,11 @@ export async function getOrphanedImagesFilenamesOnDisk() {
     .filter((entry) => entry.isFile())
     .map((entry) => entry.name);
 
-  const assetFilenames = (await db.select().from(journalAssets)).map(asset => {
-    return (asset.serverPath).split("/").pop() || ""
-  })
+  const assetFilenames = (await db.select().from(journalAssets))
+    .map(asset => toSafeUploadFilename(asset.serverPath))
+    .filter((filename): filename is string => filename !== null);
 
-  const dbSet = new Set(
-    assetFilenames.map((asset) => asset.split("/").pop())
-  );
+  const dbSet = new Set(assetFilenames);
 
   return filenames.filter((filename) => !dbSet.has(filename));
 }
@@ -129,7 +136,8 @@ export async function deleteFilesFromDisk(assets: JournalAsset[]): Promise<void>
   await Promise.all(
     assets.map(async (asset) => {
       try {
-        const filename = asset.serverPath.split("/").pop();
+        const filename = toSafeUploadFilename(asset.serverPath);
+        if (!filename) return;
         const file = Bun.file(`${env.UPLOAD_DIR}${filename}`);
         if (await file.exists()) {
           await file.delete();
