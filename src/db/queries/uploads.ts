@@ -3,6 +3,7 @@ import { db } from "../db";
 import { journalAssets, journalEntries, type JournalAsset } from "../schema";
 import { readdir } from "fs/promises";
 import { env } from "../../backend/env";
+import { logger } from "../../backend/logger";
 
 export async function insertJournalAsset(asset: JournalAsset) {
   return await db.insert(journalAssets).values(asset).returning();
@@ -86,7 +87,28 @@ export async function getOrphanedImagesFilenamesOnDisk() {
   return filenames.filter((filename) => !dbSet.has(filename));
 }
 
-export async function deleteJournalAssets(assetsToDelete: JournalAsset[], deleteFilesFromDisk = false): Promise<number> {
+export async function deleteFilesFromDisk(assets: JournalAsset[]): Promise<void> {
+  if (!assets || assets.length === 0) {
+    return;
+  }
+
+  // best-effort: failures leave orphaned files that GC cleans up later
+  await Promise.all(
+    assets.map(async (asset) => {
+      try {
+        const filename = asset.serverPath.split("/").pop();
+        const file = Bun.file(`${env.UPLOAD_DIR}${filename}`);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      } catch (error) {
+        logger.error(`file delete failed: ${(error as Error).message}`);
+      }
+    })
+  );
+}
+
+export async function deleteJournalAssets(assetsToDelete: JournalAsset[], deleteFiles = false): Promise<number> {
   if (!assetsToDelete || assetsToDelete.length === 0) {
     return 0;
   }
@@ -101,16 +123,8 @@ export async function deleteJournalAssets(assetsToDelete: JournalAsset[], delete
     .delete(journalAssets)
     .where(inArray(journalAssets.id, idsToDelete));
 
-  if (deleteFilesFromDisk) {
-    await Promise.all(
-      assetsToDelete.map(async (asset) => {
-        const filename = asset.serverPath.split("/").pop();
-        const file = Bun.file(`${env.UPLOAD_DIR}${filename}`);
-        if (await file.exists()) {
-          await file.delete();
-        }
-      })
-    );
+  if (deleteFiles) {
+    await deleteFilesFromDisk(assetsToDelete);
   }
 
   return idsToDelete.length;
