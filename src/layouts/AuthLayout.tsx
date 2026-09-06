@@ -34,6 +34,7 @@ export function AuthLayout(props: AuthLayoutProps) {
       title={props.pageTitle}
       stylesheets={["/static/assets/css/auth.css"]}
       scripts={["/static/assets/js/auth-form.js"]}
+      showTopBar={false}
     >
       <div class="main m3-login-card">
 
@@ -42,6 +43,9 @@ export function AuthLayout(props: AuthLayoutProps) {
         </div>
 
         <div class="card-content-side">
+          <div class="auth-logo">
+            <h2 class="auth-logo__title">Slice of <em class="auth-logo__accent">Life</em></h2>
+          </div>
           <h1 style="margin-bottom: 4px;">{props.title}</h1>
           <h3 style="font-weight: 400; margin-top: 0; margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant, #49454f);">
             {props.subtitle}

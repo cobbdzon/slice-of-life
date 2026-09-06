@@ -1,12 +1,15 @@
 @use "./bar.scss";
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: inherit;
 }
 
@@ -109,6 +112,24 @@ body.m3-surface {
     font-weight: 400;
   }
 
+  .m3-logo {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 24px;
+  }
+
+  .m3-username {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+
+    &__icon {
+      font-size: 20px;
+    }
+  }
+
   .icon-btn {
     cursor: pointer;
     user-select: none;
@@ -125,9 +146,9 @@ a.no-link-style {
   color: inherit;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
+
   &:hover {
     color: inherit;
     text-decoration: none;
   }
 }
-
