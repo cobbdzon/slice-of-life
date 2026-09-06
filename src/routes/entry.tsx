@@ -12,7 +12,7 @@ import { EntryEditor } from "../pages/EntryEditor";
 import { entryPayloadValidator } from "../schemas/entryPayload";
 import { deleteJournalEntryWithAssets, getJournalEntries, getJournalEntriesFromDate, getJournalEntryFromEntryId, insertJournalEntry, updateJournalEntryWithRemovedAssets } from "../db/queries/entry";
 import { randomUUID } from "crypto";
-import { deleteFilesFromDisk, getJournalAssetsFromImagePaths } from "../db/queries/uploads";
+import { deleteFilesFromDisk, getJournalAssetsFromImagePaths, getMissingJournalAssets } from "../db/queries/uploads";
 
 const app = new Hono();
 
@@ -158,6 +158,11 @@ app.post("/api/entry", entryPayloadValidator, async (c) => {
     return c.redirect(`/?error=ENTRY_ALREADY_EXISTS#${entryPayload.date}`);
   }
 
+  const missingImages = await getMissingJournalAssets(user.id, newEntry.imagePaths);
+  if (missingImages.length > 0) {
+    return c.json({ error: "MISSING_IMAGES", paths: missingImages }, 422);
+  }
+
   await insertJournalEntry(user.id, newEntry);
 
   const [year, month, day] = dateToString(newEntry.date).split('-').map(Number);
@@ -186,6 +191,11 @@ app.put("/api/entry/:entryId", entryPayloadValidator, async (c) => {
   const newImagePathsSet = new Set(imagePaths);
   const removedImagePaths = existingEntry.imagePaths.filter(imageEntry => !newImagePathsSet.has(imageEntry));
   const assetsToRemove = await getJournalAssetsFromImagePaths(removedImagePaths);
+
+  const missingImages = await getMissingJournalAssets(user.id, imagePaths);
+  if (missingImages.length > 0) {
+    return c.json({ error: "MISSING_IMAGES", paths: missingImages }, 422);
+  }
 
   await updateJournalEntryWithRemovedAssets(user.id, {
     id: existingEntry.id,
