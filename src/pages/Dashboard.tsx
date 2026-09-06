@@ -33,8 +33,8 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
   })
 
   journalEntries.forEach(entry => {
-    const monthIndex = entry.date.getMonth();
-    const dayIndex = entry.date.getDate() - 1;
+    const monthIndex = entry.date.getUTCMonth();
+    const dayIndex = entry.date.getUTCDate() - 1;
 
     const monthGroup = monthGroups[monthIndex] as MonthGroup;
     monthGroup.journalEntries[dayIndex] = entry;

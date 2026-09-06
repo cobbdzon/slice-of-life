@@ -1,6 +1,6 @@
 import { BaseLayout } from '../layouts/BaseLayout';
 import { type JournalEntry, type User } from '../db/schema';
-import { dateToString, stringToDate } from '../backend/entry';
+import { dateToStringUTC, stringToDate } from '../backend/entry';
 import { getFileSizeOfImagePaths } from '../db/queries/uploads';
 
 interface EntryPageProps {
@@ -49,7 +49,7 @@ export async function EntryPage({ user, dateString, journalEntry, showFileSize =
       <div class="entry-view-container">
 
         <div class="entry-nav-strip">
-          <a href={`/#${dateToString(journalEntry.date)}`} class="entry-back-button">
+          <a href={`/#${dateToStringUTC(journalEntry.date).slice(5)}`} class="entry-back-button">
             <span class="material-symbols-outlined">arrow_back</span>
           </a>
         </div>
