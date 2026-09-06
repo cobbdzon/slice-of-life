@@ -304,6 +304,69 @@ html.js .entry-card.card-entered {
   }
 }
 
+.seeker {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background-color: var(--md-sys-color-surface-container, #f3edf7);
+  color: var(--md-sys-color-on-surface, #1d1b20);
+  box-shadow: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
+
+  .seeker-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .seeker-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--md-sys-color-on-surface-variant, #49454f);
+    width: 44px;
+    flex-shrink: 0;
+  }
+
+  .seeker-value {
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 72px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .seeker-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--md-sys-color-on-surface, #1d1b20);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    &:hover {
+      background-color: var(--md-sys-color-surface-container-high, #ece6f0);
+      transform: scale(1.05);
+    }
+  }
+}
+
 @media (min-width: 600px) {
   .entries-gallery {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

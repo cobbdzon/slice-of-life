@@ -1,4 +1,5 @@
 import { BaseLayout } from '../layouts/BaseLayout';
+import { Seeker } from '../components/Seeker';
 import { type JournalEntry, type User } from '../db/schema';
 import { dateToString, getDaysInMonth, getMonthNames, type MonthGroup } from '../backend/entry';
 import { getFileSizeOfImagePaths } from '../db/queries/uploads';
@@ -115,7 +116,7 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
     const isCurrentMonth = monthIndex === currentDate.getMonth() && requestedYear === currentDate.getFullYear();
 
     return (
-      <section class={`month-section${isCurrentMonth ? " month-section--current" : ""}`}>
+      <section data-month={monthIndex} class={`month-section${isCurrentMonth ? " month-section--current" : ""}`}>
         <h2 class="section-title">
           {monthGroup.monthName} <span class="section-year">{monthGroup.year}</span>
         </h2>
@@ -137,6 +138,8 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
       <div class={`dashboard-wrapper${isCurrentMonthRendered ? " has-current" : ""}`}>
         {monthGroupElements}
       </div>
+
+      <Seeker year={requestedYear} month={requestedMonth} singleMonthView={requestedMonth !== undefined} />
 
     </BaseLayout >
   )
