@@ -8,6 +8,8 @@
 .month-section {
   margin-bottom: 40px;
   transition: filter 0.3s ease;
+  // keep month headers clear of the sticky 64px top bar when seeking to #MM
+  scroll-margin-top: 88px;
 }
 
 // Emphasis: while the current month is in view, dim the surrounding months.
@@ -64,6 +66,8 @@
 .entry-card {
   position: relative;
   width: 100%;
+  // clear the sticky top bar when seeking to #MM-DD
+  scroll-margin-top: 88px;
   aspect-ratio: 1 / 1;
   border-radius: 16px;
   overflow: hidden;
