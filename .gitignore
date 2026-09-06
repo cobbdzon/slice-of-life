@@ -2,6 +2,10 @@
 public/uploads/*
 !public/uploads/.gitkeep
 
+# Compiled Sass output (source of truth is src/styles)
+public/assets/css/*.css
+public/assets/css/*.css.map
+
 # Logs
 logs
 *.log
