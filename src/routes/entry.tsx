@@ -26,10 +26,36 @@ app.get('/', async (c) => {
   const hideEmpty = c.req.query('hideEmpty') === 'true';
   const currentDate = new Date();
 
-  const journalEntries = await getJournalEntries(user.id, { year: currentDate.getFullYear(), month: currentDate.getMonth() });
+  const yearParam = c.req.query("year");
+
+  let requestedYear: number;
+  if (yearParam) {
+    const parsedYear = validateRequestedYear(yearParam);
+    if (parsedYear === null) {
+      return c.redirect("/?error=INVALID_YEAR");
+    }
+    requestedYear = parsedYear;
+  } else {
+    requestedYear = currentDate.getFullYear();
+  }
+
+  const monthParam = c.req.query("month");
+  let requestedMonth: number | undefined;
+  if (monthParam) {
+    const parsedMonth = Number(monthParam);
+    if (isNaN(parsedMonth) || parsedMonth < 1 || parsedMonth > 12) {
+      return c.redirect(`/?year=${requestedYear}&error=INVALID_MONTH`);
+    }
+    requestedMonth = parsedMonth - 1;
+  }
+
+  const journalEntries = await getJournalEntries(user.id, {
+    year: requestedYear,
+    ...(requestedMonth !== undefined ? { month: requestedMonth } : {}),
+  });
 
   return c.html(
-    <DashboardPage user={user} requestedYear={currentDate.getFullYear()} requestedMonth={currentDate.getMonth()} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />
+    <DashboardPage user={user} requestedYear={requestedYear} requestedMonth={requestedMonth} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />
   );
 });
 
@@ -232,53 +258,6 @@ app.delete("/api/entry/:entryId", async (c) => {
   await deleteFilesFromDisk(assetsToDelete);
 
   return c.json({ success: true });
-})
-
-app.get("/:year", async (c) => {
-  const isValidToken = await validateTokenFromContext(c);
-  if (!isValidToken) {
-    return c.redirect("/login");
-  }
-
-  const year = c.req.param("year");
-  if (!validateRequestedYear(year)) {
-    return c.redirect("/?error=INVALID_YEAR")
-  }
-
-  const user = await getUserFromContext(c) as User;
-  const hideEmpty = c.req.query('hideEmpty') === 'true';
-
-  const journalEntries = await getJournalEntries(user.id, { year: Number(year) });
-
-  return c.html(
-    <DashboardPage user={user} requestedYear={Number(year)} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />
-  )
-})
-
-app.get("/:year/:month", async (c) => {
-  const isValidToken = await validateTokenFromContext(c);
-  if (!isValidToken) {
-    return c.redirect("/login");
-  }
-
-  const year = Number(c.req.param("year"));
-  if (!validateRequestedYear(year.toString())) {
-    return c.redirect("/?error=INVALID_YEAR")
-  }
-
-  const month = Number(c.req.param("month"));
-  if (isNaN(month) || month < 1 || month > 12) {
-    return c.redirect(`/${year}?error=INVALID_MONTH`)
-  }
-
-  const user = await getUserFromContext(c) as User;
-  const hideEmpty = c.req.query('hideEmpty') === 'true';
-
-  const journalEntries = await getJournalEntries(user.id, { year, month: month - 1 });
-
-  return c.html(
-    <DashboardPage user={user} requestedYear={Number(year)} requestedMonth={month - 1} journalEntries={journalEntries} hideEmptyDays={hideEmpty} />
-  )
 })
 
 export default app;

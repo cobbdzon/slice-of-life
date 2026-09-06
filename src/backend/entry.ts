@@ -33,12 +33,12 @@ export function stringToDate(dateString: string) {
   return new Date(year as number, (month as number - 1), (day ? day + 1 : 0) as number);
 }
 
-export function validateRequestedYear(yearInput: string | null | undefined): number {
+export function validateRequestedYear(yearInput: string | null | undefined): number | null {
   const currentYear = new Date().getFullYear();
   const minYear = 1975;
 
   if (!yearInput) {
-    return currentYear;
+    return null;
   }
 
   const parsedYear = parseInt(yearInput, 10);
@@ -48,7 +48,7 @@ export function validateRequestedYear(yearInput: string | null | undefined): num
     parsedYear < minYear ||
     parsedYear > currentYear
   ) {
-    return currentYear;
+    return null;
   }
 
   return parsedYear;
