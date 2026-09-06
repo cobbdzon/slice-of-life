@@ -80,10 +80,23 @@ body.m3-surface {
   justify-content: space-between;
   height: 64px;
   padding: 0 16px;
-  background-color: rgba(0, 0, 0, 0);
+  // background-color: rgba(0, 0, 0, 0);
   // background-color: var(--md-sys-color-surface);
   // border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   gap: 16px;
+
+  // fallback: solid surface when backdrop-filter is unsupported
+  background-color: var(--md-sys-color-surface);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    // translucent surface over blurred content (80% keeps text readable)
+    background-color: rgba(24, 17, 21, 0.8); // matches --md-sys-color-surface: #181115
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
 
   div {
     display: flex;
