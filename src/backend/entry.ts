@@ -10,15 +10,18 @@ export type MonthGroup = {
   journalEntries: JournalEntryNullable[];
 }
 
+// Date convention: a `Date` is an instant. A calendar date (YYYY-MM-DD) is
+// parsed as UTC-noon so it never shifts with timezone; reads recover the
+// calendar day via UTC getters, and writes store toISOString().
 export function getMonthNames(locale: string = 'en-US'): string[] {
   return Array.from({ length: 12 }, (_, index) => {
-    const date = new Date(2026, index, 1); // year doesnt matter
-    return date.toLocaleDateString(locale, { month: 'long' });
+    const date = new Date(Date.UTC(2026, index, 1)); // year doesnt matter
+    return date.toLocaleDateString(locale, { month: 'long', timeZone: 'UTC' });
   });
 }
 
 export function getDaysInMonth(year: number, monthIndex: number) {
-  return new Date(year, monthIndex + 1, 0).getDate();
+  return new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
 }
 
 export function dateToString(date: Date) {
@@ -28,9 +31,16 @@ export function dateToString(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
+export function dateToStringUTC(date: Date) {
+  const year = date.getUTCFullYear();
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  const day = date.getUTCDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function stringToDate(dateString: string) {
   const [year, month, day] = dateString.split('-').map(Number);
-  return new Date(year as number, (month as number - 1), (day ? day + 1 : 0) as number);
+  return new Date(Date.UTC(year as number, (month as number) - 1, day as number));
 }
 
 export function validateRequestedYear(yearInput: string | null | undefined): number | null {

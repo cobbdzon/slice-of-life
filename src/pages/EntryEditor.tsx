@@ -1,6 +1,6 @@
 import { BaseLayout } from "../layouts/BaseLayout"; // Adjust import path as needed
 import type { User, JournalEntry } from "../db/schema"; // Adjust import path as needed
-import { dateToString } from "../backend/entry";
+import { dateToStringUTC } from "../backend/entry";
 
 interface EntryEditorProps {
   user: User;
@@ -14,9 +14,7 @@ export function EntryEditor({ user, date, entry }: EntryEditorProps) {
   const pageTitle = isEditMode ? "Edit Entry - Slice of Life" : "New Entry - Slice of Life";
 
   // Formatting the date to YYYY-MM-DD format for the HTML native date input
-  const defaultDateString = date
-    ? new Date(date).toISOString().split("T")[0]
-    : new Date().toISOString().split("T")[0];
+  const defaultDateString = date ? dateToStringUTC(date) : dateToStringUTC(new Date());
 
   // Safely extract paths array for clean server-side JSX rendering
   const existingImagePaths: string[] = entry?.imagePaths || [];
@@ -125,7 +123,7 @@ export function EntryEditor({ user, date, entry }: EntryEditorProps) {
               {isEditMode ? "Save Changes" : "Publish Entry"}
             </md-filled-button>
 
-            <md-outlined-button type="button" href={`/#${dateToString(date)}`}>
+            <md-outlined-button type="button" href={`/#${dateToStringUTC(date).slice(5)}`}>
               Cancel
             </md-outlined-button>
 
