@@ -10,6 +10,12 @@ import { ErrorPage } from "./pages/ErrorPage";
 const app = new Hono();
 
 // Serve static assets + uploaded files under /static/* → ./public/*
+app.use("/static/*", async (c, next) => {
+  // Uploads are re-encoded server-side before storage (see src/backend/imageProcessing.ts),
+  // but locking the declared MIME as authoritative is cheap extra defense-in-depth.
+  c.header("X-Content-Type-Options", "nosniff");
+  await next();
+});
 app.use(
   '/static/*',
   serveStatic({
