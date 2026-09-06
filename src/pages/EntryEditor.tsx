@@ -1,6 +1,8 @@
 import { BaseLayout } from "../layouts/BaseLayout"; // Adjust import path as needed
 import type { User, JournalEntry } from "../db/schema"; // Adjust import path as needed
 import { dateToStringUTC } from "../backend/entry";
+import { getUserTotalFilesSize } from "../db/queries/uploads";
+import { Bar } from "../components/Bar";
 
 interface EntryEditorProps {
   user: User;
@@ -9,7 +11,7 @@ interface EntryEditorProps {
   entry?: JournalEntry;
 }
 
-export function EntryEditor({ user, date, entry }: EntryEditorProps) {
+export async function EntryEditor({ user, date, entry }: EntryEditorProps) {
   const isEditMode = Boolean(entry?.id);
   const pageTitle = isEditMode ? "Edit Entry - Slice of Life" : "New Entry - Slice of Life";
 
@@ -18,6 +20,12 @@ export function EntryEditor({ user, date, entry }: EntryEditorProps) {
 
   // Safely extract paths array for clean server-side JSX rendering
   const existingImagePaths: string[] = entry?.imagePaths || [];
+
+  // Storage usage shown while writing, so the user knows their current usage
+  const userFileSizeTaken = (await getUserTotalFilesSize(user.id)) / (1024 * 1024); // In MiB
+  const userFileSizeLimit = user.fileUploadLimit || 10; // In MiB (default 10 for Free plan)
+  const usageRatio = userFileSizeTaken / userFileSizeLimit;
+  const usagePercentage = Math.round(usageRatio * 100);
 
   return (
     <BaseLayout
@@ -33,6 +41,29 @@ export function EntryEditor({ user, date, entry }: EntryEditorProps) {
             {isEditMode ? "Modify your thoughts or update your pictures" : "Capture what happened today"}
           </p>
         </header>
+
+        {/* Storage usage */}
+        <div
+          class="editor-storage-usage"
+          role="group"
+          aria-label="Storage usage"
+          data-file-size-taken={userFileSizeTaken}
+          data-file-size-limit={userFileSizeLimit}
+        >
+          <div class="editor-storage-usage__header">
+            <span class="editor-storage-usage__label">Storage</span>
+            <span class="editor-storage-usage__percentage">{usagePercentage}% used</span>
+          </div>
+          <Bar value={usageRatio} label="Storage used" />
+          <div class="editor-storage-usage__footer">
+            <span class="editor-storage-usage__stats">
+              <strong>{userFileSizeTaken.toFixed(2)} MiB</strong> of {userFileSizeLimit} MiB
+            </span>
+            <span class="editor-storage-usage__remaining">
+              {(userFileSizeLimit - userFileSizeTaken).toFixed(2)} MiB remaining
+            </span>
+          </div>
+        </div>
 
         <form
           id="entryForm"

@@ -21,6 +21,59 @@
   }
 }
 
+// Storage usage block shown while writing an entry
+.editor-storage-usage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: var(--md-sys-color-surface-container-highest);
+  padding: 16px 20px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  &__percentage {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--md-sys-color-primary);
+  }
+
+  .m3-progress-bar {
+    background-color: var(--md-sys-color-surface-container-low);
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+
+    &__stats {
+      color: var(--md-sys-color-on-surface-variant);
+      strong {
+        color: var(--md-sys-color-primary);
+        font-weight: 700;
+      }
+    }
+
+    &__remaining {
+      color: var(--md-sys-color-on-surface-variant);
+      opacity: 0.8;
+    }
+  }
+}
+
 .editor-form {
   display: flex;
   flex-direction: column;
