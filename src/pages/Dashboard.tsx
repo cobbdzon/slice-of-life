@@ -16,6 +16,9 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
   requestedYear = requestedYear || new Date().getFullYear();
 
   const currentDate = new Date();
+  const isCurrentMonthRendered =
+    requestedYear === currentDate.getFullYear() &&
+    (requestedMonth === undefined || requestedMonth === currentDate.getMonth());
 
   const monthNames = getMonthNames();
   const monthGroups: MonthGroup[] = [];
@@ -105,22 +108,14 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
       );
     });
 
-    const visibleEntries = monthGroup.journalEntries.filter((journalEntry) => {
-      return journalEntry !== null && journalEntry !== undefined;
-    })
-
-    if (requestedMonth !== undefined) {
-      if (monthIndex !== requestedMonth) {
-        return;
-      }
-    } else {
-      if (visibleEntries.length === 0 && (monthIndex !== currentDate.getMonth() || requestedYear !== currentDate.getFullYear())) {
-        return;
-      }
+    if (requestedMonth !== undefined && monthIndex !== requestedMonth) {
+      return;
     }
 
+    const isCurrentMonth = monthIndex === currentDate.getMonth() && requestedYear === currentDate.getFullYear();
+
     return (
-      <section class="month-section">
+      <section class={`month-section${isCurrentMonth ? " month-section--current" : ""}`}>
         <h2 class="section-title">
           {monthGroup.monthName} <span class="section-year">{monthGroup.year}</span>
         </h2>
@@ -139,7 +134,9 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
         <span class="material-symbols-outlined">add</span>
       </a>
 
-      {monthGroupElements}
+      <div class={`dashboard-wrapper${isCurrentMonthRendered ? " has-current" : ""}`}>
+        {monthGroupElements}
+      </div>
 
     </BaseLayout >
   )

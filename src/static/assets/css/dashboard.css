@@ -7,6 +7,20 @@
 
 .month-section {
   margin-bottom: 40px;
+  transition: filter 0.3s ease;
+}
+
+.dashboard-wrapper.has-current .month-section:not(.month-section--current) {
+  filter: brightness(calc(1 - 0.45 * var(--dim, 1)));
+  transition: filter 0.15s linear;
+}
+
+.month-section--current .section-title {
+  color: var(--md-sys-color-primary, #6750a4);
+}
+.month-section--current .section-year {
+  color: var(--md-sys-color-primary, #6750a4);
+  opacity: 0.8;
 }
 
 .section-title {
@@ -30,6 +44,16 @@
   gap: 12px;
 }
 
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 .entry-card {
   position: relative;
   width: 100%;
@@ -43,6 +67,11 @@
   box-sizing: border-box;
   background-color: var(--md-sys-color-surface-container-high, #ece6f0);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .entry-card {
+    animation: none;
+  }
 }
 .entry-card:hover {
   transform: scale(1.03);
@@ -170,6 +199,30 @@
   border-color: var(--md-sys-color-primary, #6750a4);
 }
 
+/* Entrance animation: cards stay hidden until JS observes them entering the viewport. */
+html.js .entry-card {
+  opacity: 0;
+}
+
+.entry-card.card-enter-anim {
+  animation: card-enter 0.25s ease-out both;
+  animation-delay: var(--d, 0ms);
+}
+
+.entry-card.card-entered {
+  opacity: 1;
+}
+
+html.js .entry-card.card-entered {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js .entry-card {
+    opacity: 1;
+    animation: none;
+  }
+}
 /* Structural top & bottom overlay bars */
 .entry-top-bar {
   position: relative;
