@@ -247,8 +247,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         if (response.ok) {
-          const dateObj = new Date(payload.date);
-          window.location.href = `/entry/${dateObj.getFullYear()}/${dateObj.getMonth() + 1}/${dateObj.getDate()}`;
+          const [year, month, day] = payload.date.split("-").map(Number);
+          window.location.href = `/entry/${year}/${month}/${day}`;
         } else {
           const errorData = await response.json().catch(() => ({}));
           if (errorData.error === "MISSING_IMAGES") {
