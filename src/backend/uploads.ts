@@ -93,7 +93,8 @@ export async function startGarbageCollectionLoop() {
 
       // assets with no parent entry, that is not stale
       const assetsOrphaned = (await getOrphanedJournalAssets()).filter(asset => {
-        const isStale = Date.now() - new Date(asset.createdAt as string).getTime() > STALE_THRESHOLD_MS;
+        const createdAtMs = asset.createdAt ? new Date(asset.createdAt).getTime() : NaN;
+        const isStale = !Number.isFinite(createdAtMs) || (Date.now() - createdAtMs > STALE_THRESHOLD_MS);
         return isStale;
       });
       // console.log("Does not belong to any entry: ", assetsOrphaned.map(asset => asset.originalName));
