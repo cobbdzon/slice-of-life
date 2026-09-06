@@ -7,7 +7,7 @@ A personal journal with media attachments for each entry, built over a week-long
 - [Bun](https://bun.sh) — runtime
 - [Hono](https://hono.dev) — server and routing, with server-side JSX templates
 - [Drizzle ORM](https://orm.drizzle.team) + libSQL — SQLite database at `journal.db`
-- [Sass](https://sass-lang.com) — compiled to `src/static/assets/css`
+- [Sass](https://sass-lang.com) — compiled to `public/assets/css`
 - JWT — short-lived cookie-based auth
 
 ## Development setup
@@ -50,7 +50,7 @@ The app serves on `http://localhost:3000`.
 Compile the SCSS once (without the watch flag):
 
 ```bash
-bunx sass src/styles:src/static/assets/css
+bunx sass src/styles:public/assets/css
 ```
 
 Then start the server:
