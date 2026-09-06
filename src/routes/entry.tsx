@@ -10,9 +10,9 @@ import { DashboardPage } from '../pages/Dashboard';
 import { EntryPage } from "../pages/Entry";
 import { EntryEditor } from "../pages/EntryEditor";
 import { entryPayloadValidator } from "../schemas/entryPayload";
-import { deleteJournalEntry, getJournalEntries, getJournalEntriesFromDate, getJournalEntryFromEntryId, insertJournalEntry, updateJournalEntry } from "../db/queries/entry";
+import { deleteJournalEntryWithAssets, getJournalEntries, getJournalEntriesFromDate, getJournalEntryFromEntryId, insertJournalEntry, updateJournalEntryWithRemovedAssets } from "../db/queries/entry";
 import { randomUUID } from "crypto";
-import { deleteJournalAssets, getJournalAssetsFromImagePaths } from "../db/queries/uploads";
+import { deleteFilesFromDisk, getJournalAssetsFromImagePaths } from "../db/queries/uploads";
 
 const app = new Hono();
 
@@ -186,15 +186,16 @@ app.put("/api/entry/:entryId", entryPayloadValidator, async (c) => {
   const newImagePathsSet = new Set(imagePaths);
   const removedImagePaths = existingEntry.imagePaths.filter(imageEntry => !newImagePathsSet.has(imageEntry));
   const assetsToRemove = await getJournalAssetsFromImagePaths(removedImagePaths);
-  await deleteJournalAssets(assetsToRemove, true);
 
-  await updateJournalEntry(user.id, {
+  await updateJournalEntryWithRemovedAssets(user.id, {
     id: existingEntry.id,
     title: title,
     note: note,
     imagePaths: imagePaths,
     date: new Date(date)
-  })
+  }, assetsToRemove.map(asset => asset.id));
+
+  await deleteFilesFromDisk(assetsToRemove);
 
   return c.json({ success: true });
 })
@@ -216,12 +217,10 @@ app.delete("/api/entry/:entryId", async (c) => {
     return c.redirect("/?error=FORBIDDEN_ENTRY_NOT_OWNED");
   }
 
-  await getJournalAssetsFromImagePaths(existingEntry.imagePaths).then(async (imagePaths) => {
-    await deleteJournalAssets(imagePaths, true);
-  })
-  await deleteJournalEntry(user.id, existingEntry.id);
+  const assetsToDelete = await getJournalAssetsFromImagePaths(existingEntry.imagePaths);
+  await deleteJournalEntryWithAssets(user.id, existingEntry.id, assetsToDelete.map(asset => asset.id));
+  await deleteFilesFromDisk(assetsToDelete);
 
-  // const [year, month] = dateToString(existingEntry.date).split('-').map(Number);
   return c.json({ success: true });
 })
 

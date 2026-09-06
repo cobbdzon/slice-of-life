@@ -1,6 +1,6 @@
 import { db } from "../db";
 import { and, eq, inArray, like } from "drizzle-orm";
-import { journalEntries, type DBJournalEntry, type JournalEntry } from "../schema";
+import { journalAssets, journalEntries, type DBJournalEntry, type JournalEntry } from "../schema";
 
 export async function insertJournalEntry(userId: number, journalEntry: JournalEntry) {
   const newRow: DBJournalEntry = {
@@ -107,6 +107,37 @@ export async function updateJournalEntry(userId: number, entry: JournalEntry) {
     );
 }
 
+// Atomically remove assets and update the entry. Rolls back both if the update fails,
+// so removed assets are never lost while the old entry still references them.
+export async function updateJournalEntryWithRemovedAssets(
+  userId: number,
+  entry: JournalEntry,
+  removedAssetIds: string[]
+) {
+  return await db.transaction(async (tx) => {
+    await tx
+      .update(journalEntries)
+      .set({
+        title: entry.title,
+        note: entry.note,
+        date: entry.date.toISOString(),
+        imagePaths: entry.imagePaths,
+      })
+      .where(
+        and(
+          eq(journalEntries.id, entry.id),
+          eq(journalEntries.userId, userId)
+        )
+      );
+
+    if (removedAssetIds.length > 0) {
+      await tx
+        .delete(journalAssets)
+        .where(inArray(journalAssets.id, removedAssetIds));
+    }
+  });
+}
+
 export async function updateMultipleJournalEntries(userId: number, entries: JournalEntry[]) {
   // db.transaction opens a single transaction pipeline
   return await db.transaction(async (tx) => {
@@ -138,6 +169,27 @@ export async function deleteJournalEntry(userId: number, entryId: string) {
         eq(journalEntries.userId, userId)
       )
     );
+}
+
+// Atomically delete the entry and its assets. Rolls back both if the entry delete
+// fails, so the entry never references assets that no longer exist.
+export async function deleteJournalEntryWithAssets(userId: number, entryId: string, assetIds: string[]) {
+  return await db.transaction(async (tx) => {
+    if (assetIds.length > 0) {
+      await tx
+        .delete(journalAssets)
+        .where(inArray(journalAssets.id, assetIds));
+    }
+
+    await tx
+      .delete(journalEntries)
+      .where(
+        and(
+          eq(journalEntries.id, entryId),
+          eq(journalEntries.userId, userId)
+        )
+      );
+  });
 }
 
 export async function deleteMultipleJournalEntries(userId: number, entryIds: string[]) {
