@@ -80,7 +80,7 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
 
       // actual entry box
       return (
-        <a href={`/entry/${requestedYear}/${monthIndex + 1}/${dayIndex + 1}`} id={elementId} class="entry-card real-entry no-link-style" title={journalEntry.title}>
+        <a href={`/entry/${requestedYear}/${monthIndex + 1}/${dayIndex + 1}`} id={elementId} class={`entry-card real-entry no-link-style${isCurrentDate ? " current-entry" : ""}`} title={journalEntry.title}>
           {
             hasImage ? (
               <img

@@ -230,6 +230,26 @@
   }
 }
 
+// Current-day card: soft pulsing halo around the primary ring, lifted above
+// neighboring cards so the glow isn't painted over. Skipped for reduced motion.
+.entry-card.current-entry {
+  z-index: 2;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: entry-glow 3s ease-in-out infinite;
+  }
+}
+
+@keyframes entry-glow {
+  0%,
+  100% {
+    box-shadow: 0px 0px 8px rgba(103, 80, 164, 0.35);
+  }
+  50% {
+    box-shadow: 0px 0px 18px rgba(103, 80, 164, 0.6);
+  }
+}
+
 /* Entrance animation: cards stay hidden until JS observes them entering the viewport. */
 html.js .entry-card {
   opacity: 0;
