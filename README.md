@@ -1,12 +1,15 @@
 # Slice of Life
 
-A personal journal with media attachments for each entry, built over a week-long hackathon with friends. One diary, one entry per day, optional images/videos.
+A personal journal with media attachments for each entry,
+built over a week-long hackathon with friends.
+One diary, one entry per day, optional images/videos.
 
 ## Stack
 
 - [Bun](https://bun.sh) — runtime
-- [Hono](https://hono.dev) — server and routing, with server-side JSX templates
-- [Drizzle ORM](https://orm.drizzle.team) + libSQL — SQLite database at `journal.db`
+- [Hono](https://hono.dev) — server and routing with server-side JSX templates
+- [Drizzle ORM](https://orm.drizzle.team) + libSQL
+  — SQLite database at `journal.db`
 - [Sass](https://sass-lang.com) — compiled to `public/assets/css`
 - JWT — short-lived cookie-based auth
 
@@ -18,17 +21,18 @@ Requires Bun ≥ 1.
 bun install
 ```
 
-Set up the environment. Copy the shape of `.env` — all values are required at startup:
+Set up the environment. Copy the shape of `.env` —
+all values are required at startup:
 
-| Variable                    | Example                 | Description                          |
-| --------------------------- | ----------------------- | ------------------------------------ |
-| `JWT_SECRET`                | `changeme`              | Secret for signing session cookies   |
-| `NODE_ENV`                  | `development`           | `development` or `production`        |
-| `UPLOAD_DIR`                | `./public/uploads/`     | Disk directory for uploaded files, trailing slash |
-| `UPLOAD_URL_PREFIX`         | `/static/uploads/`      | URL prefix that serves uploaded files, trailing slash |
-| `MAX_UPLOAD_FILE_SIZE`      | `5`                     | Max upload size in MB                |
-| `UPLOAD_FILE_STALE_THRESHOLD` | `30`                  | Minutes before an orphaned upload is eligible for cleanup |
-| `GARBAGE_COLLECT_INTERVAL`  | `60`                    | Minutes between upload cleanup runs  |
+| Variable | Example | Description |
+| --- | --- | --- |
+| `JWT_SECRET` | `changeme` | Session cookie secret |
+| `NODE_ENV` | `development` | `development`/`production` |
+| `UPLOAD_DIR` | `./public/uploads/` | Uploads dir, trailing `/` |
+| `UPLOAD_URL_PREFIX` | `/static/uploads/` | URL prefix, trailing `/` |
+| `MAX_UPLOAD_FILE_SIZE` | `5` | Max upload size, MB |
+| `UPLOAD_FILE_STALE_THRESHOLD` | `30` | Stale upload age, min |
+| `GARBAGE_COLLECT_INTERVAL` | `60` | Cleanup interval, min |
 
 Create the database schema:
 
@@ -62,6 +66,10 @@ NODE_ENV=production bun run start
 Notes:
 
 - `public/uploads/` must exist and be writable by the app user.
-- Wire the app behind a reverse proxy (e.g. Caddy/Nginx) if you want TLS or a domain.
-- There is no static asset bundling — `src/` is served directly alongside the generated CSS.
-- `journal.db` is checked in by default; add it to `.gitignore` (and drop the committed copy) if you don't want the dev database in the repo.
+- Wire the app behind a reverse proxy (e.g. Caddy/Nginx)
+  if you want TLS or a domain.
+- There is no static asset bundling — `src/` is served directly
+  alongside the generated CSS.
+- `journal.db` is checked in by default; add it to `.gitignore`
+  (and drop the committed copy) if you don't want the dev database
+  in the repo.
