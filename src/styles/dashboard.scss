@@ -250,8 +250,9 @@
   }
 }
 
-/* Entrance animation: cards stay hidden until JS observes them entering the viewport. */
-html.js .entry-card {
+/* Entrance animation: the page-load target month's cards stay hidden until JS
+   runs its one-time staggered batch; all other months are instantly visible. */
+html.js .month-section.animating .entry-card:not(.card-entered) {
   opacity: 0;
 }
 
@@ -269,7 +270,8 @@ html.js .entry-card.card-entered {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.js .entry-card {
+  html.js .month-section.animating .entry-card:not(.card-entered),
+  html.js .entry-card.card-enter-anim {
     opacity: 1;
     animation: none;
   }

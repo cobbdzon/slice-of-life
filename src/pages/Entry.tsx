@@ -33,7 +33,7 @@ export async function EntryPage({ user, dateString, journalEntry, showFileSize =
   const showControls = totalImages > 1;
 
   // TODO: client side async?
-  var fileSizeText = ""
+  let fileSizeText = ""
   if (showFileSize && journalEntry.imagePaths.length > 0) {
     const entryFileSize = (await getFileSizeOfImagePaths(journalEntry.imagePaths)) / (1024 * 1024);
     fileSizeText = `${entryFileSize.toFixed(2)} MiB`
