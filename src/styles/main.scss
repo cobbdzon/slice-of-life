@@ -159,6 +159,12 @@ body.m3-surface {
     }
   }
 
+  .m3-logout-button {
+    @media (max-width: 640px) {
+      display: none;
+    }
+  }
+
   .icon-btn {
     cursor: pointer;
     user-select: none;
