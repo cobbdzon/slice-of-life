@@ -1,0 +1,14 @@
+node_modules
+.git
+.gitignore
+.env
+*.db
+*.sqlite
+public/uploads/*
+!public/uploads/.gitkeep
+public/assets/css/*.css
+public/assets/css/*.css.map
+Dockerfile
+docker-compose*.yml
+README.md
+ISSUES.md

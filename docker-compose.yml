@@ -1,0 +1,32 @@
+services:
+  app:
+    build: .
+    image: slice-of-life:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      UPLOAD_DIR: /app/public/uploads/
+      UPLOAD_URL_PREFIX: /static/uploads/
+      MAX_UPLOAD_FILE_SIZE: ${MAX_UPLOAD_FILE_SIZE:-5}
+      UPLOAD_FILE_STALE_THRESHOLD: ${UPLOAD_FILE_STALE_THRESHOLD:-30}
+      GARBAGE_COLLECT_INTERVAL: ${GARBAGE_COLLECT_INTERVAL:-60}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DATABASE_URL: file:/data/journal.db
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - uploads:/app/public/uploads
+      - db:/data
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  uploads:
+  db:

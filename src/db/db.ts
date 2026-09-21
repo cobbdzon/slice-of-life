@@ -3,7 +3,7 @@ import { createClient } from '@libsql/client';
 import * as schema from './schema';
 
 const client = createClient({
-  url: 'file:journal.db'
+  url: process.env.DATABASE_URL ?? 'file:journal.db'
 });
 
 export const db = drizzle(client, { schema });
