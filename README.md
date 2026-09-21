@@ -95,6 +95,17 @@ The app binds to `127.0.0.1:3000` on the host, ready to sit behind the
 | `uploads` | `/app/public/uploads` | Uploaded media |
 | `db` | `/data` | SQLite database (`journal.db`) |
 
+The container runs as the unprivileged `bun` user; both mount points are created
+and chowned in the image so the named volumes inherit the right ownership. If a
+volume was created by an older image and the app fails with
+`ConnectionFailed("Unable to open connection to local database ...")`, remove
+and recreate it (`docker compose down -v` deletes the volumes' data):
+
+```bash
+docker compose down -v
+docker compose up -d --build
+```
+
 On first start the entrypoint creates the schema with `drizzle-kit push`.
 After changing `src/db/schema.ts`, apply it to a running stack:
 
