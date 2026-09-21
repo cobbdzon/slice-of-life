@@ -17,7 +17,7 @@ services:
       TEST_ACCOUNT_TTL_MINUTES: ${TEST_ACCOUNT_TTL_MINUTES:-30}
       DATABASE_URL: file:/data/journal.db
     ports:
-      - "127.0.0.1:3000:3000"
+      - "3000:3000"
     volumes:
       - uploads:/app/public/uploads
       - db:/data
