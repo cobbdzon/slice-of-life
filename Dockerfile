@@ -15,7 +15,9 @@ ENV NODE_ENV=production \
     UPLOAD_DIR=/app/public/uploads/ \
     UPLOAD_URL_PREFIX=/static/uploads/
 COPY --from=build --chown=bun:bun /app /app
-RUN mkdir -p /app/public/uploads && chown -R bun:bun /app/public/uploads
+# /data must exist and be owned by bun so the named volume is initialized with
+# the right ownership; otherwise it is root-owned and SQLite can't open it.
+RUN mkdir -p /app/public/uploads /data && chown -R bun:bun /app/public/uploads /data
 USER bun
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
