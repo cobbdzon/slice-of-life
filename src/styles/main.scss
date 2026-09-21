@@ -130,6 +130,35 @@ body.m3-surface {
     }
   }
 
+  .m3-test-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    background-color: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface-variant);
+    transition: background-color 0.3s ease, color 0.3s ease;
+
+    &__icon {
+      font-size: 18px;
+    }
+
+    &.is-warning {
+      background-color: #ffd54f;
+      color: #4a3200;
+    }
+
+    &.is-critical {
+      background-color: var(--md-sys-color-error-container, #f9dedc);
+      color: var(--md-sys-color-on-error-container, #410e0b);
+    }
+  }
+
   .icon-btn {
     cursor: pointer;
     user-select: none;

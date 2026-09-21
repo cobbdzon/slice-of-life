@@ -128,8 +128,8 @@ Every account registered while the flag is on becomes a **temporary account**:
 - Its expiry is stamped at registration using `TEST_ACCOUNT_TTL_MINUTES`
   (default 30). Accounts created before the flag was enabled have no expiry and
   are unaffected.
-- The profile page shows a live countdown, and the login/register pages display
-  a "temporary account" notice.
+- A countdown pill is shown in the top bar, turning yellow then red as time
+  runs out. The login/register pages display a "temporary account" notice.
 - Once the timer elapses the account is logged out and **deleted** — the user,
   its journal entries, its asset rows, and the actual uploaded files on disk.
   The username becomes available again.

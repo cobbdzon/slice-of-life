@@ -3,19 +3,23 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!root) return;
 
   const expiresAt = Number(root.dataset.expiresAt);
+  const totalMs = Number(root.dataset.totalMs);
   const output = root.querySelector("[data-countdown]");
   if (!Number.isFinite(expiresAt) || !output) return;
 
-  const pad = (n) => String(n).padStart(2, "0");
-
   const format = (ms) => {
-    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return hours > 0
-      ? `${hours}h ${pad(minutes)}m ${pad(seconds)}s`
-      : `${minutes}m ${pad(seconds)}s`;
+    if (ms <= 0) return "0s";
+    const hours = Math.floor(ms / 3_600_000);
+    if (hours >= 1) return `${hours}h`;
+    const minutes = Math.floor(ms / 60_000);
+    if (minutes >= 1) return `${minutes}m`;
+    return `${Math.ceil(ms / 1000)}s`;
+  };
+
+  const severity = (ratio) => {
+    if (ratio <= 0.2) return "is-critical";
+    if (ratio <= 0.5) return "is-warning";
+    return "";
   };
 
   const tick = () => {
@@ -25,7 +29,12 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "/logout";
       return;
     }
+
     output.textContent = format(remaining);
+
+    root.classList.remove("is-warning", "is-critical");
+    const cls = severity(totalMs > 0 ? remaining / totalMs : 1);
+    if (cls) root.classList.add(cls);
   };
 
   tick();

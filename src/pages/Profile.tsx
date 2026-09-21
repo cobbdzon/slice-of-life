@@ -7,17 +7,6 @@ export type ProfilePageProps = {
   user: User;
 }
 
-function formatRemaining(ms: number): string {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return hours > 0
-    ? `${hours}h ${pad(minutes)}m ${pad(seconds)}s`
-    : `${minutes}m ${pad(seconds)}s`;
-}
-
 export async function ProfilePage({ user }: ProfilePageProps) {
   const userRole = "Free"
   const userAvatarUrl = `https://api.dicebear.com/10.x/glyphs/svg?seed=${encodeURIComponent(user.username)}`;
@@ -30,17 +19,8 @@ export async function ProfilePage({ user }: ProfilePageProps) {
   const usageRatio = userFileSizeTaken / userFileSizeLimit;
   const usagePercentage = Math.round(usageRatio * 100);
 
-  const testExpiresAt = user.testExpiresAt ?? null;
-  const testRemainingText = testExpiresAt
-    ? formatRemaining(testExpiresAt - Date.now())
-    : null;
-
   return (
-    <BaseLayout
-      user={user}
-      stylesheets={["/static/assets/css/profile.css"]}
-      scripts={testExpiresAt ? ["/static/assets/js/test-account-timer.js"] : []}
-    >
+    <BaseLayout user={user} stylesheets={["/static/assets/css/profile.css"]}>
       <div class="profile-container">
         <div class="m3-user-card">
           {/* Header Section */}
@@ -62,16 +42,6 @@ export async function ProfilePage({ user }: ProfilePageProps) {
           </div>
 
           <hr class="m3-divider" />
-
-          {testExpiresAt && (
-            <div class="m3-test-banner" data-expires-at={String(testExpiresAt)}>
-              <span class="material-symbols-outlined m3-test-banner__icon">timer</span>
-              <span class="m3-test-banner__text">
-                Test account — all data is deleted in{" "}
-                <strong data-countdown>{testRemainingText}</strong>
-              </span>
-            </div>
-          )}
 
           {/* Storage Details Section */}
           <div class="m3-user-card__storage">
