@@ -75,6 +75,48 @@ Notes:
   (and drop the committed copy) if you don't want the dev database
   in the repo.
 
+## Docker
+
+The compose file reads `JWT_SECRET` and the upload settings from your shell
+environment or the repo `.env`. Set a strong secret before starting:
+
+```bash
+JWT_SECRET=$(openssl rand -hex 32)   # put this in .env
+docker compose up -d --build
+```
+
+The app binds to `127.0.0.1:3000` on the host, ready to sit behind the
+[Nginx reverse proxy](#nginx-reverse-proxy). Two named volumes persist state:
+
+| Volume | Mount | Contents |
+| --- | --- | --- |
+| `uploads` | `/app/public/uploads` | Uploaded media |
+| `db` | `/data` | SQLite database (`journal.db`) |
+
+On first start the entrypoint creates the schema with `drizzle-kit push`.
+After changing `src/db/schema.ts`, apply it to a running stack:
+
+```bash
+docker compose run --rm app bun run push
+```
+
+Overridable env vars: `DATABASE_URL` (default `file:/data/journal.db`),
+`PORT` (3000), `UPLOAD_DIR`, `UPLOAD_URL_PREFIX`, `MAX_UPLOAD_FILE_SIZE`,
+`UPLOAD_FILE_STALE_THRESHOLD`, `GARBAGE_COLLECT_INTERVAL`, `LOG_LEVEL`.
+Keep `MAX_UPLOAD_FILE_SIZE` below the reverse proxy's
+`client_max_body_size` (`8m` in the sample config).
+
+Without Compose:
+
+```bash
+docker build -t slice-of-life .
+docker run -d --name slice-of-life -p 127.0.0.1:3000:3000 \
+  -e JWT_SECRET=... \
+  -v slice-of-life-uploads:/app/public/uploads \
+  -v slice-of-life-db:/data \
+  slice-of-life
+```
+
 ## Nginx reverse proxy
 
 The app speaks plain HTTP and expects TLS to be terminated in front of it.
