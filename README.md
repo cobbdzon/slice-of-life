@@ -1,7 +1,7 @@
 # Slice of Life
 
 A personal journal with media attachments for each entry,
-built over a week-long hackathon with friends.
+was originally built over a week-long hackathon with friends.
 One diary, one entry per day, optional images/videos.
 
 ## Stack
