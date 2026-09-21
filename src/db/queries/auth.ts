@@ -6,6 +6,7 @@ import { LibsqlError } from "@libsql/client";
 import type { Context } from "hono";
 import { users, type User } from "../schema";
 import { logger } from "../../backend/logger";
+import { env } from "../../backend/env";
 
 export type UserQueryResult = {
   success: boolean;
@@ -22,7 +23,10 @@ export async function insertUser(username: string, password: string): Promise<In
   try {
     return await db.insert(users).values({
       username: username,
-      passwordHash: passwordHash
+      passwordHash: passwordHash,
+      testExpiresAt: env.TEST_INSTANCE
+        ? Date.now() + env.TEST_ACCOUNT_TTL_MINUTES * 60_000
+        : null,
     }).returning({
       id: users.id
     }).then((insertedIds) => {

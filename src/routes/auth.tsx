@@ -1,7 +1,8 @@
 // routes/auth.ts
 
 import { Hono } from "hono";
-import { getUserFromUsername, insertUser } from "../db/queries/auth";
+import { getUserFromContext, getUserFromUsername, insertUser } from "../db/queries/auth";
+import { isUserExpired, purgeUser } from "../backend/purge";
 import { authValidator } from "../schemas/auth";
 import { generateToken, setToken, deleteToken } from "../backend/cookies";
 import { logger } from "../backend/logger";
@@ -73,6 +74,13 @@ app.post("/register", authValidator, async (c) => {
 })
 
 app.get("/logout", async (c) => {
+  const user = await getUserFromContext(c);
+  if (user && isUserExpired(user)) {
+    await purgeUser(user.id).catch((error) => {
+      logger.error(`failed to purge expired test account: ${(error as Error).message}`);
+    });
+  }
+
   deleteToken(c);
   return c.redirect("/login");
 })

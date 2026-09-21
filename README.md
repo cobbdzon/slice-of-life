@@ -33,6 +33,8 @@ all values are required at startup:
 | `MAX_UPLOAD_FILE_SIZE` | `5` | Max upload size, MB |
 | `UPLOAD_FILE_STALE_THRESHOLD` | `30` | Stale upload age, min |
 | `GARBAGE_COLLECT_INTERVAL` | `60` | Cleanup interval, min |
+| `TEST_INSTANCE` | `false` | Run as a disposable test instance |
+| `TEST_ACCOUNT_TTL_MINUTES` | `30` | Lifetime of test accounts, min |
 
 Create the database schema:
 
@@ -102,7 +104,8 @@ docker compose run --rm app bun run push
 
 Overridable env vars: `DATABASE_URL` (default `file:/data/journal.db`),
 `PORT` (3000), `UPLOAD_DIR`, `UPLOAD_URL_PREFIX`, `MAX_UPLOAD_FILE_SIZE`,
-`UPLOAD_FILE_STALE_THRESHOLD`, `GARBAGE_COLLECT_INTERVAL`, `LOG_LEVEL`.
+`UPLOAD_FILE_STALE_THRESHOLD`, `GARBAGE_COLLECT_INTERVAL`, `LOG_LEVEL`,
+`TEST_INSTANCE`, `TEST_ACCOUNT_TTL_MINUTES`.
 Keep `MAX_UPLOAD_FILE_SIZE` below the reverse proxy's
 `client_max_body_size` (`8m` in the sample config).
 
@@ -115,6 +118,32 @@ docker run -d --name slice-of-life -p 127.0.0.1:3000:3000 \
   -v slice-of-life-uploads:/app/public/uploads \
   -v slice-of-life-db:/data \
   slice-of-life
+```
+
+## Test instances
+
+Set `TEST_INSTANCE=true` to run the app as a disposable test/demo instance.
+Every account registered while the flag is on becomes a **temporary account**:
+
+- Its expiry is stamped at registration using `TEST_ACCOUNT_TTL_MINUTES`
+  (default 30). Accounts created before the flag was enabled have no expiry and
+  are unaffected.
+- The profile page shows a live countdown, and the login/register pages display
+  a "temporary account" notice.
+- Once the timer elapses the account is logged out and **deleted** — the user,
+  its journal entries, its asset rows, and the actual uploaded files on disk.
+  The username becomes available again.
+
+Expiry is enforced three ways: on the next authenticated request
+(`validateTokenFromContext`), immediately on `/logout`, and by a background
+sweep that runs every 60 seconds even with no traffic.
+
+This adds a column to `users`, so apply the schema before enabling it:
+
+```bash
+bun run push
+# or, on an existing Docker volume:
+docker compose run --rm app bun run push
 ```
 
 ## Nginx reverse proxy

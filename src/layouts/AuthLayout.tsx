@@ -15,6 +15,8 @@ export interface AuthLayoutProps {
   cardImage?: string;
 
   errorCode?: string;
+
+  notice?: string;
 }
 
 // error codes -> friendly messages (unknown codes fall back to raw value)
@@ -55,6 +57,13 @@ export function AuthLayout(props: AuthLayoutProps) {
             <div class="m3-error-banner" style="color: var(--md-sys-color-error, #ba1a1a); margin-bottom: 20px; font-weight: 500;">
               <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px;">error</span>
               <span style="vertical-align: middle;">{errorMessage}</span>
+            </div>
+          )}
+
+          {props.notice && (
+            <div class="m3-notice-banner">
+              <span class="material-symbols-outlined m3-notice-banner__icon">timer</span>
+              <span>{props.notice}</span>
             </div>
           )}
 
