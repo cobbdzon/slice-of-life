@@ -19,6 +19,7 @@ export const users = sqliteTable("users", {
   passwordHash: text("password_hash").notNull(),
   fileUploadLimit: integer("file_upload_limit").default(0).notNull(),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+  testExpiresAt: integer("test_expires_at"),
 });
 
 export const journalEntries = sqliteTable("entries", {

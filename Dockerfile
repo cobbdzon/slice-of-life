@@ -3,14 +3,12 @@
 FROM oven/bun:1-slim AS base
 WORKDIR /app
 
-# --- dependencies + asset build -------------------------------------------
 FROM base AS build
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY . .
 RUN bunx sass src/styles:public/assets/css
 
-# --- runtime ---------------------------------------------------------------
 FROM base AS runtime
 ENV NODE_ENV=production \
     PORT=3000 \

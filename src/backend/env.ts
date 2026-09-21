@@ -12,6 +12,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string(),
   NODE_ENV: z.optional(z.string()),
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+
+  TEST_INSTANCE: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
+  TEST_ACCOUNT_TTL_MINUTES: z.coerce.number().int().min(1).default(30),
 })
 
 const parseEnv = envSchema.parse(process.env)

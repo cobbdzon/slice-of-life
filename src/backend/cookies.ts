@@ -6,6 +6,7 @@ import { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { getUser } from "../db/queries/auth.ts";
 import { logger } from "./logger";
+import { isUserExpired, purgeUser } from "./purge";
 
 const JWT_SECRET = env.JWT_SECRET;
 const SIG_ALGORITHM: SignatureAlgorithm = "HS256"
@@ -82,6 +83,15 @@ export async function validateTokenFromContext(c: Context) {
   const user = await getUser(userId);
   if (!user) {
     logger.debug("no user for token payload")
+    deleteToken(c);
+    return false;
+  }
+
+  if (isUserExpired(user)) {
+    logger.info(`test account expired, purging user ${user.id}`);
+    await purgeUser(user.id).catch((error) => {
+      logger.error(`failed to purge expired test account: ${(error as Error).message}`);
+    });
     deleteToken(c);
     return false;
   }

@@ -6,6 +6,7 @@ import profileRoutes from "./routes/profile.tsx";
 import uploadsApi, { startGarbageCollectionLoop } from "./backend/uploads.ts"
 import { logger } from "./backend/logger";
 import { ErrorPage } from "./pages/ErrorPage";
+import { startTestAccountSweep } from "./backend/purge";
 
 const app = new Hono();
 
@@ -31,6 +32,7 @@ app.route("/api", uploadsApi);
 app.route("/", entryRoutes);
 
 startGarbageCollectionLoop();
+startTestAccountSweep();
 
 const isApiRequest = (path: string) => path.startsWith("/api");
 

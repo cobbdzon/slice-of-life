@@ -1,4 +1,5 @@
 import { AuthLayout } from '../layouts/AuthLayout';
+import { env } from '../backend/env';
 
 interface LoginPageProps {
   errorCode?: string;
@@ -9,6 +10,9 @@ export function LoginPage(props: LoginPageProps) {
   return (
     <AuthLayout
       errorCode={props.errorCode}
+      notice={env.TEST_INSTANCE
+        ? "Test instance: accounts are temporary and expire."
+        : undefined}
 
       pageTitle="Login - Slice of Life"
       title="Login"
