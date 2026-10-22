@@ -3,6 +3,7 @@ node_modules
 .gitignore
 .env
 *.db
+*.db.bak
 *.sqlite
 public/uploads/*
 !public/uploads/.gitkeep

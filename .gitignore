@@ -16,6 +16,7 @@ lerna-debug.log*
 
 # database
 *.db
+*.db.bak
 *.sqlite
 
 # package-json
