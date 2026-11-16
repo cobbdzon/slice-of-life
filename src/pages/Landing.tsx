@@ -12,16 +12,26 @@ export function LandingPage() {
       </header>
 
       <main class="landing-hero">
-        <p class="landing-eyebrow">A personal journal</p>
-        <h1 class="landing-title">One entry a day.<br />Yours to keep.</h1>
-        <p class="landing-sub">
-          Capture a slice of every day — a title, a note, and the photos or video that
-          made it yours. Private by default. No feeds, no likes, no noise.
-        </p>
-        <div class="landing-actions">
-          <md-filled-button href="/register" class="landing-btn landing-btn--primary">Start journaling</md-filled-button>
-          <md-outlined-button href="/login" class="landing-btn">I already have an account</md-outlined-button>
+        <div class="landing-hero__text">
+          <p class="landing-eyebrow">A personal journal</p>
+          <h1 class="landing-title">One entry a day.<br /><span class="landing-title__keep">Yours to keep.</span></h1>
+          <p class="landing-sub">
+            Capture a slice of every day — a title, a note, and the photos or video that
+            made it yours. Private by default. No feeds, no likes, no noise.
+          </p>
+          <div class="landing-actions">
+            <md-filled-button href="/register" class="landing-btn landing-btn--primary">Start journaling</md-filled-button>
+            <md-outlined-button href="/login" class="landing-btn">I already have an account</md-outlined-button>
+          </div>
         </div>
+        <img
+          class="landing-hero__art"
+          src="/static/assets/images/landing-hero-art.svg"
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          decoding="async"
+        />
       </main>
 
       <section class="landing-features">

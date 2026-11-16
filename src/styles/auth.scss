@@ -178,16 +178,24 @@
 
 @media (max-width: 879px) {
   .auth-shell {
+    grid-template-rows: auto 1fr;
     min-height: calc(100vh - 48px);
     border-radius: 24px;
     margin: 0 8px;
   }
   .auth-cover {
-    min-height: 180px;
+    height: 160px;
     border-radius: 0 0 24px 24px;
   }
   .auth-cover__overlay {
-    padding: 18px 20px;
+    padding: 16px 20px;
+    background: linear-gradient(
+      to top,
+      rgba(24, 17, 21, 0.9) 0%,
+      rgba(24, 17, 21, 0.6) 36%,
+      rgba(24, 17, 21, 0.18) 72%,
+      rgba(24, 17, 21, 0) 100%
+    );
   }
   .auth-panel {
     padding: 24px 20px 32px;

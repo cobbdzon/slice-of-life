@@ -11,7 +11,7 @@ export function LoginPage(props: LoginPageProps) {
     <AuthLayout
       errorCode={props.errorCode}
       notice={props.notice ?? (env.TEST_INSTANCE
-        ? "Test instance: accounts are temporary and expire."
+        ? "Test instance: accounts are temporary and\u00A0expire."
         : undefined)}
       passwordAutocomplete="current-password"
 

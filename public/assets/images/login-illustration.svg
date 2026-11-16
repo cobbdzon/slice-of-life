@@ -1,124 +1,194 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 960" width="800" height="960" role="img" aria-label="Slice of Life illustration">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 960" fill="none" role="img" aria-labelledby="auth-art-title">
+  <title id="auth-art-title">An open journal with a photo, a calendar and a dusk archway</title>
+
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#130c0f"/>
-      <stop offset="55%" stop-color="#181115"/>
-      <stop offset="100%" stop-color="#251d21"/>
+    <linearGradient id="aa-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#130c0f"/>
+      <stop offset=".55" stop-color="#181115"/>
+      <stop offset="1" stop-color="#251d21"/>
     </linearGradient>
-    <radialGradient id="blobPrimary" cx="0.3" cy="0.2" r="0.7">
-      <stop offset="0%" stop-color="#6c3453" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#6c3453" stop-opacity="0"/>
+
+    <radialGradient id="aa-glow-plum" cx=".28" cy=".16" r=".62">
+      <stop offset="0" stop-color="#6c3453" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#6c3453" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="blobTertiary" cx="0.8" cy="0.15" r="0.6">
-      <stop offset="0%" stop-color="#643d26" stop-opacity="0.85"/>
-      <stop offset="100%" stop-color="#643d26" stop-opacity="0"/>
+
+    <radialGradient id="aa-glow-peach" cx=".82" cy=".62" r=".55">
+      <stop offset="0" stop-color="#643d26" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#643d26" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="blobSecondary" cx="0.7" cy="0.85" r="0.6">
-      <stop offset="0%" stop-color="#58404c" stop-opacity="0.8"/>
-      <stop offset="100%" stop-color="#58404c" stop-opacity="0"/>
+
+    <linearGradient id="aa-sky" x1="400" y1="128" x2="400" y2="852" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#241621"/>
+      <stop offset=".38" stop-color="#4d2a3d"/>
+      <stop offset=".66" stop-color="#8c4a5a"/>
+      <stop offset=".88" stop-color="#d48a6d"/>
+      <stop offset="1" stop-color="#f3ba9b"/>
+    </linearGradient>
+
+    <radialGradient id="aa-sun-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffd8e9" stop-opacity=".5"/>
+      <stop offset=".55" stop-color="#f3ba9b" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#f3ba9b" stop-opacity="0"/>
     </radialGradient>
-    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000000" flood-opacity="0.45"/>
+
+    <radialGradient id="aa-sun" cx="50%" cy="45%" r="55%">
+      <stop offset="0" stop-color="#fff0e8"/>
+      <stop offset=".65" stop-color="#ffdbc9"/>
+      <stop offset="1" stop-color="#f3c1a5"/>
+    </radialGradient>
+
+    <linearGradient id="aa-photo" x1="527" y1="546" x2="527" y2="652" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c3b52"/>
+      <stop offset=".55" stop-color="#b06468"/>
+      <stop offset="1" stop-color="#f3ba9b"/>
+    </linearGradient>
+
+    <filter id="aa-shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#000000" flood-opacity=".4"/>
     </filter>
-    <filter id="innerGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="6" result="b"/>
-      <feComposite in="SourceGraphic" in2="b" operator="over"/>
+
+    <filter id="aa-print-shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#000000" flood-opacity=".28"/>
     </filter>
-    <clipPath id="cardClip">
-      <rect x="180" y="260" width="440" height="520" rx="28"/>
+
+    <clipPath id="aa-arch">
+      <path d="M188 782 V340 A212 212 0 0 1 612 340 V782 Z"/>
+    </clipPath>
+
+    <clipPath id="aa-calendar">
+      <rect x="84" y="220" width="170" height="190" rx="38"/>
+    </clipPath>
+
+    <clipPath id="aa-photo-frame">
+      <rect x="462" y="546" width="130" height="106" rx="6"/>
     </clipPath>
   </defs>
 
   <!-- Background -->
-  <rect width="800" height="960" fill="url(#bg)"/>
+  <rect width="800" height="960" fill="url(#aa-bg)"/>
+  <rect width="800" height="960" fill="url(#aa-glow-plum)"/>
+  <rect width="800" height="960" fill="url(#aa-glow-peach)"/>
 
-  <!-- Tonal blobs (MD3 tonal surfaces as depth) -->
-  <rect width="800" height="960" fill="url(#blobPrimary)"/>
-  <rect width="800" height="960" fill="url(#blobTertiary)"/>
-  <rect width="800" height="960" fill="url(#blobSecondary)"/>
+  <!-- Archway -->
+  <path d="M170 800 V340 A230 230 0 0 1 630 340 V800 Z" fill="#5a2b44" stroke="#fcb0d6" stroke-opacity=".25" stroke-width="2"/>
 
-  <!-- Decorative MD3 vector shapes: rounded squircles -->
-  <path d="M 640 120 Q 720 100 760 180 Q 780 260 700 280 Q 620 300 600 220 Q 580 140 640 120 Z" fill="#f3ba9b" fill-opacity="0.16"/>
-  <path d="M 120 760 Q 60 700 100 640 Q 160 580 220 640 Q 260 720 180 780 Q 120 820 120 760 Z" fill="#fcb0d6" fill-opacity="0.14"/>
-  <ellipse cx="400" cy="140" rx="120" ry="40" fill="#dfbdcc" fill-opacity="0.12"/>
+  <g clip-path="url(#aa-arch)">
+    <rect x="188" y="128" width="424" height="654" fill="url(#aa-sky)"/>
 
-  <!-- Expressive "slice" wedge accent (subject nod to "Slice of Life") -->
-  <g transform="translate(90 230) rotate(-12)" opacity="0.9">
-    <path d="M 0 0 L 150 0 A 150 150 0 0 1 40 144 Z" fill="#6c3453" fill-opacity="0.55"/>
-    <path d="M 0 0 L 150 0 A 150 150 0 0 1 40 144 Z" fill="none" stroke="#fcb0d6" stroke-width="2" stroke-opacity="0.6"/>
-    <circle cx="60" cy="40" r="6" fill="#fcb0d6" fill-opacity="0.8"/>
-    <circle cx="95" cy="25" r="4" fill="#f3ba9b" fill-opacity="0.8"/>
-    <circle cx="70" cy="80" r="5" fill="#dfbdcc" fill-opacity="0.8"/>
+    <!-- Sun -->
+    <circle cx="400" cy="405" r="190" fill="url(#aa-sun-glow)"/>
+    <circle cx="400" cy="405" r="82" fill="url(#aa-sun)"/>
+
+    <!-- Haze -->
+    <rect x="336" y="448" width="128" height="9" rx="4.5" fill="#ffd8e9" fill-opacity=".13"/>
+    <rect x="414" y="460" width="70" height="7" rx="3.5" fill="#ffd8e9" fill-opacity=".1"/>
+
+    <!-- Clouds -->
+    <rect x="270" y="250" width="86" height="9" rx="4.5" fill="#ffd8e9" fill-opacity=".18"/>
+    <rect x="310" y="278" width="54" height="7" rx="3.5" fill="#ffd8e9" fill-opacity=".14"/>
+    <rect x="468" y="300" width="64" height="8" rx="4" fill="#ffd8e9" fill-opacity=".16"/>
+    <rect x="240" y="330" width="42" height="6" rx="3" fill="#ffd8e9" fill-opacity=".12"/>
+
+    <!-- Birds -->
+    <path d="M286 452 q9 -8 18 0 q9 -8 18 0" stroke="#3a2230" stroke-opacity=".4" stroke-width="3" stroke-linecap="round"/>
+    <path d="M476 426 q6 -5 12 0 q6 -5 12 0" stroke="#3a2230" stroke-opacity=".32" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Hills -->
+    <path d="M188 852 V500 C 250 468 318 462 390 480 C 460 498 540 486 612 460 V852 Z" fill="#6c3453"/>
+    <path d="M188 852 V528 C 262 500 330 498 402 514 C 474 530 548 520 612 502 V852 Z" fill="#3a2230"/>
   </g>
 
-  <!-- Floating chips (MD3 chip-like pills) -->
-  <g opacity="0.9">
-    <rect x="60" y="90" width="150" height="36" rx="18" fill="#58404c"/>
-    <circle cx="82" cy="108" r="9" fill="#dfbdcc"/>
-    <rect x="98" y="102" width="96" height="12" rx="6" fill="#fdd9e8" fill-opacity="0.85"/>
-
-    <rect x="560" y="820" width="170" height="36" rx="18" fill="#6c3453"/>
-    <circle cx="582" cy="838" r="9" fill="#fcb0d6"/>
-    <rect x="598" y="832" width="116" height="12" rx="6" fill="#ffd8e9" fill-opacity="0.85"/>
+  <!-- Calendar -->
+  <g transform="rotate(-8 169 315)" filter="url(#aa-shadow)">
+    <rect x="122" y="206" width="12" height="32" rx="6" fill="#6c3453"/>
+    <rect x="196" y="206" width="12" height="32" rx="6" fill="#6c3453"/>
+    <rect x="84" y="220" width="170" height="190" rx="38" fill="#fdd9e8"/>
+    <g clip-path="url(#aa-calendar)">
+      <rect x="84" y="220" width="170" height="48" fill="#fcb0d6"/>
+    </g>
+    <g fill="#511d3c" fill-opacity=".22">
+      <circle cx="128" cy="302" r="7.5"/>
+      <circle cx="170" cy="302" r="7.5"/>
+      <circle cx="212" cy="302" r="7.5"/>
+      <circle cx="128" cy="336" r="7.5"/>
+      <circle cx="212" cy="336" r="7.5"/>
+      <circle cx="128" cy="370" r="7.5"/>
+      <circle cx="170" cy="370" r="7.5"/>
+      <circle cx="212" cy="370" r="7.5"/>
+    </g>
+    <circle cx="170" cy="336" r="11" fill="#6c3453"/>
   </g>
 
-  <!-- Rain drops -->
-  <g fill="#f3ba9b" fill-opacity="0.5">
-    <circle cx="140" cy="200" r="3"/>
-    <circle cx="200" cy="170" r="2.5"/>
-    <circle cx="700" cy="320" r="3"/>
-    <circle cx="660" cy="260" r="2"/>
-    <circle cx="720" cy="400" r="2.5"/>
-    <circle cx="90" cy="520" r="2"/>
-    <circle cx="740" cy="600" r="3"/>
+  <!-- Open journal -->
+  <g transform="rotate(-3 400 660)">
+    <rect x="112" y="498" width="576" height="314" rx="36" fill="#5a2b44" stroke="#fcb0d6" stroke-opacity=".14" stroke-width="2" filter="url(#aa-shadow)"/>
+
+    <!-- Page stack edge -->
+    <g transform="translate(0 10)" fill="#dfbdcc">
+      <path d="M400 492 C 320 484 220 490 148 516 C 128 600 132 716 152 782 C 224 806 330 808 400 798 Z"/>
+      <path d="M400 492 C 480 484 580 490 652 516 C 672 600 668 716 648 782 C 576 806 470 808 400 798 Z"/>
+    </g>
+
+    <!-- Pages -->
+    <path d="M400 492 C 320 484 220 490 148 516 C 128 600 132 716 152 782 C 224 806 330 808 400 798 Z" fill="#ffdbc9"/>
+    <path d="M400 492 C 480 484 580 490 652 516 C 672 600 668 716 648 782 C 576 806 470 808 400 798 Z" fill="#ffe4d6"/>
+
+    <!-- Spine fold -->
+    <path d="M400 492 C 392 590 392 700 400 798 C 408 700 408 590 400 492 Z" fill="#311302" fill-opacity=".12"/>
+
+    <!-- Left page: entry -->
+    <rect x="184" y="546" width="64" height="13" rx="6.5" fill="#fcb0d6"/>
+    <circle cx="193" cy="552.5" r="2.5" fill="#6c3453"/>
+    <rect x="200" y="550" width="32" height="5" rx="2.5" fill="#6c3453" fill-opacity=".45"/>
+
+    <rect x="184" y="580" width="152" height="16" rx="8" fill="#311302" fill-opacity=".76"/>
+    <rect x="184" y="620" width="180" height="8" rx="4" fill="#311302" fill-opacity=".3"/>
+    <rect x="184" y="638" width="156" height="8" rx="4" fill="#311302" fill-opacity=".3"/>
+    <rect x="184" y="656" width="170" height="8" rx="4" fill="#311302" fill-opacity=".3"/>
+
+    <circle cx="202" cy="736" r="18" fill="#6c3453"/>
+    <path d="M197 736 v-4.8 a5 5 0 0 1 10 0 v4.8" stroke="#ffd8e9" stroke-width="2.6" stroke-linecap="round"/>
+    <rect x="195" y="735" width="14" height="12" rx="3" fill="#ffd8e9"/>
+
+    <g fill="#311302" fill-opacity=".18">
+      <circle cx="296" cy="736" r="5"/>
+      <circle cx="318" cy="736" r="5"/>
+      <circle cx="340" cy="736" r="5"/>
+      <circle cx="362" cy="736" r="5"/>
+    </g>
+    <circle cx="318" cy="736" r="8.5" fill="#6c3453"/>
+
+    <!-- Right page: photo print -->
+    <g transform="rotate(3 527 609)" filter="url(#aa-print-shadow)">
+      <rect x="452" y="536" width="150" height="146" rx="10" fill="#fff1e8"/>
+      <g clip-path="url(#aa-photo-frame)">
+        <rect x="462" y="546" width="130" height="106" fill="url(#aa-photo)"/>
+        <circle cx="492" cy="572" r="12" fill="#ffd8e9" fill-opacity=".9"/>
+        <path d="M462 636 C 488 610 512 616 530 628 C 550 640 574 626 592 608 V652 H462 Z" fill="#3a2230"/>
+      </g>
+      <rect x="462" y="526" width="38" height="16" rx="4" fill="#fcb0d6" fill-opacity=".72" transform="rotate(-8 481 534)"/>
+      <rect x="556" y="526" width="38" height="16" rx="4" fill="#fcb0d6" fill-opacity=".72" transform="rotate(8 575 534)"/>
+      <rect x="466" y="662" width="76" height="7" rx="3.5" fill="#311302" fill-opacity=".3"/>
+    </g>
+
+    <!-- Pen -->
+    <g transform="translate(468 742) rotate(-18)" filter="url(#aa-print-shadow)">
+      <rect x="0" y="0" width="120" height="15" rx="7.5" fill="#f3ba9b"/>
+      <rect x="0" y="0" width="14" height="15" rx="7.5" fill="#6c3453"/>
+      <rect x="104" y="-2" width="8" height="19" rx="3" fill="#6c3453"/>
+      <rect x="20" y="-4" width="46" height="5" rx="2.5" fill="#6c3453" fill-opacity=".8"/>
+      <path d="M120 0 L148 7.5 L120 15 Z" fill="#ffd8e9"/>
+      <path d="M138 4.5 L148 7.5 L138 10.5 Z" fill="#311302"/>
+    </g>
   </g>
 
-  <!-- Journal card (MD3 card, medium shape 12-28dp) -->
-  <g filter="url(#softShadow)">
-    <rect x="180" y="260" width="440" height="520" rx="28" fill="#30282b"/>
-    <rect x="180" y="260" width="440" height="520" rx="28" fill="none" stroke="#504349" stroke-width="1" stroke-opacity="0.6"/>
+  <!-- Sparkles -->
+  <g>
+    <path d="M688 166 Q 691 177 702 180 Q 691 183 688 194 Q 685 183 674 180 Q 685 177 688 166 Z" fill="#fcb0d6" fill-opacity=".6"/>
+    <path d="M94 470 Q 97 480 107 483 Q 97 486 94 496 Q 91 486 81 483 Q 91 480 94 470 Z" fill="#f3ba9b" fill-opacity=".5"/>
+    <circle cx="720" cy="440" r="4" fill="#fcb0d6" fill-opacity=".3"/>
+    <circle cx="650" cy="108" r="3" fill="#f3ba9b" fill-opacity=".4"/>
+    <circle cx="116" cy="742" r="3" fill="#fcb0d6" fill-opacity=".25"/>
   </g>
-
-  <!-- Page lines -->
-  <g clip-path="url(#cardClip)" opacity="0.55">
-    <rect x="220" y="330" width="360" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-    <rect x="220" y="360" width="300" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-    <rect x="220" y="390" width="340" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-    <rect x="220" y="420" width="280" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-    <rect x="220" y="450" width="350" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-    <rect x="220" y="480" width="310" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-    <rect x="220" y="510" width="330" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-    <rect x="220" y="540" width="290" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-    <rect x="220" y="570" width="345" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-    <rect x="220" y="600" width="270" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-    <rect x="220" y="630" width="320" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-    <rect x="220" y="660" width="260" height="8" rx="4" fill="#d4c2c8" fill-opacity="0.35"/>
-  </g>
-
-  <!-- Bookmark ribbon (primary, full shape pill) -->
-  <path d="M 560 260 L 600 260 L 600 360 L 580 340 L 560 360 Z" fill="#fcb0d6" fill-opacity="0.9"/>
-
-  <!-- Pen (stylized) -->
-  <g transform="translate(500 700) rotate(-35)">
-    <rect x="0" y="0" width="120" height="16" rx="8" fill="#f3ba9b"/>
-    <rect x="108" y="0" width="24" height="16" rx="4" fill="#643d26"/>
-    <polygon points="0,0 -18,8 0,16" fill="#eedfe3"/>
-  </g>
-
-  <!-- Coffee cup -->
-  <g transform="translate(120 780)">
-    <rect x="0" y="20" width="80" height="70" rx="12" fill="#58404c"/>
-    <path d="M 80 30 Q 110 30 110 60 Q 110 90 80 90" fill="none" stroke="#dfbdcc" stroke-width="8" stroke-linecap="round"/>
-    <ellipse cx="40" cy="20" rx="40" ry="10" fill="#dfbdcc" fill-opacity="0.6"/>
-    <path d="M 20 0 Q 28 -20 36 0 Q 44 -20 52 0" fill="none" stroke="#f3ba9b" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
-  </g>
-
-  <!-- Sparkle accents (MD3 expressive) -->
-  <g fill="#fcb0d6">
-    <path d="M 300 200 L 306 212 L 318 218 L 306 224 L 300 236 L 294 224 L 282 218 L 294 212 Z" opacity="0.8"/>
-    <path d="M 620 470 L 624 478 L 632 482 L 624 486 L 620 494 L 616 486 L 608 482 L 616 478 Z" opacity="0.7"/>
-  </g>
-
-  <!-- Bottom wave/shape -->
-  <path d="M 0 900 Q 200 860 400 900 T 800 900 L 800 960 L 0 960 Z" fill="#251d21" fill-opacity="0.6"/>
 </svg>

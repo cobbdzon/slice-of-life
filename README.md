@@ -4,6 +4,8 @@ A personal journal with media attachments for each entry,
 was originally built over a week-long hackathon with friends.
 One diary, one entry per day, optional images/videos.
 
+Illustration and SVG rules: see [ART_DIRECTION.md](ART_DIRECTION.md).
+
 ## Stack
 
 - [Bun](https://bun.sh) — runtime
