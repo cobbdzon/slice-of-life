@@ -5,10 +5,10 @@ export function LandingPage() {
     <BaseLayout title="Slice of Life" showTopBar={false} stylesheets={["/static/assets/css/landing.css"]}>
       <header class="landing-nav">
         <a class="landing-logo no-link-style" href="/">Slice of Life</a>
-        <nav class="landing-nav__links">
-          <a href="/login" class="landing-nav__link">Log in</a>
-          <md-filled-button href="/register" class="landing-cta">Get started</md-filled-button>
-        </nav>
+        {/* <nav class="landing-nav__links"> */}
+        {/*   <a href="/login" class="landing-nav__link">Log in</a> */}
+        {/*   <md-filled-button href="/register" class="landing-cta">Get started</md-filled-button> */}
+        {/* </nav> */}
       </header>
 
       <main class="landing-hero">
