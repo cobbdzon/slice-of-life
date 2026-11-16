@@ -65,7 +65,7 @@ body {
   --md-sys-color-tertiary-container: #643d26;
   --md-sys-color-tertiary-fixed: #ffdbc9;
   --md-sys-color-tertiary-fixed-dim: #f3ba9b;
-  --md-sys-typescale-body-large-font: 'Roboto', sans-serif;
+  --md-sys-typescale-body-large-font: 'Plus Jakarta Sans', sans-serif;
 }
 
 body.m3-surface {
@@ -85,7 +85,7 @@ body.m3-surface {
   padding: 0 16px;
   // background-color: rgba(0, 0, 0, 0);
   // background-color: var(--md-sys-color-surface);
-  // border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   gap: 16px;
 
   // fallback: solid surface when backdrop-filter is unsupported
