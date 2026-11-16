@@ -22,8 +22,12 @@ app.get("/landing", async (c) => {
 
 app.get("/login", async (c) => {
   const errorCode = c.req.query("error") as string;
+  const registrationSuccess = c.req.query("registration") === "SUCCESS";
   return c.html(
-    <LoginPage errorCode={errorCode}>
+    <LoginPage
+      errorCode={errorCode}
+      notice={registrationSuccess ? "Account created. Please log in." : undefined}
+    >
     </LoginPage>
   );
 });
@@ -72,9 +76,9 @@ app.post("/register", authValidator, async (c) => {
     if (errorType === "USERNAME_TAKEN") {
       return c.redirect("/register?error=USERNAME_TAKEN")
     } else {
-      c.redirect("/register?error=INTERNAL_SERVER_ERROR");
+      return c.redirect("/register?error=INTERNAL_SERVER_ERROR");
     }
-    return c.text(message);
+    return c.text(message ?? "Something went wrong.");
   }
 })
 

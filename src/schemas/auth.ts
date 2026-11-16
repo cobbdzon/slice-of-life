@@ -10,9 +10,8 @@ const authSchema = z.object({
 
 const authValidator = zValidator("form", authSchema, (result, c) => {
   if (!result.success) {
-    return c.json({
-      errors: result.error.issues.map((issue) => issue.message)
-    }, 400);
+    const target = c.req.path.includes("register") ? "/register" : "/login";
+    return c.redirect(`${target}?error=VALIDATION_ERROR`);
   }
 })
 

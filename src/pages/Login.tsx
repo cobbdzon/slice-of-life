@@ -3,16 +3,17 @@ import { env } from '../backend/env';
 
 interface LoginPageProps {
   errorCode?: string;
+  notice?: string;
 }
 
-// TODO: display ?register=SUCCESS
 export function LoginPage(props: LoginPageProps) {
   return (
     <AuthLayout
       errorCode={props.errorCode}
-      notice={env.TEST_INSTANCE
+      notice={props.notice ?? (env.TEST_INSTANCE
         ? "Test instance: accounts are temporary and expire."
-        : undefined}
+        : undefined)}
+      passwordAutocomplete="current-password"
 
       pageTitle="Login - Slice of Life"
       title="Login"

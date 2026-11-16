@@ -17,19 +17,23 @@ export interface AuthLayoutProps {
   errorCode?: string;
 
   notice?: string;
+
+  passwordAutocomplete?: string;
 }
 
-// error codes -> friendly messages (unknown codes fall back to raw value)
 const ERROR_MESSAGES: Record<string, string> = {
   INVALID_CREDENTIALS: "Invalid username or password.",
   INTERNAL_SERVER_ERROR: "Something went wrong. Please try again.",
   USERNAME_TAKEN: "This username is already taken.",
+  VALIDATION_ERROR: "Please check your input and try again.",
 };
 
 export function AuthLayout(props: AuthLayoutProps) {
   const errorMessage = props.errorCode
     ? ERROR_MESSAGES[props.errorCode] ?? props.errorCode
     : undefined;
+
+  const passwordAutocomplete = props.passwordAutocomplete ?? "current-password";
 
   return (
     <BaseLayout
@@ -38,51 +42,74 @@ export function AuthLayout(props: AuthLayoutProps) {
       scripts={["/static/assets/js/auth-form.js"]}
       showTopBar={false}
     >
-      <div class="main m3-login-card">
+      <div class="auth-shell">
 
-        <div class="card-image-side">
-          <img src={props.cardImage || "/static/assets/images/login-illustration.png"} alt="Login Graphic" />
-        </div>
-
-        <div class="card-content-side">
-          <div class="auth-logo">
-            <h2 class="auth-logo__title">Slice of <em class="auth-logo__accent">Life</em></h2>
+        <aside class="auth-cover" aria-hidden="true">
+          <img
+            class="auth-cover__image"
+            src={props.cardImage || "/static/assets/images/login-illustration.png"}
+            alt=""
+            loading="eager"
+            decoding="async"
+          />
+          <div class="auth-cover__overlay">
+            <a class="auth-cover__brand no-link-style" href="/">Slice of Life</a>
+            <p class="auth-cover__tagline">A quiet place to remember.</p>
           </div>
-          <h1 style="margin-bottom: 4px;">{props.title}</h1>
-          <h3 style="font-weight: 400; margin-top: 0; margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant, #49454f);">
-            {props.subtitle}
-          </h3>
+        </aside>
 
-          {errorMessage && (
-            <div class="m3-error-banner" style="color: var(--md-sys-color-error, #ba1a1a); margin-bottom: 20px; font-weight: 500;">
-              <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px;">error</span>
-              <span style="vertical-align: middle;">{errorMessage}</span>
-            </div>
-          )}
+        <section class="auth-panel">
+          <div class="auth-panel__inner">
+            <header class="auth-panel__header">
+              <h1 class="auth-panel__title">{props.title}</h1>
+              <p class="auth-panel__subtitle">{props.subtitle}</p>
+            </header>
 
-          {props.notice && (
-            <div class="m3-notice-banner">
-              <span class="material-symbols-outlined m3-notice-banner__icon">timer</span>
-              <span>{props.notice}</span>
-            </div>
-          )}
+            {errorMessage && (
+              <div class="auth-banner auth-banner--error" role="alert">
+                <span class="material-symbols-outlined auth-banner__icon">error</span>
+                <span class="auth-banner__text">{errorMessage}</span>
+              </div>
+            )}
 
-          <form action={props.formAction} method="post" style="display: flex; flex-direction: column; gap: 20px;">
-            <md-outlined-text-field label="Username" name="username" id="username" required></md-outlined-text-field>
-            <md-outlined-text-field label="Password" type="password" name="password" id="password" required minlength="8"></md-outlined-text-field>
+            {props.notice && (
+              <div class="auth-banner auth-banner--notice" role="status">
+                <span class="material-symbols-outlined auth-banner__icon">info</span>
+                <span class="auth-banner__text">{props.notice}</span>
+              </div>
+            )}
 
-            <div class="wrap" style="margin-top: 12px;">
-              <md-filled-button type="submit" style="width: 100%;">{props.submitMessage}</md-filled-button>
-            </div>
-          </form>
+            <form action={props.formAction} method="post" class="auth-form" autocomplete="on">
+              <md-outlined-text-field
+                label="Username"
+                name="username"
+                id="username"
+                required
+                autocomplete="username"
+              ></md-outlined-text-field>
+              <md-outlined-text-field
+                label="Password"
+                type="password"
+                name="password"
+                id="password"
+                required
+                minlength="8"
+                autocomplete={passwordAutocomplete}
+              ></md-outlined-text-field>
 
-          <p style="margin-top: 24px; font-size: 14px;">
-            {props.bottomMessage}{" "}
-            <a href={props.bottomLink} style="text-decoration: none; color: var(--md-sys-color-primary, #6750a4); font-weight: 500;">
-              {props.bottomLinkMessage}
-            </a>
-          </p>
-        </div>
+              <md-filled-button type="submit" class="auth-submit">
+                {props.submitMessage}
+              </md-filled-button>
+            </form>
+
+            <p class="auth-switch">
+              {props.bottomMessage}{" "}
+              <a href={props.bottomLink} class="auth-switch__link">
+                {props.bottomLinkMessage}
+              </a>
+            </p>
+          </div>
+        </section>
 
       </div>
     </BaseLayout>

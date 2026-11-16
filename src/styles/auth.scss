@@ -1,160 +1,195 @@
-body {
-  overflow: hidden;
-}
+/* Auth pages — Material 3 Expressive */
 
-.m3-main-container {
+/* Center the auth card within BaseLayout's main container */
+.m3-main-container:has(.auth-shell) {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  padding: 16px;
-  box-sizing: border-box;
+  min-height: calc(100vh - 48px);
 }
 
-.m3-login-card {
-  position: relative;
-  display: flex;
+.auth-shell {
+  display: grid;
+  grid-template-columns: 1fr;
   width: 100%;
-  max-width: 400px;
-  background-color: var(--md-sys-color-surface-variant);
-  // soft pink wash "from above" that fades into the card's own color
-  background-image: linear-gradient(
-    to bottom,
-    rgba(252, 176, 214, 0.35) 0%,
-    rgba(252, 176, 214, 0.14) 45%,
-    rgba(252, 176, 214, 0) 75%
-  );
+  min-height: calc(100vh - 48px);
   border-radius: 28px;
-  box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
-  margin: 0; 
+  overflow: hidden;
+  background-color: var(--md-sys-color-surface-container-low);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: -160px;
-    left: -160px;
-    right: -160px;
-    bottom: -160px;
-    background: radial-gradient(
-      circle, 
-      var(--md-sys-color-primary) 0%, 
-      transparent 70%
-    );
-    filter: blur(40px);
-    opacity: 0.35; 
-    z-index: -1; 
-    pointer-events: none; 
-
-    animation: fadeInGlow 3s cubic-bezier(0.2, 0, 0, 1) 0.2s forwards;
-    opacity: 0;
+@media (min-width: 880px) {
+  .auth-shell {
+    grid-template-columns: 1.05fr 1fr;
+    max-width: 1040px;
+    min-height: 640px;
+    margin: 0 auto;
   }
 }
 
-.auth-logo {
+.auth-cover {
   position: relative;
-  display: flex;
-  justify-content: center;
-  padding-bottom: 16px;
-  margin-bottom: 28px;
-  text-align: center;
-
-  &__title {
-    font-family: "DM Serif Display", Georgia, serif;
-    font-style: normal;
-    font-size: 40px;
-    font-weight: 400;
-    margin: 0;
-    letter-spacing: 1px;
-    color: var(--md-sys-color-primary);
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
-  }
-
-  &__accent {
-    font-style: italic;
-    font-size: 1.15em;
-    color: var(--md-sys-color-on-surface);
-  }
-
-  // flourish underline: hairline + centered diamond
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 128px;
-    height: 4px;
-    background:
-      linear-gradient(
-        to right,
-        transparent 0%,
-        var(--md-sys-color-primary) 22%,
-        var(--md-sys-color-primary) 78%,
-        transparent 100%
-      ) center / 100% 1.5px no-repeat,
-      linear-gradient(45deg, var(--md-sys-color-primary), var(--md-sys-color-primary)) center / 7px 7px no-repeat;
-  }
+  overflow: hidden;
+  min-height: 220px;
+  background-color: var(--md-sys-color-surface-container);
 }
 
-.card-image-side {
-  display: none;
-  flex: 1;
-  aspect-ratio: 9 / 16;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+.auth-cover__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(1.05) contrast(1.02);
 }
 
-.card-content-side {
-  flex: 1;
-  padding: 32px;
+.auth-cover__overlay {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
+  padding: 28px 32px;
+  background: linear-gradient(
+    to top,
+    rgba(24, 17, 21, 0.85) 0%,
+    rgba(24, 17, 21, 0.35) 45%,
+    rgba(24, 17, 21, 0) 100%
+  );
+  color: var(--md-sys-color-on-background);
 }
 
-@media (min-width: 768px) {
-  .m3-login-card {
-    max-width: 800px;
-    overflow: visible;
-  }
-
-  .card-image-side {
-    display: block;
-    border-top-left-radius: 28px;
-    border-bottom-left-radius: 28px;
-    overflow: hidden;
-  }
+.auth-cover__brand {
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--md-sys-color-on-background);
 }
 
-.m3-notice-banner {
+.auth-cover__tagline {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+  max-width: 32ch;
+}
+
+.auth-panel {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  margin-bottom: 20px;
-  border-radius: 12px;
-  background-color: var(--md-sys-color-error-container, #f9dedc);
-  color: var(--md-sys-color-on-error-container, #410e0b);
-  font-size: 0.8125rem;
-  line-height: 1.35;
+  justify-content: center;
+  padding: 32px 24px;
+  background-color: var(--md-sys-color-surface-container-low);
+}
 
-  &__icon {
-    font-size: 18px;
-    flex-shrink: 0;
+.auth-panel__inner {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.auth-panel__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.auth-panel__title {
+  margin: 0;
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--md-sys-color-on-surface);
+}
+
+.auth-panel__subtitle {
+  margin: 0;
+  font-size: 15px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.auth-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.auth-banner__icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.auth-banner--error {
+  background-color: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
+
+.auth-banner--notice {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-submit {
+  width: 100%;
+  height: 48px;
+  border-radius: 999px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.auth-switch {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+}
+
+.auth-switch__link {
+  color: var(--md-sys-color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-switch__link:hover {
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-shell,
+  .auth-cover__image {
+    transition: none;
   }
 }
 
-@keyframes fadeInGlow {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
+@media (max-width: 879px) {
+  .auth-shell {
+    min-height: calc(100vh - 48px);
+    border-radius: 24px;
+    margin: 0 8px;
   }
-  to {
-    opacity: 0.35; // Matches your target ambient glow opacity
-    transform: scale(1);
+  .auth-cover {
+    min-height: 180px;
+    border-radius: 0 0 24px 24px;
+  }
+  .auth-cover__overlay {
+    padding: 18px 20px;
+  }
+  .auth-panel {
+    padding: 24px 20px 32px;
   }
 }
