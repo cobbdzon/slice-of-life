@@ -7,6 +7,7 @@ import { entryQueryValidator } from "../schemas/entryQuery";
 import type { JournalEntry, User } from "../db/schema";
 
 import { DashboardPage } from '../pages/Dashboard';
+import { LandingPage } from '../pages/Landing';
 import { EntryPage } from "../pages/Entry";
 import { EntryEditor } from "../pages/EntryEditor";
 import { entryPayloadValidator } from "../schemas/entryPayload";
@@ -19,7 +20,7 @@ const app = new Hono();
 app.get('/', async (c) => {
   const isValidToken = await validateTokenFromContext(c);
   if (!isValidToken) {
-    return c.redirect("/login");
+    return c.html(<LandingPage />);
   }
 
   const user = await getUserFromContext(c) as User;

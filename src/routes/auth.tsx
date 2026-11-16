@@ -9,11 +9,16 @@ import { logger } from "../backend/logger";
 
 import { LoginPage } from "../pages/Login";
 import { RegisterPage } from "../pages/Register";
+import { LandingPage } from "../pages/Landing";
 
 // dummy hash so not-found and wrong-password take similar time (anti-enumeration)
 const DUMMY_PASSWORD_HASH = await Bun.password.hash("dummy-password-for-timing");
 
 const app = new Hono();
+
+app.get("/landing", async (c) => {
+  return c.html(<LandingPage />);
+});
 
 app.get("/login", async (c) => {
   const errorCode = c.req.query("error") as string;

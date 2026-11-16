@@ -1,0 +1,215 @@
+.landing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.landing-logo {
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 26px;
+  color: var(--md-sys-color-on-background);
+}
+
+.landing-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-nav__link {
+  color: var(--md-sys-color-on-surface-variant);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.landing-cta {
+  border-radius: 999px;
+}
+
+.landing-hero {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 80px 24px 64px;
+  text-align: left;
+}
+
+.landing-eyebrow {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-sys-color-tertiary);
+  letter-spacing: 0.08em;
+  text-transform: none;
+  margin: 0 0 16px;
+}
+
+.landing-title {
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: clamp(48px, 8vw, 96px);
+  line-height: 0.95;
+  font-weight: 400;
+  margin: 0 0 24px;
+  color: var(--md-sys-color-on-background);
+  letter-spacing: -0.02em;
+}
+
+.landing-sub {
+  max-width: 560px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 0 0 32px;
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.landing-btn {
+  height: 52px;
+  padding: 0 28px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.landing-features {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.landing-card {
+  padding: 32px 28px;
+  background-color: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    background-color: var(--md-sys-color-surface-container-high);
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.5;
+  }
+}
+
+.landing-card--a {
+  border-radius: 32px 8px 32px 8px;
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+
+  p {
+    color: var(--md-sys-color-on-primary-container);
+    opacity: 0.85;
+  }
+}
+
+.landing-card--b {
+  border-radius: 8px 32px 8px 32px;
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+
+  p {
+    color: var(--md-sys-color-on-secondary-container);
+    opacity: 0.85;
+  }
+}
+
+.landing-card--c {
+  border-radius: 24px 24px 4px 24px;
+  background-color: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+
+  p {
+    color: var(--md-sys-color-on-tertiary-container);
+    opacity: 0.85;
+  }
+}
+
+.landing-card__icon {
+  font-size: 36px;
+}
+
+.landing-footer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 24px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 14px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-hero {
+    animation: landing-reveal 0.7s cubic-bezier(0.2, 0, 0, 1) both;
+  }
+
+  .landing-card {
+    opacity: 0;
+    animation: landing-card-in 0.5s cubic-bezier(0.2, 0, 0, 1) both;
+  }
+
+  .landing-card--a {
+    animation-delay: 0.15s;
+  }
+
+  .landing-card--b {
+    animation-delay: 0.25s;
+  }
+
+  .landing-card--c {
+    animation-delay: 0.35s;
+  }
+}
+
+@keyframes landing-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .landing-hero,
+  .landing-card {
+    opacity: 1;
+    animation: none;
+  }
+}
