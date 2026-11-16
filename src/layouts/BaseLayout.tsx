@@ -1,5 +1,6 @@
 import type { User } from "../db/schema";
 import { env } from "../backend/env";
+import { cacheBust } from "../backend/cacheBust";
 
 interface BaseLayoutProps {
   user?: User;
@@ -58,14 +59,14 @@ export function BaseLayout({ user, title = "Slice of Life", stylesheets = [], sc
         <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-        <link rel="stylesheet" href="/static/assets/css/main.css" />
+        <link rel="stylesheet" href={cacheBust("/static/assets/css/main.css")} />
 
         {stylesheets.map((href) => (
-          <link rel="stylesheet" href={href} />
+          <link rel="stylesheet" href={cacheBust(href)} />
         ))}
 
         {loadedScripts.map((href) => (
-          <script src={href}></script>
+          <script src={cacheBust(href)}></script>
         ))}
 
         <script type="module" src="https://esm.run/@material/web/all.js"></script>
