@@ -23,7 +23,7 @@ export function LoginPage(props: LoginPageProps) {
       bottomMessage="Not registered?"
       bottomLink="/register"
       bottomLinkMessage="Create account"
-      cardImage="/static/assets/images/login-illustration.png"
+      cardImage="/static/assets/images/login-illustration.svg"
     >
     </AuthLayout>
   )

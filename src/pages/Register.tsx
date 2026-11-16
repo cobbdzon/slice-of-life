@@ -23,7 +23,7 @@ export function RegisterPage(props: RegisterPageProps) {
       bottomMessage="Already have an account?"
       bottomLink="/login"
       bottomLinkMessage="Login"
-      cardImage="/static/assets/images/login-illustration.png"
+      cardImage="/static/assets/images/login-illustration.svg"
     >
     </AuthLayout>
   )

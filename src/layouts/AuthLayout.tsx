@@ -47,7 +47,7 @@ export function AuthLayout(props: AuthLayoutProps) {
         <aside class="auth-cover" aria-hidden="true">
           <img
             class="auth-cover__image"
-            src={props.cardImage || "/static/assets/images/login-illustration.png"}
+            src={props.cardImage || "/static/assets/images/login-illustration.svg"}
             alt=""
             loading="eager"
             decoding="async"
