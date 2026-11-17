@@ -8,74 +8,77 @@ export type ProfilePageProps = {
 }
 
 export async function ProfilePage({ user }: ProfilePageProps) {
-  const userRole = "Free"
-  const userAvatarUrl = `https://api.dicebear.com/10.x/glyphs/svg?seed=${encodeURIComponent(user.username)}`;
-  const memberSinceText = new Date(user.createdAt as string).toLocaleString("en-US", {
+  const userRole = "Free plan";
+  const monogram = Array.from(user.username.trim() || "?")[0]?.toUpperCase() ?? "?";
+
+  const memberSinceDate = new Date(user.createdAt ?? Date.now());
+  const memberSinceText = memberSinceDate.toLocaleString("en-US", {
     dateStyle: "long",
   });
+  const memberSinceIso = Number.isNaN(memberSinceDate.getTime())
+    ? undefined
+    : memberSinceDate.toISOString();
 
-  const userFileSizeTaken = await getUserTotalFilesSize(user.id) / (1024 * 1024); // In MiB
-  const userFileSizeLimit = user.fileUploadLimit || 10;   // In MiB (default 10 for Free plan)
-  const usageRatio = userFileSizeTaken / userFileSizeLimit;
-  const usagePercentage = Math.round(usageRatio * 100);
+  const userFileSizeTaken = (await getUserTotalFilesSize(user.id)) / (1024 * 1024); // In MiB
+  const userFileSizeLimit = user.fileUploadLimit || 10; // In MiB (default 10 for Free plan)
+  const usageRatio = userFileSizeLimit > 0 ? userFileSizeTaken / userFileSizeLimit : 0;
+  const usagePercentage = Math.round(Math.min(Math.max(usageRatio, 0), 1) * 100);
+  const remainingFileSize = Math.max(userFileSizeLimit - userFileSizeTaken, 0);
+  const storageStateClass = usageRatio >= 0.9 ? " profile-card--storage-critical" : "";
 
   return (
-    <BaseLayout user={user} stylesheets={["/static/assets/css/profile.css"]}>
-      <div class="profile-container">
-        <div class="m3-user-card">
-          {/* Header Section */}
-          <div class="m3-user-card__header">
-            <div class="m3-user-card__avatar-wrapper">
-              <img
-                src={userAvatarUrl}
-                alt={user.username}
-                class="m3-user-card__avatar"
-              />
-            </div>
-            <div class="m3-user-card__info">
-              <h1 class="m3-user-card__name">{user.username}</h1>
-              <div class="m3-user-card__badge-row">
-                <span class="m3-chip m3-chip--primary">{userRole}</span>
-                <span class="m3-chip m3-chip--outline">Member since {memberSinceText}</span>
-              </div>
-            </div>
-          </div>
+    <BaseLayout user={user} title="Profile - Slice of Life" stylesheets={["/static/assets/css/profile.css"]}>
+      <div class="profile-page">
+        <article class={`profile-card${storageStateClass}`} aria-labelledby="profile-name">
+          <header class="profile-card__identity">
+            <div class="profile-card__monogram" aria-hidden="true">{monogram}</div>
 
-          <hr class="m3-divider" />
+            <div class="profile-card__intro">
+              <h1 id="profile-name" class="profile-card__name">{user.username}</h1>
+              <p class="profile-card__member">
+                Keeping a journal since{" "}
+                <time datetime={memberSinceIso}>{memberSinceText}</time>
+              </p>
+              <span class="profile-card__plan">{userRole}</span>
+            </div>
+          </header>
 
-          {/* Storage Details Section */}
-          <div class="m3-user-card__storage">
-            <div class="m3-storage-header">
-              <div class="m3-storage-header__title-group">
-                <svg class="m3-icon" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z" />
-                </svg>
-                <span class="m3-storage-header__label">Storage Space</span>
-              </div>
-              <span class="m3-storage-header__percentage">{usagePercentage}% used</span>
+          <section class="profile-card__storage" aria-labelledby="profile-storage">
+            <div class="profile-card__storage-head">
+              <h2 id="profile-storage" class="profile-card__storage-title">Storage</h2>
+              <p class="profile-card__usage">
+                <span class="profile-card__usage-value">{usagePercentage}%</span>
+                <span class="profile-card__usage-label">used</span>
+              </p>
             </div>
 
-            <div class="m3-storage-bar-wrapper">
-              <Bar value={usageRatio} label="Storage used" />
-            </div>
+            <Bar
+              value={usageRatio}
+              className="profile-card__bar"
+              label={`Storage used: ${usagePercentage}%, ${userFileSizeTaken.toFixed(2)} of ${userFileSizeLimit} MiB`}
+            />
 
-            <div class="m3-storage-footer">
-              <span class="m3-storage-footer__stats">
+            <div class="profile-card__figures">
+              <p>
                 <strong>{userFileSizeTaken.toFixed(2)} MiB</strong> of {userFileSizeLimit} MiB
-              </span>
-              <span class="m3-storage-footer__remaining">
-                {(userFileSizeLimit - userFileSizeTaken).toFixed(2)} MiB remaining
-              </span>
+              </p>
+              <p>{remainingFileSize.toFixed(2)} MiB free</p>
             </div>
-          </div>
 
-          {/* Card Action Strip */}
-          <div class="m3-user-card__actions">
-            <md-filled-button onclick="window.location.href='/logout'">
-              Log Out
+            <p class={`profile-card__storage-note${usageRatio >= 0.9 ? " profile-card__storage-note--critical" : ""}`}>
+              {usageRatio >= 0.9
+                ? "You're close to your plan limit. Remove unused media to free space."
+                : "Photos and video count toward this limit."}
+            </p>
+          </section>
+
+          <footer class="profile-card__actions">
+            <md-filled-button class="profile-card__logout" onclick="window.location.href='/logout'">
+              <span slot="icon" class="material-symbols-outlined" aria-hidden="true">logout</span>
+              Log out
             </md-filled-button>
-          </div>
-        </div>
+          </footer>
+        </article>
       </div>
     </BaseLayout>
   );

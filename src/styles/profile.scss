@@ -1,226 +1,346 @@
-// M3 Shape Tokens (matching M3 shape scale)
-$shape-sm: 8px;    // chips / small elements
-$shape-md: 16px;   // standard controls
-$shape-lg: 20px;   // containers
-$shape-xl: 28px;   // cards / large surfaces
+/* Profile — Material 3 Expressive account card */
 
-body {
-  overflow: hidden;
+.profile-page {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 112px);
+  min-height: calc(100svh - 112px);
+  padding: 8px 0 40px;
 }
 
-.profile-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 64px);
-  padding: 16px;
-  box-sizing: border-box;
-}
+/* Quiet surface card, matching the auth panel */
+.profile-card {
+  --profile-ink: var(--md-sys-color-on-surface);
+  --profile-ink-soft: var(--md-sys-color-on-surface-variant);
+  --profile-rule: color-mix(in srgb, var(--md-sys-color-outline-variant) 60%, transparent);
+  --profile-accent: var(--md-sys-color-primary);
 
-.m3-user-card {
-  position: relative;
+  display: grid;
+  gap: 24px;
   width: 100%;
   max-width: 520px;
-  background-color: var(--md-sys-color-surface-variant);
-  border-radius: $shape-xl;
-  padding: 32px;
-  box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-sizing: border-box;
+  padding: 28px 24px 24px;
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  background-color: var(--md-sys-color-surface-container-low);
+  color: var(--profile-ink);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--md-sys-color-shadow) 35%, transparent);
+  animation: profile-card-settle 420ms cubic-bezier(0.2, 0, 0, 1) both;
 
-  // Ambient Glow Effect matching Auth Page
-  &::before {
-    content: "";
-    position: absolute;
-    top: -160px;
-    left: -160px;
-    right: -160px;
-    bottom: -160px;
-    background: radial-gradient(
-      circle,
-      var(--md-sys-color-primary) 0%,
-      transparent 70%
-    );
-    filter: blur(40px);
-    opacity: 0;
-    z-index: -1;
-    pointer-events: none;
-
-    animation: fadeInGlow 3s cubic-bezier(0.2, 0, 0, 1) 0.2s forwards;
-  }
-
-  &__header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-
-    @media (max-width: 480px) {
-      flex-direction: column;
-      text-align: center;
-    }
-  }
-
-  &__avatar-wrapper {
-    position: relative;
-    flex-shrink: 0;
-    width: 72px;
-    height: 72px;
-  }
-
-  &__avatar {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background-color: var(--md-sys-color-surface-container-high);
-    object-fit: cover;
-    border: 1px solid var(--md-sys-color-outline-variant);
-  }
-
-  &__info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    overflow: hidden;
-  }
-
-  &__name {
-    margin: 0;
-    font-size: 1.375rem; // M3 Title Medium/Large
-    font-weight: 600;
-    line-height: 1.2;
-    margin-bottom: 8px;
-    color: var(--md-sys-color-on-surface);
-  }
-
-  &__email {
-    margin: 0 0 6px 0;
-    font-size: 0.875rem;
-    color: var(--md-sys-color-on-surface-variant);
-  }
-
-  &__badge-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-
-    @media (max-width: 480px) {
-      justify-content: center;
-    }
-  }
-}
-
-// Chips / Badges
-.m3-chip {
-  display: inline-flex;
-  align-items: center;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: $shape-sm;
-  font-size: 0.75rem;
-  font-weight: 500;
-
-  &--primary {
+  &::selection,
+  ::selection {
     background-color: var(--md-sys-color-primary-container);
     color: var(--md-sys-color-on-primary-container);
   }
 
-  &--outline {
-    border: 1px solid var(--md-sys-color-outline-variant);
-    color: var(--md-sys-color-on-surface-variant);
+  &--storage-critical {
+    --profile-accent: var(--md-sys-color-error);
   }
 }
 
-.m3-divider {
-  border: none;
-  height: 1px;
-  background-color: var(--md-sys-color-outline-variant);
-  margin: 0;
-  opacity: 0.3;
+.profile-card__identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
 }
 
-// Storage Container
-.m3-user-card__storage {
+.profile-card__monogram {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.profile-card__intro {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  background-color: var(--md-sys-color-surface-container-highest);
-  padding: 20px;
-  border-radius: $shape-lg;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
 }
 
-.m3-storage-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.profile-card__name {
+  margin: 0;
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: clamp(1.75rem, 6vw, 2rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+  color: var(--profile-ink);
+}
 
-  &__title-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--md-sys-color-on-surface);
+.profile-card__member {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.43;
+  color: var(--profile-ink-soft);
+  text-wrap: pretty;
+
+  time {
+    color: var(--profile-ink);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
+
+/* Plan chip — quiet container, not a bright seal */
+.profile-card__plan {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  margin-top: 4px;
+  padding: 0 10px;
+  border-radius: var(--md-sys-shape-corner-small);
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--profile-ink-soft);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.profile-card__storage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--profile-rule);
+}
+
+.profile-card__storage-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.profile-card__storage-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--profile-ink);
+}
+
+.profile-card__usage {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+}
+
+.profile-card__usage-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--profile-ink);
+}
+
+.profile-card__usage-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--profile-ink-soft);
+}
+
+.profile-card__bar {
+  height: 8px;
+
+  .m3-progress-bar__indicator {
+    background-color: var(--profile-accent);
+    animation-duration: 700ms;
+  }
+}
+
+.profile-card__figures {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 16px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--profile-ink-soft);
+
+  p {
+    margin: 0;
   }
 
-  &__label {
-    font-size: 0.875rem;
+  strong {
+    color: var(--profile-ink);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.profile-card__storage-note {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.34;
+  color: var(--profile-ink-soft);
+
+  &--critical {
+    color: var(--md-sys-color-error);
     font-weight: 600;
   }
-
-  &__percentage {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--md-sys-color-primary);
-  }
 }
 
-.m3-icon {
-  width: 20px;
-  height: 20px;
-  fill: var(--md-sys-color-primary);
+.profile-card--storage-critical .profile-card__usage-value {
+  color: var(--md-sys-color-error);
 }
 
-.m3-storage-bar-wrapper {
+.profile-card__actions {
+  display: flex;
+}
+
+.profile-card__logout {
   width: 100%;
-  .m3-progress-bar {
-    background-color: var(--md-sys-color-surface-container-low);
+  --md-filled-button-container-height: 48px;
+  --md-filled-button-container-color: var(--md-sys-color-primary);
+  --md-filled-button-container-shape-start-start: var(--md-sys-shape-corner-full);
+  --md-filled-button-container-shape-start-end: var(--md-sys-shape-corner-full);
+  --md-filled-button-container-shape-end-start: var(--md-sys-shape-corner-full);
+  --md-filled-button-container-shape-end-end: var(--md-sys-shape-corner-full);
+  --md-filled-button-label-text-font: "Plus Jakarta Sans", sans-serif;
+  --md-filled-button-label-text-size: 0.875rem;
+  --md-filled-button-label-text-weight: 600;
+  --md-filled-button-label-text-line-height: 1.43;
+  --md-filled-button-label-text-color: var(--md-sys-color-on-primary);
+  --md-filled-button-icon-color: var(--md-sys-color-on-primary);
+  --md-filled-button-icon-size: 18px;
+  --md-filled-button-hover-state-layer-color: var(--md-sys-color-on-primary);
+  --md-filled-button-hover-state-layer-opacity: 0.08;
+  --md-filled-button-hover-label-text-color: var(--md-sys-color-on-primary);
+  --md-filled-button-focus-label-text-color: var(--md-sys-color-on-primary);
+  --md-filled-button-pressed-state-layer-color: var(--md-sys-color-on-primary);
+  --md-filled-button-pressed-state-layer-opacity: 0.12;
+  --md-filled-button-pressed-label-text-color: var(--md-sys-color-on-primary);
+  --md-filled-button-with-leading-icon-leading-space: 24px;
+  --md-filled-button-with-leading-icon-trailing-space: 24px;
+  --md-focus-ring-color: var(--md-sys-color-on-surface);
+  --md-focus-ring-width: 3px;
+  transition: transform 220ms cubic-bezier(0.2, 0, 0, 1);
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  .material-symbols-outlined {
+    color: var(--md-sys-color-on-primary);
+    font-size: 18px;
+    line-height: 1;
   }
 }
 
-.m3-storage-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.75rem;
-
-  &__stats {
-    color: var(--md-sys-color-on-surface-variant);
-    strong {
-      color: var(--md-sys-color-primary);
-      font-weight: 700;
-    }
-  }
-
-  &__remaining {
-    color: var(--md-sys-color-on-surface-variant);
-    opacity: 0.8;
-  }
-}
-
-// Card Action Strip
-.m3-user-card__actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-@keyframes fadeInGlow {
+@keyframes profile-card-settle {
   from {
     opacity: 0;
-    transform: scale(0.92);
+    transform: translateY(8px);
   }
   to {
-    opacity: 0.35;
-    transform: scale(1);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 600px) {
+  .profile-page {
+    padding: 24px 0 48px;
+  }
+
+  .profile-card {
+    padding: 32px 32px 28px;
+  }
+
+  .profile-card__monogram {
+    width: 72px;
+    height: 72px;
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 379px) {
+  .profile-card {
+    padding: 24px 20px 20px;
+    gap: 20px;
+  }
+
+  .profile-card__identity {
+    gap: 12px;
+  }
+
+  .profile-card__monogram {
+    width: 56px;
+    height: 56px;
+    font-size: 1.5rem;
+  }
+
+  .profile-card__name {
+    font-size: 1.5rem;
+  }
+
+  .profile-card__member {
+    font-size: 0.8125rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-card,
+  .profile-card__bar .m3-progress-bar__indicator {
+    animation: none;
+  }
+
+  .profile-card__logout {
+    transition: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .profile-card {
+    --profile-ink-soft: var(--profile-ink);
+    --profile-rule: var(--md-sys-color-outline);
+  }
+
+  .profile-card__plan {
+    border: 1px solid var(--md-sys-color-outline);
+  }
+}
+
+@media (forced-colors: active) {
+  .profile-card {
+    border: 1px solid CanvasText;
+  }
+
+  .profile-card__monogram,
+  .profile-card__plan,
+  .profile-card__bar {
+    border: 1px solid CanvasText;
+  }
+
+  .profile-card__bar .m3-progress-bar__indicator {
+    background-color: Highlight;
+    forced-color-adjust: none;
+  }
+
+  .profile-card__storage {
+    border-color: CanvasText;
+  }
+
+  .profile-card__logout {
+    --md-filled-button-container-color: Highlight;
+    --md-filled-button-label-text-color: HighlightText;
+    --md-filled-button-icon-color: HighlightText;
   }
 }
