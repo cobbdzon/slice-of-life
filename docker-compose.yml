@@ -4,6 +4,7 @@ services:
     image: slice-of-life:latest
     restart: unless-stopped
     environment:
+      TZ: ${TZ:-Asia/Manila}
       NODE_ENV: production
       PORT: "3000"
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
