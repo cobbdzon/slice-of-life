@@ -64,10 +64,10 @@ export function validateRequestedYear(yearInput: string | null | undefined): num
   return parsedYear;
 }
 
-export function getDefaultEntry(): JournalEntry {
+export function getDefaultEntry(date: Date = new Date()): JournalEntry {
   return {
     id: "null",
-    date: new Date(),
+    date,
     title: "Entry not found",
     note: "Entry not found",
     imagePaths: [],

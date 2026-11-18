@@ -70,7 +70,6 @@ app.get("/entry/:year/:month/:day", entryQueryValidator, async (c) => {
   const { year, month, day } = c.req.valid("param");
   // const parsedDate = new Date(year, month - 1, day);
 
-  const defaultEntry = getDefaultEntry();
   const journalEntries = await getJournalEntries(user.id, { year, month: month - 1 })
 
   // TODO: SUPPORT MULTIPLE ENTRIES FOR THE SAME DATE?
@@ -81,12 +80,17 @@ app.get("/entry/:year/:month/:day", entryQueryValidator, async (c) => {
     return sameYear && sameMonth && sameDay;
   });
 
-  if (requestedEntries.length === 0) {
-    requestedEntries[0] = defaultEntry;
-  }
+  const entry = requestedEntries.pop();
+  const requestedDate = new Date(Date.UTC(year, month - 1, day));
+  const dateString = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
   return c.html(
-    <EntryPage user={user} dateString={c.req.query("date") || ""} journalEntry={requestedEntries.pop()}>
+    <EntryPage
+      user={user}
+      dateString={dateString}
+      journalEntry={entry ?? getDefaultEntry(requestedDate)}
+      isEmpty={!entry}
+    >
     </EntryPage>
   )
 })

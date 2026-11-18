@@ -7,117 +7,169 @@ interface EntryPageProps {
   user: User;
   dateString: string;
   journalEntry?: JournalEntry;
-  showFileSize?: Boolean;
+  isEmpty?: boolean;
+  showFileSize?: boolean;
 }
 
-export async function EntryPage({ user, dateString, journalEntry, showFileSize = true }: EntryPageProps) {
+const DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  timeZone: 'UTC',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+};
+
+export async function EntryPage({ user, dateString, journalEntry, isEmpty = false, showFileSize = true }: EntryPageProps) {
   const requestedEntryDate = stringToDate(dateString);
-
-
   journalEntry = journalEntry || {
     id: "null",
     date: requestedEntryDate,
-    title: "Empty entry",
-    note: "Entry note here",
+    title: "Entry not found",
+    note: "",
     imagePaths: [],
-  }
+  };
 
-  const formattedDate = journalEntry.date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  const entryDate = journalEntry.date;
+  const formattedDate = entryDate.toLocaleDateString('en-US', DATE_FORMAT);
+  const weekday = entryDate.toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'long' });
+  const dayNumber = String(entryDate.getUTCDate()).padStart(2, '0');
 
-  const hasImages = journalEntry.imagePaths && journalEntry.imagePaths.length > 0;
-  const totalImages = journalEntry.imagePaths ? journalEntry.imagePaths.length : 0;
+  const backHref = `/#${dateToStringUTC(entryDate).slice(5)}`;
+  const newEntryHref = `/entry/new?date=${dateToStringUTC(entryDate)}`;
+
+  const hasImages = journalEntry.imagePaths.length > 0;
+  const totalImages = journalEntry.imagePaths.length;
   const showControls = totalImages > 1;
 
-  // TODO: client side async?
   let fileSizeText = ""
-  if (showFileSize && journalEntry.imagePaths.length > 0) {
+  if (showFileSize && hasImages) {
     const entryFileSize = (await getFileSizeOfImagePaths(journalEntry.imagePaths)) / (1024 * 1024);
     fileSizeText = `${entryFileSize.toFixed(2)} MiB`
+  }
+
+  const stylesheets = ["/static/assets/css/entry.css"];
+  const scripts = hasImages ? ["/static/assets/js/entry-carousel.js"] : [];
+
+  // A day with no entry gets its own invitation to write, not a hollow copy of
+  // the reading layout with a broken edit link.
+  if (isEmpty) {
+    return (
+      <BaseLayout user={user} title={`${formattedDate} - Slice of Life`} stylesheets={stylesheets}>
+        <div class="entry-view">
+          <nav class="entry-topbar">
+            <a href={backHref} class="entry-back">
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+              <span>Back to calendar</span>
+            </a>
+          </nav>
+
+          <section class="entry-empty">
+            <div class="entry-empty__mark" aria-hidden="true">
+              <span class="material-symbols-outlined">edit_note</span>
+            </div>
+            <p class="entry-empty__date">{weekday}, {formattedDate}</p>
+            <h1 class="entry-empty__title">Nothing written yet.</h1>
+            <p class="entry-empty__text">This day is still open. Add a title, a note, or a photo to keep it.</p>
+            <a href={newEntryHref} class="entry-primary-action">
+              <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+              Write an entry
+            </a>
+          </section>
+        </div>
+      </BaseLayout>
+    );
   }
 
   return (
     <BaseLayout
       user={user}
       title={`${journalEntry.title} - Slice of Life`}
-      stylesheets={["/static/assets/css/entry.css"]}
-      scripts={showControls ? ["/static/assets/js/entry-carousel.js"] : []}
+      stylesheets={stylesheets}
+      scripts={scripts}
     >
-      <div class="entry-view-container">
-
-        <div class="entry-nav-strip">
-          <a href={`/#${dateToStringUTC(journalEntry.date).slice(5)}`} class="entry-back-button">
-            <span class="material-symbols-outlined">arrow_back</span>
+      <div class="entry-view">
+        <nav class="entry-topbar">
+          <a href={backHref} class="entry-back">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            <span>Back to calendar</span>
           </a>
-        </div>
+        </nav>
 
-        <article class="entry-main-card">
+        <article class={`entry-article${hasImages ? " entry-article--with-media" : ""}`}>
+          {
+            hasImages && (
+              <div class="entry-hero">
+                <button class="entry-expand-btn" id="expandBtn" type="button" aria-label="View photo full screen">
+                  <span class="material-symbols-outlined expand-icon" aria-hidden="true">fullscreen</span>
+                  <span class="material-symbols-outlined collapse-icon" aria-hidden="true">close</span>
+                </button>
 
-          {hasImages ? (
-            <div class="entry-carousel-wrapper">
-              {/* Note: aspect-ratio is removed here and handled by the script/CSS heights */}
-              <div class="entry-carousel-container" id="carousel">
-                {journalEntry.imagePaths.map((path, idx) => (
-                  <div class="entry-hero-frame" key={idx}>
-                    <img
-                      src={path}
-                      alt={`${journalEntry.title} - View ${idx + 1}`}
-                      loading={idx === 0 ? "eager" : "lazy"}
-                      draggable="false"
-                      /* Triggers height initialization on script load if image is cached */
-                      onload="this.setAttribute('data-loaded', 'true')"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {showControls && (
-                <div class="carousel-counter" id="carouselCounter">
-                  1 / {totalImages}
+                <div class="entry-hero__frame" id="carousel" tabIndex={0} aria-label="Photos for this entry">
+                  {
+                    journalEntry.imagePaths.map((path, idx) => (
+                      <div class="entry-hero__slide" key={idx}>
+                        <img
+                          src={path}
+                          alt={`${journalEntry.title} — photo ${idx + 1}`}
+                          loading={idx === 0 ? "eager" : "lazy"}
+                          draggable={false}
+                        />
+                      </div>
+                    ))
+                  }
                 </div>
-              )}
 
-              {showControls && (
-                <>
-                  <button class="carousel-nav-btn prev" id="prevBtn" aria-label="Previous image">
-                    <span class="material-symbols-outlined">chevron_left</span>
-                  </button>
-                  <button class="carousel-nav-btn next" id="nextBtn" aria-label="Next image">
-                    <span class="material-symbols-outlined">chevron_right</span>
-                  </button>
-                </>
-              )}
+                {
+                  showControls && (
+                    <>
+                      <div class="carousel-counter" id="carouselCounter" aria-live="polite">1 / {totalImages}</div>
+                      <button class="carousel-nav-btn prev" id="prevBtn" type="button" aria-label="Previous photo">
+                        <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                      </button>
+                      <button class="carousel-nav-btn next" id="nextBtn" type="button" aria-label="Next photo">
+                        <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                      </button>
+                      <div class="carousel-dots" aria-hidden="true">
+                        {journalEntry.imagePaths.map((_, idx) => (
+                          <span class={`carousel-dots__dot${idx === 0 ? " is-active" : ""}`} key={idx}></span>
+                        ))}
+                      </div>
+                    </>
+                  )
+                }
+              </div>
+            )
+          }
+
+          <div class="entry-content">
+            <div class="entry-main">
+              <header class="entry-heading">
+                <div class="entry-dateline">
+                  <span class="entry-dateline__day" aria-hidden="true">{dayNumber}</span>
+                  <div class="entry-dateline__detail">
+                    <p class="entry-dateline__date">
+                      <span class="sr-only">Entry date: </span>{weekday}, {formattedDate}
+                    </p>
+                    <p class="entry-dateline__meta">
+                      {hasImages && <span>{totalImages} {totalImages === 1 ? "photo" : "photos"}</span>}
+                      {fileSizeText && <span>{fileSizeText}</span>}
+                      {!hasImages && <span>Text entry</span>}
+                    </p>
+                  </div>
+                </div>
+                <h1 class="entry-title">{journalEntry.title}</h1>
+              </header>
+
+              <p class="entry-note">{journalEntry.note || "No note for this entry."}</p>
+
+              <footer class="entry-actions">
+                <a href={`/entry/${journalEntry.id}/edit`} class="entry-primary-action">
+                  <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                  Edit entry
+                </a>
+              </footer>
             </div>
-          ) : (
-            <div class="entry-hero-frame image-fallback-placeholder">
-              <span class="material-symbols-outlined">landscape</span>
-            </div>
-          )}
-
-          <div class="entry-body-frame">
-            <header class="entry-header-block">
-              <span class="entry-meta-date">{formattedDate}</span>
-              <span class="entry-meta-filesize">{fileSizeText}</span>
-              <h1 class="entry-main-title">{journalEntry.title}</h1>
-            </header>
-
-            <div class="entry-text-block">
-              <p class="entry-full-note">{journalEntry.note}</p>
-            </div>
-
-            <footer class="entry-footer-actions">
-              <a href={`/entry/${journalEntry.id}/edit`} class="entry-edit-action">
-                <span class="material-symbols-outlined">edit</span>
-                Edit Entry
-              </a>
-            </footer>
           </div>
-
         </article>
-
       </div>
     </BaseLayout>
   );
