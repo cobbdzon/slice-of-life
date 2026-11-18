@@ -56,16 +56,26 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
 
       const elementId = `${dateToString(parsedDate)}`
 
+      const dayNumber = String(dayIndex + 1).padStart(2, "0");
+
       if (journalEntry === null) {
         if (hideEmptyDays) {
           return;
         }
-        // const requestedDate = new Date(requestedYear, monthIndex, dayIndex + 1);
         return (
-          <div id={elementId} class={`entry-card empty-placeholder ${isCurrentDate ? "current-entry" : ""}`}>
-            <a href={`/entry/new?date=${dateToString(parsedDate)}`} class="material-symbols-outlined no-link-style">add</a>
-            <span class="date-text">{monthGroup.monthName} {dayIndex + 1}</span>
-          </div>
+          <a
+            href={`/entry/new?date=${dateToString(parsedDate)}`}
+            id={elementId}
+            class={`entry-card entry-card--empty${isCurrentDate ? " is-today" : ""}`}
+            aria-label={`Write an entry for ${monthGroup.monthName} ${dayIndex + 1}`}
+          >
+            <span class="entry-day" aria-hidden="true">{dayNumber}</span>
+            <span class="empty-add" aria-hidden="true">
+              <span class="material-symbols-outlined">add</span>
+            </span>
+            <span class="empty-label" aria-hidden="true">Write</span>
+            {isCurrentDate && <span class="today-badge" aria-hidden="true">Today</span>}
+          </a>
         )
       }
 
@@ -80,31 +90,41 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
 
       // actual entry box
       return (
-        <a href={`/entry/${requestedYear}/${monthIndex + 1}/${dayIndex + 1}`} id={elementId} class={`entry-card real-entry no-link-style${isCurrentDate ? " current-entry" : ""}`} title={journalEntry.title}>
+        <a
+          href={`/entry/${requestedYear}/${monthIndex + 1}/${dayIndex + 1}`}
+          id={elementId}
+          class={`entry-card entry-card--entry no-link-style${hasImage ? " entry-card--media" : " entry-card--note"}${isCurrentDate ? " is-today" : ""}`}
+          title={journalEntry.title}
+          aria-label={`${monthGroup.monthName} ${dayIndex + 1}: ${journalEntry.title}`}
+        >
           {
-            hasImage ? (
+            hasImage && (
               <img
                 src={journalEntry.imagePaths[0] || "/static/assets/images/placeholder.png"}
-                alt={journalEntry.title}
+                alt=""
                 loading="lazy"
               />
-            ) : (
-              <span class="material-symbols-outlined entry-icon-placeholder">landscape</span>
             )
           }
 
-          <div class="entry-top-bar">
+          <span class="entry-day" aria-hidden="true">{dayNumber}</span>
+
+          <div class="entry-body">
             <span class="entry-title">{journalEntry.title}</span>
-            <span class="date-text">{monthGroup.monthName} {dayIndex + 1}</span> <br />
-            <span class="filesize-text">{fileSizeText}</span>
+            <span class="entry-note">{journalEntry.note}</span>
+            {
+              fileSizeText && <span class="entry-meta">{fileSizeText}</span>
+            }
           </div>
 
-          <div class="entry-bottom-bar">
-            {
-              // TODO: possibly markdown renderer?
-            }
-            <span class="entry-note">{journalEntry.note}</span>
-          </div>
+          {
+            hasImage && (
+              <span class="entry-media-badge" aria-hidden="true">
+                <span class="material-symbols-outlined">photo_camera</span>
+              </span>
+            )
+          }
+          {isCurrentDate && <span class="today-badge" aria-hidden="true">Today</span>}
         </a>
       );
     });
@@ -114,12 +134,25 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
     }
 
     const isCurrentMonth = monthIndex === currentDate.getMonth() && requestedYear === currentDate.getFullYear();
+    const writtenCount = monthGroup.journalEntries.filter(entry => entry !== null).length;
+    const dayCount = monthGroup.journalEntries.length;
+    const writtenPercent = dayCount > 0 ? Math.round((writtenCount / dayCount) * 100) : 0;
 
     return (
       <section data-month={monthIndex} class={`month-section${isCurrentMonth ? " month-section--current" : ""}`}>
-        <h2 class="section-title">
-          {monthGroup.monthName} <span class="section-year">{monthGroup.year}</span>
-        </h2>
+        <div class="month-header">
+          <div class="month-header__title">
+            <h2 class="section-title">{monthGroup.monthName}</h2>
+            <span class="section-year">{monthGroup.year}</span>
+          </div>
+          <div class="month-progress" aria-label={`${writtenCount} of ${dayCount} days written`}>
+            <span class="month-progress__count">{writtenCount}<span class="month-progress__total">/{dayCount}</span></span>
+            <span class="month-progress__label">days written</span>
+            <span class="month-progress__track" aria-hidden="true">
+              <span class="month-progress__fill" style={`width: ${writtenPercent}%`}></span>
+            </span>
+          </div>
+        </div>
 
         <div class="entries-gallery">
           {entriesGalleryElements}
@@ -131,8 +164,9 @@ export async function DashboardPage({ user, requestedYear, requestedMonth, journ
   return (
     <BaseLayout user={user} title="Dashboard - Slice of Life" stylesheets={["/static/assets/css/dashboard.css"]} scripts={["/static/assets/js/dashboard.js"]}>
       {/* TODO: seek to the next day thats available */}
-      <a href={`/entry/new?date=${dateToString(new Date())}`} class="m3-fab">
-        <span class="material-symbols-outlined">add</span>
+      <a href={`/entry/new?date=${dateToString(new Date())}`} class="m3-fab" aria-label="Write today's entry">
+        <span class="material-symbols-outlined" aria-hidden="true">add</span>
+        <span class="m3-fab__label">New entry</span>
       </a>
 
       <div class={`dashboard-wrapper${isCurrentMonthRendered ? " has-current" : ""}`}>

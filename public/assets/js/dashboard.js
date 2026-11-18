@@ -48,25 +48,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 100);
   }
 
-  // Staggered entrance animation each time an entry card enters the viewport.
-  const entryObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const card = entry.target;
-        const gallery = card.parentElement;
-        const index = [...gallery.children].indexOf(card);
-        card.style.setProperty("--d", `${Math.min(index * 16, 400)}ms`);
-        card.classList.add("card-enter-anim");
-        card.addEventListener("animationend", () => {
-          card.classList.remove("card-enter-anim");
-          card.classList.add("card-entered");
-        }, { once: true });
-        entryObserver.unobserve(card);
-      }
-    });
-  }, { threshold: 0.1, rootMargin: "0px 0px -40px 0px" });
+  // Reveal cards as they enter the viewport, with a short stagger per batch.
+  // The visible state is the element's natural CSS state — the animation only
+  // carries it in — so no animationend bookkeeping is needed and a card can
+  // never be left stranded at opacity 0.
+  const cards = document.querySelectorAll(".entry-card");
+  const reveal = (card, delay) => {
+    card.style.setProperty("--d", `${delay}ms`);
+    card.classList.add("is-revealed");
+  };
 
-  document.querySelectorAll(".entry-card").forEach((card) => entryObserver.observe(card));
+  if (!("IntersectionObserver" in window)) {
+    cards.forEach((card) => reveal(card, 0));
+  } else {
+    const cardObserver = new IntersectionObserver((entries, observer) => {
+      let order = 0;
+      entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) =>
+          a.boundingClientRect.top - b.boundingClientRect.top ||
+          a.boundingClientRect.left - b.boundingClientRect.left
+        )
+        .forEach((entry) => {
+          reveal(entry.target, Math.min(order * 40, 240));
+          order += 1;
+          observer.unobserve(entry.target);
+        });
+    }, { threshold: 0.05, rootMargin: "0px 0px -24px 0px" });
+
+    cards.forEach((card) => cardObserver.observe(card));
+  }
 
   // Year/Month seeker
   const seeker = document.querySelector(".seeker");
