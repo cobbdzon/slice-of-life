@@ -16,6 +16,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const fileInput = document.getElementById("fileInput");
   const previewGrid = document.getElementById("previewGrid");
   const imagePathsPayload = document.getElementById("imagePathsPayload");
+  const photoCount = document.getElementById("photoCount");
+
+  // --- Dateline, Back Links, and Submit State ---
+  const editorDayNumber = document.getElementById("editorDayNumber");
+  const editorDateLine = document.getElementById("editorDateLine");
+  const submitButton = document.getElementById("submitFormBtn");
+  const submitLabel = submitButton?.querySelector(".editor-submit__label");
+  const initialSubmitLabel = submitLabel?.textContent || "";
 
   // --- Constants for Upload Safeguards ---
   // TODO: do the same server fetch for max images?
@@ -23,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   var MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit per file
   try {
     const res = await fetch("/api/max_upload_file_size");
-    if (!res.ok) { return }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const res_json = await res.json()
     MAX_FILE_SIZE = Number(res_json.MAX_UPLOAD_FILE_SIZE);
   } catch (err) {
@@ -43,6 +51,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const setImagesArray = (arr) => {
     if (imagePathsPayload) {
       imagePathsPayload.value = JSON.stringify(arr);
+    }
+  };
+
+  const updatePhotoCount = () => {
+    if (photoCount) {
+      photoCount.textContent = `${getImagesArray().length} of ${MAX_IMAGES}`;
     }
   };
 
@@ -67,6 +81,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     return existingDatesSet.has(dateStr);
   };
 
+  const pad = (value) => String(value).padStart(2, "0");
+
+  // Keep the dateline and the calendar return link in sync with the date
+  // picker. In edit mode, cancel still returns to the entry's original page.
+  const updateDateDisplay = (dateString) => {
+    if (!dateString) return;
+
+    const dateValue = new Date(`${dateString}T12:00:00Z`);
+    if (Number.isNaN(dateValue.getTime())) return;
+
+    if (editorDayNumber) {
+      editorDayNumber.textContent = pad(dateValue.getUTCDate());
+    }
+
+    if (editorDateLine) {
+      editorDateLine.textContent = dateValue.toLocaleDateString("en-US", {
+        timeZone: "UTC",
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
+
+    if (!isEditMode) {
+      const backHref = `/?year=${dateValue.getUTCFullYear()}#${pad(dateValue.getUTCMonth() + 1)}-${pad(dateValue.getUTCDate())}`;
+      document.querySelectorAll("[data-editor-back]").forEach((link) => {
+        link.setAttribute("href", backHref);
+      });
+    }
+  };
+
+  updateDateDisplay(entryDateElement?.value || "");
+
   // --- 1. Date Query String Synchronization & Conflict Reversion ---
   if (entryDateElement) {
     let lastValidDate = entryDateElement.value;
@@ -88,19 +136,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       lastValidDate = selectedDate;
       updateUrlQuerySilent("date", selectedDate);
+      updateDateDisplay(selectedDate);
     });
   }
 
-  // --- 2. Material Web Component Enter Key Submission Fix ---
-  const triggerSubmit = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      form.requestSubmit();
-    }
-  };
-
-  if (entryTitle) entryTitle.addEventListener("keydown", triggerSubmit);
-  if (entryNote) entryNote.addEventListener("keydown", triggerSubmit);
+  // Native inputs and a native submit button already handle Enter correctly:
+  // title submits, note adds a newline. No keydown shim is needed.
 
   // --- 3. Multi-File Upload Engine ---
   const handleFilesInput = async (files) => {
@@ -127,7 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       card.className = "preview-card uploading";
       card.setAttribute("data-temp-url", tempBlobUrl);
       card.innerHTML = `
-        <img src="${tempBlobUrl}" alt="Uploading asset..." style="opacity: 0.5;" />
+        <img src="${tempBlobUrl}" alt="Uploading photo" style="opacity: 0.5;" />
         <div class="upload-spinner"></div>
       `;
       previewGrid.appendChild(card);
@@ -149,14 +190,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const updatedImages = getImagesArray();
         updatedImages.push(serverUrl);
         setImagesArray(updatedImages);
+        updatePhotoCount();
 
         card.className = "preview-card";
         card.removeAttribute("data-temp-url");
         card.setAttribute("data-url", serverUrl);
         card.innerHTML = `
-          <img src="${serverUrl}" alt="Journal asset" />
-          <button type="button" class="remove-img-btn">
-            <span class="material-symbols-outlined">close</span>
+          <img src="${serverUrl}" alt="Uploaded photo" />
+          <button type="button" class="remove-img-btn" aria-label="Remove photo">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
           </button>
         `;
 
@@ -211,6 +253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       let currentImages = getImagesArray();
       currentImages = currentImages.filter((path) => path !== urlToRemove);
       setImagesArray(currentImages);
+      updatePhotoCount();
 
       card.remove();
     });
@@ -236,8 +279,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         title: entryTitle.value,
         note: entryNote.value,
         date: selectedDate,
-        imagePaths: getImagesArray(), // 👈 Now safely accessible here!
+        imagePaths: getImagesArray(),
       };
+
+      const setSaving = (isSaving) => {
+        if (submitButton) submitButton.disabled = isSaving;
+        if (submitLabel) {
+          submitLabel.textContent = isSaving ? "Saving…" : initialSubmitLabel;
+        }
+      };
+
+      setSaving(true);
 
       try {
         const response = await fetch(requestUrl, {
@@ -251,14 +303,17 @@ document.addEventListener('DOMContentLoaded', async () => {
           window.location.href = `/entry/${year}/${month}/${day}`;
         } else {
           const errorData = await response.json().catch(() => ({}));
+          setSaving(false);
           if (errorData.error === "MISSING_IMAGES") {
             alert("Some images were cleaned up before saving (uploaded too long ago). Remove and re-add them, then save again.");
           } else {
-            alert(`Failed to save entry: ${errorData.message || response.statusText}`);
+            const message = errorData.errors?.join(" ") || errorData.message || response.statusText;
+            alert(`Failed to save entry: ${message}`);
           }
         }
       } catch (err) {
         console.error("Submission Failure:", err);
+        setSaving(false);
         alert("A network connectivity error occurred while saving.");
       }
     });

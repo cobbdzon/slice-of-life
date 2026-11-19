@@ -1,5 +1,5 @@
-import { BaseLayout } from "../layouts/BaseLayout"; // Adjust import path as needed
-import type { User, JournalEntry } from "../db/schema"; // Adjust import path as needed
+import { BaseLayout } from "../layouts/BaseLayout";
+import type { User, JournalEntry } from "../db/schema";
 import { dateToStringUTC } from "../backend/entry";
 import { getUserTotalFilesSize } from "../db/queries/uploads";
 import { Bar } from "../components/Bar";
@@ -11,12 +11,29 @@ interface EntryEditorProps {
   entry?: JournalEntry;
 }
 
+const DISPLAY_DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  timeZone: "UTC",
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
+
 export async function EntryEditor({ user, date, entry }: EntryEditorProps) {
   const isEditMode = Boolean(entry?.id);
   const pageTitle = isEditMode ? "Edit Entry - Slice of Life" : "New Entry - Slice of Life";
 
   // Formatting the date to YYYY-MM-DD format for the HTML native date input
   const defaultDateString = date ? dateToStringUTC(date) : dateToStringUTC(new Date());
+  const [entryYear, entryMonth, entryDay] = defaultDateString.split("-");
+  const dayNumber = String(date.getUTCDate()).padStart(2, "0");
+  const formattedDate = date.toLocaleDateString("en-US", DISPLAY_DATE_FORMAT);
+
+  // Cancel and back return where the writer came from: the entry they were
+  // reading when editing, or the calendar when starting a new page.
+  const entryHref = `/entry/${entryYear}/${Number(entryMonth)}/${Number(entryDay)}`;
+  const cancelHref = isEditMode ? entryHref : `/?year=${entryYear}#${entryMonth}-${entryDay}`;
+  const backLabel = isEditMode ? "Back to entry" : "Back to calendar";
 
   // Safely extract paths array for clean server-side JSX rendering
   const existingImagePaths: string[] = entry?.imagePaths || [];
@@ -24,8 +41,10 @@ export async function EntryEditor({ user, date, entry }: EntryEditorProps) {
   // Storage usage shown while writing, so the user knows their current usage
   const userFileSizeTaken = (await getUserTotalFilesSize(user.id)) / (1024 * 1024); // In MiB
   const userFileSizeLimit = user.fileUploadLimit || 10; // In MiB (default 10 for Free plan)
-  const usageRatio = userFileSizeTaken / userFileSizeLimit;
-  const usagePercentage = Math.round(usageRatio * 100);
+  const usageRatio = userFileSizeLimit > 0 ? userFileSizeTaken / userFileSizeLimit : 0;
+  const usagePercentage = Math.round(Math.min(Math.max(usageRatio, 0), 1) * 100);
+  const remainingFileSize = Math.max(userFileSizeLimit - userFileSizeTaken, 0);
+  const isStorageCritical = usageRatio >= 0.9;
 
   return (
     <BaseLayout
@@ -34,144 +53,183 @@ export async function EntryEditor({ user, date, entry }: EntryEditorProps) {
       stylesheets={["/static/assets/css/entry-editor.css"]}
       scripts={["/static/assets/js/entry-editor.js"]}
     >
-      <div class="editor-container">
-        <header class="editor-header">
-          <h1>{isEditMode ? "Edit Journal Entry" : "Create New Entry"}</h1>
-          <p class="editor-subtitle">
-            {isEditMode ? "Modify your thoughts or update your pictures" : "Capture what happened today"}
-          </p>
-        </header>
+      <div class="editor-view">
+        <nav class="editor-topbar">
+          <a href={cancelHref} class="editor-back" data-editor-back>
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            <span>{backLabel}</span>
+          </a>
+        </nav>
 
-        {/* Storage usage */}
-        <div
-          class="editor-storage-usage"
-          role="group"
-          aria-label="Storage usage"
-          data-file-size-taken={userFileSizeTaken}
-          data-file-size-limit={userFileSizeLimit}
-        >
-          <div class="editor-storage-usage__header">
-            <span class="editor-storage-usage__label">Storage</span>
-            <span class="editor-storage-usage__percentage">{usagePercentage}% used</span>
-          </div>
-          <Bar value={usageRatio} label="Storage used" />
-          <div class="editor-storage-usage__footer">
-            <span class="editor-storage-usage__stats">
-              <strong>{userFileSizeTaken.toFixed(2)} MiB</strong> of {userFileSizeLimit} MiB
-            </span>
-            <span class="editor-storage-usage__remaining">
-              {(userFileSizeLimit - userFileSizeTaken).toFixed(2)} MiB remaining
-            </span>
-          </div>
-        </div>
-
-        <form
-          id="entryForm"
-          class="editor-form"
-          data-mode={isEditMode ? "edit" : "create"}
-          data-entry-id={entry?.id || ""}
-        >
-
-          {/* Date Input */}
-          <div class="form-group">
-            <label htmlFor="entryDate">Date of Entry</label>
-            <input
-              type="date"
-              id="entryDate"
-              name="date"
-              required
-              value={defaultDateString}
-              class="native-date-picker"
-            />
-          </div>
-
-          {/* Title Field */}
-          <div class="form-group">
-            <md-outlined-text-field
-              label="Title"
-              id="entryTitle"
-              name="title"
-              required
-              value={entry?.title || ""}
-              style="width: 100%;"
-            ></md-outlined-text-field>
-          </div>
-
-          {/* Note/Body Field */}
-          <div class="form-group">
-            <md-outlined-text-field
-              type="textarea"
-              label="Write your thoughts..."
-              id="entryNote"
-              name="note"
-              required
-              rows="8"
-              value={entry?.note || ""}
-              style="width: 100%;"
-            ></md-outlined-text-field>
-          </div>
-
-          {/* Image Assets Management Frame */}
-          <div class="form-group image-manager-section">
-            <label>Images</label>
-
-            {/* Clicking this wrapper triggers the native multiple file picker hidden inside it */}
-            <div class="image-upload-zone" id="uploadZone">
-              <span class="material-symbols-outlined">add_a_photo</span>
-              <p>Click to select or drag images here</p>
-
-              <input
-                type="file"
-                id="fileInput"
-                accept="image/*"
-                multiple
-                style="display: none;"
-              />
+        <article class="editor-sheet" aria-labelledby="editor-title">
+          <header class="editor-head">
+            <div class="editor-dateline">
+              <span class="editor-dateline__day" id="editorDayNumber" aria-hidden="true">{dayNumber}</span>
+              <p class="editor-dateline__date">
+                <span class="sr-only">Entry date: </span>
+                <span id="editorDateLine">{formattedDate}</span>
+              </p>
             </div>
 
-            <input
-              type="hidden"
-              id="imagePathsPayload"
-              name="imagePaths"
-              value={JSON.stringify(existingImagePaths)}
-            />
+            <div class="editor-date-control">
+              <label class="editor-date-control__label" htmlFor="entryDate">Date</label>
+              <span class="editor-date-control__field">
+                <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+                <input
+                  type="date"
+                  id="entryDate"
+                  name="date"
+                  required
+                  value={defaultDateString}
+                  class="native-date-picker"
+                />
+              </span>
+            </div>
 
-            <div class="image-preview-grid" id="previewGrid">
-              {existingImagePaths.map((path) => (
-                <div class="preview-card" data-url={path}>
-                  <img src={path} alt="Journal asset" />
-                  <button type="button" class="remove-img-btn">
-                    <span class="material-symbols-outlined">close</span>
-                  </button>
+            <h1 id="editor-title" class="editor-head__title">
+              {isEditMode ? "Edit entry" : "New entry"}
+            </h1>
+            <p class="editor-head__subtitle">
+              {isEditMode
+                ? "Update the words or photos for this day."
+                : "A few words and a photo are enough."}
+            </p>
+          </header>
+
+          <form
+            id="entryForm"
+            class="editor-form"
+            data-mode={isEditMode ? "edit" : "create"}
+            data-entry-id={entry?.id || ""}
+          >
+            <div class="editor-body">
+              <div class="editor-writing">
+                <div class="editor-field">
+                  <label class="editor-field__label" htmlFor="entryTitle">Title</label>
+                  <input
+                    type="text"
+                    id="entryTitle"
+                    name="title"
+                    required
+                    maxlength={255}
+                    autocomplete="off"
+                    placeholder="Name this day"
+                    value={entry?.title || ""}
+                    class="editor-field__input editor-field__input--title"
+                  />
                 </div>
-              ))}
+
+                <div class="editor-field">
+                  <label class="editor-field__label" htmlFor="entryNote">Note</label>
+                  <textarea
+                    id="entryNote"
+                    name="note"
+                    required
+                    rows={8}
+                    placeholder="What happened today? What do you want to remember?"
+                    class="editor-field__input editor-field__textarea"
+                  >{entry?.note || ""}</textarea>
+                </div>
+              </div>
+
+              <aside class="editor-rail" aria-label="Entry details">
+                <section class="editor-section" aria-labelledby="editor-photos-title">
+                  <div class="editor-section-head">
+                    <h2 id="editor-photos-title" class="editor-section-head__title">Photos</h2>
+                    <span class="editor-section-head__meta" id="photoCount" aria-live="polite">{existingImagePaths.length} of 10</span>
+                  </div>
+
+                  <button type="button" class="image-upload-zone" id="uploadZone">
+                    <span class="image-upload-zone__icon" aria-hidden="true">
+                      <span class="material-symbols-outlined">add_photo_alternate</span>
+                    </span>
+                    <span class="image-upload-zone__text">
+                      <strong>Add photos</strong>
+                      <span>Choose files or drop them here</span>
+                    </span>
+                  </button>
+
+                  <input
+                    type="file"
+                    id="fileInput"
+                    accept="image/*"
+                    multiple
+                    hidden
+                  />
+
+                  <input
+                    type="hidden"
+                    id="imagePathsPayload"
+                    name="imagePaths"
+                    value={JSON.stringify(existingImagePaths)}
+                  />
+
+                  <div class="image-preview-grid" id="previewGrid">
+                    {existingImagePaths.map((path, index) => (
+                      <div class="preview-card" data-url={path}>
+                        <img src={path} alt={`Photo ${index + 1}`} loading="lazy" />
+                        <button type="button" class="remove-img-btn" aria-label={`Remove photo ${index + 1}`}>
+                          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section
+                  class={`editor-section editor-storage${isStorageCritical ? " editor-storage--critical" : ""}`}
+                  aria-labelledby="editor-storage-title"
+                  data-file-size-taken={userFileSizeTaken}
+                  data-file-size-limit={userFileSizeLimit}
+                >
+                  <div class="editor-section-head">
+                    <h2 id="editor-storage-title" class="editor-section-head__title">Storage</h2>
+                    <span class="editor-section-head__meta">{usagePercentage}% used</span>
+                  </div>
+
+                  <Bar
+                    value={usageRatio}
+                    className="editor-storage__bar"
+                    label={`Storage used: ${usagePercentage}%, ${userFileSizeTaken.toFixed(2)} of ${userFileSizeLimit} MiB`}
+                  />
+
+                  <div class="editor-storage__figures">
+                    <p><strong>{userFileSizeTaken.toFixed(2)} MiB</strong> of {userFileSizeLimit} MiB</p>
+                    <p>{remainingFileSize.toFixed(2)} MiB free</p>
+                  </div>
+
+                  {isStorageCritical && (
+                    <p class="editor-storage__warning" role="status">
+                      You're close to your plan limit. Remove unused photos to free space.
+                    </p>
+                  )}
+                </section>
+              </aside>
             </div>
-          </div>
 
-          {/* Form Action Strip */}
-          <div class="form-actions-strip">
-            <md-filled-button type="submit" id="submitFormBtn">
-              {isEditMode ? "Save Changes" : "Publish Entry"}
-            </md-filled-button>
+            <footer class="editor-publish">
+              <div class="editor-commit">
+                <a href={cancelHref} class="editor-cancel" data-editor-back>Cancel</a>
 
-            <md-outlined-button type="button" href={`/#${dateToStringUTC(date).slice(5)}`}>
-              Cancel
-            </md-outlined-button>
+                <button type="submit" class="editor-submit" id="submitFormBtn">
+                  <span class="material-symbols-outlined" aria-hidden="true">save</span>
+                  <span class="editor-submit__label">{isEditMode ? "Save changes" : "Save entry"}</span>
+                </button>
+              </div>
 
-            {/* TODO: add "are you sure?" */}
-            {isEditMode && (
-              <md-text-button
-                type="button"
-                class="danger-action-btn"
-                onclick={`handleDeleteEntry('${entry?.id}')`}
-                style="--md-text-button-label-text-color: var(--md-sys-color-error, #b3261e);"
-              >
-                Delete Entry
-              </md-text-button>
-            )}
-          </div>
-
-        </form>
+              {isEditMode && (
+                <button
+                  type="button"
+                  class="editor-delete"
+                  onclick={`handleDeleteEntry('${entry?.id}')`}
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                  Delete entry
+                </button>
+              )}
+            </footer>
+          </form>
+        </article>
       </div>
     </BaseLayout>
   );
