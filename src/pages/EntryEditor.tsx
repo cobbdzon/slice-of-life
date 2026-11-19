@@ -120,12 +120,19 @@ export async function EntryEditor({ user, date, entry }: EntryEditorProps) {
                 </div>
 
                 <div class="editor-field">
-                  <label class="editor-field__label" htmlFor="entryNote">Note</label>
+                  <div class="editor-field__labelrow">
+                    <label class="editor-field__label" htmlFor="entryNote">Note</label>
+                    <span class="editor-field__hint" id="noteResizeHint">
+                      <span class="material-symbols-outlined" aria-hidden="true">south_east</span>
+                      Drag the corner for more room
+                    </span>
+                  </div>
                   <textarea
                     id="entryNote"
                     name="note"
                     required
-                    rows={8}
+                    rows={6}
+                    aria-describedby="noteResizeHint"
                     placeholder="What happened today? What do you want to remember?"
                     class="editor-field__input editor-field__textarea"
                   >{entry?.note || ""}</textarea>

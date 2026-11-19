@@ -4,7 +4,7 @@
   width: 100%;
   max-width: 1040px;
   margin: 0 auto;
-  padding: 16px 0 40px;
+  padding: 8px 0 24px;
 }
 
 // --- Top bar --------------------------------------------------------------
@@ -14,8 +14,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 48px;
-  margin-bottom: 20px;
+  min-height: 40px;
+  margin-bottom: 12px;
 }
 
 .editor-back {
@@ -59,6 +59,8 @@
   --editor-ink-soft: var(--md-sys-color-on-surface-variant);
   --editor-rule: color-mix(in srgb, var(--md-sys-color-outline-variant) 60%, transparent);
 
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border-radius: var(--md-sys-shape-corner-extra-large-increased);
   background-color: var(--md-sys-color-surface-container-low);
@@ -75,8 +77,9 @@
     "dateline date"
     "title date"
     "subtitle date";
+  flex-shrink: 0;
   column-gap: 32px;
-  padding: 34px 40px 30px;
+  padding: 24px 40px 22px;
   border-bottom: 1px solid var(--editor-rule);
 }
 
@@ -89,7 +92,7 @@
 
   &__day {
     flex-shrink: 0;
-    font-size: clamp(3.25rem, 7vw, 4.25rem);
+    font-size: clamp(3rem, 6vw, 3.75rem);
     font-weight: 800;
     line-height: 0.9;
     letter-spacing: -0.06em;
@@ -100,7 +103,7 @@
   &__date {
     margin: 0;
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(1.125rem, 2.2vw, 1.5rem);
+    font-size: clamp(1.0625rem, 2vw, 1.375rem);
     line-height: 1.2;
     color: var(--editor-ink);
     text-wrap: pretty;
@@ -175,9 +178,9 @@
 
 .editor-head__title {
   grid-area: title;
-  margin: 18px 0 0;
+  margin: 12px 0 0;
   font-family: "DM Serif Display", Georgia, serif;
-  font-size: clamp(2.25rem, 4.6vw, 3.25rem);
+  font-size: clamp(2.125rem, 4vw, 2.875rem);
   font-weight: 400;
   line-height: 1.05;
   letter-spacing: -0.015em;
@@ -188,8 +191,8 @@
 .editor-head__subtitle {
   grid-area: subtitle;
   max-width: 54ch;
-  margin: 8px 0 0;
-  font-size: 1rem;
+  margin: 6px 0 0;
+  font-size: 0.9375rem;
   line-height: 1.55;
   color: var(--editor-ink-soft);
   text-wrap: pretty;
@@ -202,13 +205,13 @@
   grid-template-columns: minmax(0, 1fr) 300px;
   align-items: start;
   column-gap: 32px;
-  padding: 32px 40px 36px;
+  padding: 24px 40px;
 }
 
 .editor-writing {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
   max-width: 620px;
   min-width: 0;
 }
@@ -223,6 +226,27 @@
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--editor-ink-soft);
+  }
+
+  &__labelrow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--editor-ink-soft);
+
+    .material-symbols-outlined {
+      font-size: 14px;
+    }
   }
 
   &__input {
@@ -255,20 +279,21 @@
   }
 
   &__input--title {
-    min-height: 68px;
-    padding: 13px 20px;
+    min-height: 56px;
+    padding: 10px 18px;
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    font-size: clamp(1.375rem, 2.4vw, 1.75rem);
     font-weight: 400;
     line-height: 1.15;
     letter-spacing: -0.01em;
   }
 
   &__textarea {
-    min-height: 320px;
-    padding: 18px 20px;
-    font-size: 1.0625rem;
-    line-height: 1.7;
+    height: clamp(150px, 22dvh, 250px);
+    min-height: 150px;
+    padding: 14px 18px;
+    font-size: 1.03125rem;
+    line-height: 1.65;
     resize: vertical;
   }
 }
@@ -523,10 +548,11 @@
 // --- Publish strip --------------------------------------------------------
 
 .editor-publish {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 24px 40px 28px;
+  padding: 18px 40px 20px;
   border-top: 1px solid var(--editor-rule);
 }
 
@@ -543,8 +569,8 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  height: 48px;
-  padding: 0 24px;
+  height: 44px;
+  padding: 0 22px;
   border-radius: var(--md-sys-shape-corner-full);
   font-family: inherit;
   font-size: 0.875rem;
@@ -671,6 +697,58 @@
 
 // --- Responsive -----------------------------------------------------------
 
+// On desktop the whole sheet stays in view beneath the back link. The form
+// scrolls internally only when a very short window cannot fit the content.
+@media (min-width: 1000px) {
+  .editor-sheet {
+    max-height: calc(100dvh - 196px);
+  }
+
+  .editor-form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .editor-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 1000px) and (max-height: 820px) {
+  .editor-head {
+    padding-top: 18px;
+    padding-bottom: 16px;
+  }
+
+  .editor-head__title {
+    margin-top: 8px;
+    font-size: 2.25rem;
+  }
+
+  .editor-head__subtitle {
+    margin-top: 4px;
+  }
+
+  .editor-body {
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  .editor-field__textarea {
+    height: clamp(140px, 20dvh, 170px);
+    min-height: 140px;
+  }
+
+  .editor-publish {
+    padding-top: 14px;
+    padding-bottom: 16px;
+  }
+}
+
 @media (max-width: 999px) {
   .editor-head {
     grid-template-columns: minmax(0, 1fr);
@@ -679,7 +757,7 @@
       "title"
       "subtitle"
       "date";
-    padding: 32px 28px 26px;
+    padding: 24px 28px 22px;
   }
 
   .editor-date-control {
@@ -712,7 +790,7 @@
   }
 
   .editor-publish {
-    padding: 22px 28px 26px;
+    padding: 18px 28px 20px;
   }
 }
 
@@ -796,7 +874,8 @@
   }
 
   .editor-field__textarea {
-    min-height: 240px;
+    height: clamp(160px, 26dvh, 240px);
+    min-height: 160px;
     padding: 16px;
     font-size: 1rem;
   }
